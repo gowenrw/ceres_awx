@@ -1,0 +1,37 @@
+# file: ceres.inventory
+# Inventory configs for my ansible ceres environment
+
+[ceres-a]
+192.168.65.21 ansible_ssh_user=vagrant ansible_ssh_private_key_file=./ssh.ceres-a.private_key
+
+[ceres-b]
+192.168.65.22 ansible_ssh_user=vagrant ansible_ssh_private_key_file=./ssh.ceres-b.private_key
+
+[ceres-c]
+192.168.65.23 ansible_ssh_user=vagrant ansible_ssh_private_key_file=./ssh.ceres-c.private_key
+
+# Azure server details
+# "hardwareProfile":
+#    "vmSize": "Standard_A4_v2" (4 vCPUs, 8 GiB Memory)
+# "imageReference":
+#    "publisher": "canonical",
+#    "offer": "0001-com-ubuntu-server-focal", (Ubuntu Server 20.04 From Marketplace)
+#    "sku": "20_04-lts"
+# Set up an SSH key pair and used a basic dynamic public IP tied to a DNS name
+# Opened inbound NSG rules for my home IP to access it using port 22
+# Update the details below with your server DNS name and key file location
+[ceres-azure]
+ceres.yourcloud.ninja ansible_ssh_user=azureuser ansible_ssh_private_key_file=./ssh.ceres.az_key.pem
+
+# Ceres local group
+[cereslocal:children]
+ceres-a
+ceres-b
+ceres-c
+
+# Variables that will be applied to all local servers
+[cereslocal:vars]
+# prevent errors on first run, only seems to be needed once to record the ssh keys
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+# Need to specify python3 as interpreter in case it is not set
+ansible_python_interpreter=/usr/bin/python3

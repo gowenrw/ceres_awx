@@ -1,34 +1,22 @@
 #!/bin/bash
 
+# note this only works from linux with putty installed, win puttygen is not cli
+
 # Vagrant Keys
 vKeyList=(
-  ".vagrant/machines/ceres-a/virtualbox/private_key"
-  ".vagrant/machines/ceres-b/virtualbox/private_key"
-  ".vagrant/machines/ceres-c/virtualbox/private_key"
+  "ssh.ceres-a"
+  "ssh.ceres-b"
+  "ssh.ceres-c"
+  "ssh.ceres-datass"
+  "ssh.ceres-rectal"
 )
 
 # Loop Through Keys
 for keyfile in ${vKeyList[@]}; do
   #echo $keyfile
-  if test -f "$keyfile"; then
-    vmname=`echo $keyfile | sed -e 's/\.vagrant\/machines\///; s/\/virtualbox\/private_key//'`
-    echo "copy $keyfile -> ssh.$vmname.private_key"
-    cp $keyfile ssh.$vmname.private_key
-    echo "puttygen convert ssh.$vmname.private_key -> ssh.$vmname.ppk"
-    puttygen ssh.$vmname.private_key -o ssh.$vmname.ppk
+  if test -f "$keyfile.private_key"; then
+    echo "puttygen convert $keyfile.private_key -> $keyfile.ppk"
+    puttygen $keyfile.private_key -o $keyfile.ppk
   fi
 done
 
-#echo "copy .vagrant/machines/ceres-a/virtualbox/private_key -> ssh.ceres-a.private_key"
-#cp .vagrant/machines/ceres-a/virtualbox/private_key ssh.ceres-a.private_key
-#echo "copy .vagrant/machines/ceres-b/virtualbox/private_key -> ssh.ceres-b.private_key"
-#cp .vagrant/machines/ceres-b/virtualbox/private_key ssh.ceres-b.private_key
-#echo "copy .vagrant/machines/ceres-c/virtualbox/private_key -> ssh.ceres-c.private_key"
-#cp .vagrant/machines/ceres-c/virtualbox/private_key ssh.ceres-c.private_key
-
-#echo "puttygen convert ssh.ceres-a.private_key -> ssh.ceres-a.ppk"
-#puttygen ssh.ceres-a.private_key -o ssh.ceres-a.ppk
-#echo "puttygen convert ssh.ceres-b.private_key -> ssh.ceres-b.ppk"
-#puttygen ssh.ceres-b.private_key -o ssh.ceres-b.ppk
-#echo "puttygen convert ssh.ceres-c.private_key -> ssh.ceres-c.ppk"
-#puttygen ssh.ceres-c.private_key -o ssh.ceres-c.ppk

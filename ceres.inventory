@@ -10,7 +10,14 @@
 [ceres-c]
 192.168.65.23 ansible_ssh_user=vagrant ansible_ssh_private_key_file=./ssh.ceres-c.private_key
 
+[ceres-datass]
+192.168.65.24 ansible_ssh_user=vagrant ansible_ssh_private_key_file=./ssh.ceres-datass.private_key
+
+[ceres-rectal]
+192.168.65.25 ansible_ssh_user=vagrant ansible_ssh_private_key_file=./ssh.ceres-rectal.private_key
+
 # Azure server details
+# resource group: ceres-rg
 # "hardwareProfile":
 #    "vmSize": "Standard_A4_v2" (4 vCPUs, 8 GiB Memory)
 # "imageReference":
@@ -28,6 +35,8 @@ ceres.yourcloud.ninja ansible_ssh_user=azureuser ansible_ssh_private_key_file=./
 ceres-a
 ceres-b
 ceres-c
+ceres-datass
+ceres-rectal
 
 # Variables that will be applied to all local servers
 [cereslocal:vars]

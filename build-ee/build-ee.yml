@@ -9,10 +9,16 @@
     ee_publish_fqdn: "localhost.localdomain"
 
   tasks:
-    - name: Make sure EE directory exists
-      ansible.builtin.file:
-        path: "{{ ee_dir }}"
-        state: directory
+    #- name: Make sure EE directory exists
+    #  ansible.builtin.file:
+    #    path: "{{ ee_dir }}"
+    #    state: directory
+
+    - name: Copy build files to build directory
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "{{ ee_dir }}/"
+      with_fileglob: "{{ ee_name }}*"
 
     - name: Remove EE context from previous builds
       ansible.builtin.file:
@@ -24,10 +30,12 @@
         chdir: "{{ ee_dir }}"
         cmd: "ansible-builder create --file {{ ee_name }}.yml"
 
-    - name: Build the EE
+    - name: Build the EE - This can take a LONG time - set a 15min async timeout
       ansible.builtin.shell:
         chdir: "{{ ee_dir }}"
         cmd: "podman build -f context/Containerfile --tag={{ ee_name }} context"
+      async: 900
+      poll: 15
 
     - name: Prune unused images
       ansible.builtin.shell:

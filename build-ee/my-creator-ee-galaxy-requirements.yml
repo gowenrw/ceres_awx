@@ -1,8 +1,14 @@
 ---
 # galaxy collection requirements
 collections:
+  # From creator.ee
+  - name: ansible.posix
+  - name: ansible.windows
+  - name: awx.awx
+  - name: containers.podman
+  - name: kubernetes.core
+  - name: theforeman.foreman
+  # My addons
   - name: azure.azcollection
     version: 1.14.0
   - name: community.general
-  - name: community.kubernetes
-  - name: awx.awx

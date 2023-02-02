@@ -1,0 +1,8 @@
+---
+# galaxy collection requirements
+collections:
+  - name: azure.azcollection
+    version: 1.14.0
+  - name: community.general
+  - name: community.kubernetes
+  - name: awx.awx

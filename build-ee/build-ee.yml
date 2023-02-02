@@ -1,0 +1,34 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars:
+    ee_name: my-creator-ee
+    ee_dir: "~/ee/{{ ee_name }}"
+    ee_version: 1
+    ee_publish: false
+    ee_publish_fqdn: "localhost.localdomain"
+
+  tasks:
+    - name: Remove EE context from previous builds
+      ansible.builtin.file:
+        path: "{{ ee_dir }}/context"
+        state: absent
+
+    - name: Create new EE context
+      ansible.builtin.shell:
+        chdir: "{{ ee_dir }}"
+        cmd: "ansible-builder create --file {{ ee_name }}.yml"
+
+    - name: Build the EE
+      ansible.builtin.shell:
+        chdir: "{{ ee_dir }}"
+        cmd: "podman build -f context/Containerfile --tag={{ ee_name }} context"
+
+    - name: Prune unused images
+      ansible.builtin.shell:
+        cmd: "podman image prune -f"
+
+    - name: Publish the ee image to a container registry
+      ansible.builtin.shell:
+        cmd: "podman push localhost/{{ ee_name }}:latest docker://{{ ee_publish_fqdn }}/{{ ee_name }}:{{ ee_version }}"
+      when: ee_publish

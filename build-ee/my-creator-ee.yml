@@ -1,0 +1,16 @@
+---
+version: 1
+
+build_arg_defaults:
+  EE_BASE_IMAGE: 'quay.io/ansible/creator-ee:latest'
+
+dependencies:
+  galaxy: my-creator-ee-galaxy-requirements.yml
+  python: my-creator-ee-python-requirements.txt
+
+# additional_build_steps:
+#   prepend: |
+#     ADD localfile /some/path/inee/file
+#     RUN whoami
+#   append:
+#     - RUN echo This is a post-install command!

@@ -1,22 +1,25 @@
 #!/bin/bash
 
-# note this only works from linux with putty installed, win puttygen is not cli
+# DOES NOT WORK IN NATIVE WINDOWS OR WIN-GIT-BASH CLI
+echo "------------------------------------------"
+echo "REQUIRES LINUX PUTTYGEN IN WSL OR LINUX VM"
+echo "------------------------------------------"
 
-# Vagrant Keys
-vKeyList=(
-  "ssh.ceres-a"
-  "ssh.ceres-b"
-  "ssh.ceres-c"
-  "ssh.ceres-datass"
-  "ssh.ceres-rectal"
+# Vagrant VMs with Keys
+vMList=(
+  "ceres-a"
+  "ceres-b"
+  "ceres-c"
+  "ceres-ctrl"
+  "ceres-rectal"
 )
 
 # Loop Through Keys
-for keyfile in ${vKeyList[@]}; do
-  #echo $keyfile
-  if test -f "$keyfile.private_key"; then
-    echo "puttygen convert $keyfile.private_key -> $keyfile.ppk"
-    puttygen $keyfile.private_key -o $keyfile.ppk
+for keyvm in ${vMList[@]}; do
+  keyfile="ssh.$keyvm.private_key"
+  if test -f "$keyfile"; then
+    echo "puttygen convert $keyfile -> ssh.$keyvm.ppk"
+    puttygen $keyfile -o ssh.$keyvm.ppk
   fi
 done
 

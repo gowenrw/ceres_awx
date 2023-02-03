@@ -1,19 +1,14 @@
 ---
 - hosts: localhost
   gather_facts: false
-  vars:
-    ee_name: my-creator-ee
-    ee_dir: "~/ee/{{ ee_name }}"
-    ee_version: 1
-    ee_publish: false
-    ee_publish_fqdn: "localhost.localdomain"
-
+  vars_files:
+    - build-vars.yml
   tasks:
     - name: Copy build files to build directory
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: "{{ ee_dir }}/"
-      with_fileglob: "{{ ee_name }}*"
+      with_fileglob: "config-ee*"
 
     - name: Remove EE context from previous builds
       ansible.builtin.file:

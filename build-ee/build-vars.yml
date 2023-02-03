@@ -1,0 +1,7 @@
+---
+# Variable for build-ee playbook
+ee_name: my-creator-ee
+ee_dir: "~/ee/{{ ee_name }}"
+ee_version: 1
+ee_publish: false
+ee_publish_fqdn: "localhost.localdomain"

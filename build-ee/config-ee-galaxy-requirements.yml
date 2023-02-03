@@ -1,14 +1,19 @@
 ---
 # galaxy collection requirements
 collections:
-  # From creator.ee
   - name: ansible.posix
+    version: 1.5.1
   - name: ansible.windows
+    version: 1.13.0
   - name: awx.awx
+    version: 21.11.0
   - name: containers.podman
+    version: 1.10.1
   - name: kubernetes.core
+    version: 2.4.0
   - name: theforeman.foreman
-  # My addons
+    version: 3.8.0
+  - name: community.general
+    version: 6.3.0
   - name: azure.azcollection
     version: 1.14.0
-  - name: community.general

@@ -6,12 +6,12 @@ build_arg_defaults:
   EE_BUILDER_IMAGE: 'quay.io/ansible/ansible-builder:latest'
 
 dependencies:
-  galaxy: my-creator-ee-galaxy-requirements.yml
-  python: my-creator-ee-python-requirements.txt
+  galaxy: config-ee-galaxy-requirements.yml
+  python: config-ee-python-requirements.txt
 
 # additional_build_steps:
 #   prepend: |
-#     ADD localfile /some/path/inee/file
+#     ADD localfile /some/path/inside/ee/file
 #     RUN whoami
 #   append:
 #     - RUN echo This is a post-install command!

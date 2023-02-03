@@ -1,2 +1,0 @@
-# python requirements (beyond what collections speficy)
-psutil >=5.9.4

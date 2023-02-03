@@ -3,3 +3,28 @@
 A quick and dirty ansible playbook and artifacts to build a local execution environment (for ansible-navigator to consume) and optionally push that ee to a container registry (for AWX/AAP to consume).
 
 This was written to be run from ansible core.
+
+## configuring
+
+These are the configuration files
+*  config-ee.yml
+  *  This is the main config file that calls the other two
+  *  The only thing you should need to change here is incrementing the version number
+*  config-ee-galaxy-requirements.yml
+  *  This is the list of ansible collections to install in the ee
+  *  Python modules required by these collections will also be installed
+  *  Collections without a version will pull the latest
+*  config-ee-python-requirements.txt
+  *  This is the list of Python modules to install in addition to above
+  *  Modules without a version will pull the latest
+*  build-vars.yml
+  *  This is the variable file for the build-ee playbook
+  *  There are several settings that can be tweaked here
+  *  The version here is used as a tag when pushing to a registry
+
+## running
+
+Once the configuration files are set simple execute the build-ee playbook
+```
+ansible-galaxy build-ee.yml
+```

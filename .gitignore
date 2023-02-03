@@ -44,6 +44,7 @@ Thumbs.db
 #################
 boxes/*
 /.vagrant
+.vagrantbackup*
 
 # Ansible Files #
 #################

@@ -14,10 +14,13 @@ vMList=(
   "ceres-rectal"
 )
 
-# Loop Through Keys
+# Loop Through VM Keys to Convert
 for keyvm in ${vMList[@]}; do
+  vkeyfile=".vagrant/machines/$keyvm/virtualbox/private_key"
   keyfile="ssh.$keyvm.private_key"
-  if test -f "$keyfile"; then
+  if test -f "$vkeyfile"; then
+    echo "copy $vkeyfile -> $keyfile"
+    cp $vkeyfile $keyfile
     echo "puttygen convert $keyfile -> ssh.$keyvm.ppk"
     puttygen $keyfile -o ssh.$keyvm.ppk
   fi

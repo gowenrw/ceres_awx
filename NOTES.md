@@ -136,3 +136,9 @@ On CentOS this will pull the execution environment ```creator-ee``` which has th
 12│    details: ansible [core 2.13.4]
 ```
 
+Since the default execution environment ```creator-ee``` does not contain the Microsoft Azure collection which we will need later we need to build a custom execution environment which includes this collection.
+
+To make this as easy as possible to build this ee and modify later I created an ansible playbook and scripts in the directory [build-ee](./build-ee/).
+This has its own [README](./build-ee/README.md) with details on how to use it.
+
+

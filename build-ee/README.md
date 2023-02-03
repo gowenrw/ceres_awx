@@ -26,5 +26,9 @@ These are the configuration files
 
 Once the configuration files are set simple execute the build-ee playbook
 ```
-ansible-galaxy build-ee.yml
+ansible-playbook build-ee.yml
 ```
+
+Note that I am using ansible core's ansible-playbook to run this playbook.
+This is because we need the execution of this build to stay in the local environment.
+If we were to use ansible-navigator it's use of an execution environment would cause issues.

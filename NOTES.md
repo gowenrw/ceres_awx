@@ -114,7 +114,7 @@ python -m pip install ansible-navigator
 ```
 
 Run ansible-navigator for first time pull of ee's
-Note may not be in roots path and should be needed as root
+Note may not be in root's path and shouldn't need to run as root
 ```
 ansible-navigator
 ```

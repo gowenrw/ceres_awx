@@ -9,11 +9,6 @@
     ee_publish_fqdn: "localhost.localdomain"
 
   tasks:
-    #- name: Make sure EE directory exists
-    #  ansible.builtin.file:
-    #    path: "{{ ee_dir }}"
-    #    state: directory
-
     - name: Copy build files to build directory
       ansible.builtin.copy:
         src: "{{ item }}"

@@ -18,12 +18,12 @@
     - name: Create new EE context
       ansible.builtin.shell:
         chdir: "{{ ee_dir }}"
-        cmd: "ansible-builder create --file {{ ee_name }}.yml"
+        cmd: "ansible-builder create --file config-ee.yml"
 
     - name: Build the EE - This can take a LONG time - set a 15min async timeout
       ansible.builtin.shell:
         chdir: "{{ ee_dir }}"
-        cmd: "podman build -f context/Containerfile --tag={{ ee_name }} context"
+        cmd: "podman build -f context/Containerfile --tag={{ ee_name }}:{{ ee_version }} context"
       async: 900
       poll: 15
 
@@ -33,5 +33,5 @@
 
     - name: Publish the ee image to a container registry
       ansible.builtin.shell:
-        cmd: "podman push localhost/{{ ee_name }}:latest docker://{{ ee_publish_fqdn }}/{{ ee_name }}:{{ ee_version }}"
+        cmd: "podman push localhost/{{ ee_name }}:{{ ee_version }} docker://{{ ee_publish_fqdn }}/{{ ee_name }}:{{ ee_version }}"
       when: ee_publish

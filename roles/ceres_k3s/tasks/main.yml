@@ -1,0 +1,57 @@
+---
+# main tasks file for ceres_k3s
+
+# PREREQUISITES
+
+# DOWNLOAD
+- name: Download k3s installer
+  get_url:
+    url: "{{ ceres_k3s_installer_url }}"
+    dest: "{{ ceres_k3s_installer_directory }}/k3s-install.sh"
+    mode: "0700"
+
+- name: Stat k3s binary
+  stat: path="{{ ceres_k3s_bin_directory }}/k3s"
+  register: reg_k3binary
+
+# INSTALL
+- name: Install Block
+  block:
+    - name: Set facts for installer environment
+      set_fact:
+        ceres_k3s_install_env:
+          INSTALL_K3S_VERSION: "{{ k3s_installer_version }}"
+          INSTALL_K3S_CHANNEL: "{{ k3s_installer_channel }}"
+          INSTALL_K3S_BIN_DIR: "{{ ceres_k3s_bin_directory }}"
+          INSTALL_K3S_EXEC: "{{ ceres_k3s_exec_role }}"
+          INSTALL_K3S_SKIP_START: "true"
+
+    - name: Execute k3s installer
+      command:
+        cmd: "{{ ceres_k3s_installer_directory }}/k3s-install.sh"
+        creates: "{{ ceres_k3s_bin_directory }}/k3s"
+      environment: "{{ ceres_k3s_install_env }}"
+      register: reg_k3s_install
+
+  always:
+    - name: Create k3s install logs
+      copy:
+        dest: "{{ ceres_k3s_installer_directory }}/k3s-install.{{ item.type }}.log"
+        content: |
+          # k3s install log ({{ item.type }})
+          # start: {{ reg_k3s_install.start }}
+          # environment:
+          {% for k, v in ceres_k3s_install_env.items() %}
+          {{ k }}={{ v }}
+          {% endfor %}
+          # log:
+          {{ reg_k3s_install[item.type] }}
+          # end: {{ reg_k3s_install.end }}
+        mode: "0440"
+      loop:
+        - type: stdout
+        - type: stderr
+      when: reg_k3s_install.changed | bool
+
+  when: not k3binary.stat.exists or ceres_k3s_installer_reinstall
+

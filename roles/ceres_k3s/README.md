@@ -1,7 +1,9 @@
-Role Name
+ceres_k3s
 =========
 
-A brief description of the role goes here.
+This role will install k3s lightweight kubernetes.
+
+This is a bare bones role for installing k3s for use with AWX for the ceres_awx project.
 
 Requirements
 ------------
@@ -30,7 +32,7 @@ Including an example of how to use your role (for instance, with variables passe
 License
 -------
 
-BSD
+MIT
 
 Author Information
 ------------------

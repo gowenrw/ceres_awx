@@ -1,0 +1,13 @@
+---
+# defaults file for ceres_k3s
+
+## k3s installer defaults
+ceres_k3s_installer_url: "https://get.k3s.io"
+ceres_k3s_installer_directory: /opt/k3s
+ceres_k3s_installer_version: ""
+ceres_k3s_installer_channel: "stable"
+ceres_k3s_installer_reinstall: False
+
+## k3s environment
+ceres_k3s_bin_directory: /usr/local/bin
+ceres_k3s_exec_role: "server" # Valid values are server or agent

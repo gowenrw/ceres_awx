@@ -5,12 +5,12 @@ echo "------------------------------------------"
 echo "REQUIRES LINUX PUTTYGEN IN WSL OR LINUX VM"
 echo "------------------------------------------"
 
-# Run from shared directory if running from local ansible control vm
+# Run from shared dir if on local ansible control vm
 runpwd=`pwd`
-if test -f "/vagrant"; then
+if test -d "/vagrant"; then
   runfrom="/vagrant"
 else
-  runfrom="$pwd"
+  runfrom="$runpwd"
 fi
 
 # Vagrant VMs with Keys
@@ -32,10 +32,10 @@ for keyvm in ${vMList[@]}; do
     cp $vkeyfile $keyfile
     echo "puttygen convert $keyfile -> $keyppk"
     puttygen $keyfile -o $keyppk
+    # Copy ssh keys from shared dir if on local ansible control vm
+    if test -d "/vagrant"; then
+      cp $keyfile $runpwd
+    fi
   fi
 done
 
-# Copy ssh keys from shared directory if running from local ansible control vm
-if test -f "/vagrant"; then
-  cp $keyfile $pwd
-fi

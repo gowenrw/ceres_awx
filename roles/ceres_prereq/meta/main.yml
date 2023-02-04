@@ -1,6 +1,6 @@
 galaxy_info:
   author: Richard Gowen
-  description: This role will install k3s lightweight kubernetes.
+  description: This role will get a vm ready as a target for the ceres_awx project.
 
   license: MIT
 
@@ -11,5 +11,3 @@ galaxy_info:
 dependencies: []
   # Might need the following collections - need to confirm
   # community.general
-  # containers.podman
-  # kubernetes.core

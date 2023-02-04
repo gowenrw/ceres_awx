@@ -1,7 +1,5 @@
 ---
-# main tasks file for ceres_k3s
-
-# PREREQUISITES
+# tasks main.yml file
 
 # DOWNLOAD
 - name: Download k3s installer

@@ -1,5 +1,5 @@
 ---
-# defaults file for ceres_k3s
+# defaults main.yml file
 
 ## k3s installer defaults
 ceres_k3s_installer_url: "https://get.k3s.io"

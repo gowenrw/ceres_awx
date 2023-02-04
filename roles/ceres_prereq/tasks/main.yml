@@ -1,0 +1,32 @@
+---
+# tasks main.yml file
+
+# PREREQUISITES
+
+- name: Read disk /dev/sda information
+  community.general.parted: device=/dev/sda unit=GB
+  register: reg_sda_info
+
+- name: Read root partition /dev/sda1 information
+  community.general.parted: device=/dev/sda1 unit=GB
+  register: reg_sda1_info
+
+- name: Debug disk /dev/sda information
+  ansible.builtin.debug:
+    var: reg_sda_info
+    verbosity: 0
+
+- name: Debug root partition /dev/sda1 information
+  ansible.builtin.debug:
+    var: reg_sda_info
+    verbosity: 0
+
+- name: Debug ceres_prereq_testvar
+  ansible.builtin.debug:
+    var: ceres_prereq_testvar
+    verbosity: 0
+
+- name: Debug test_sudo_pass
+  ansible.builtin.debug:
+    var: test_sudo_pass
+    verbosity: 0

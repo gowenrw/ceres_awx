@@ -1,9 +1,7 @@
-ceres_k3s
-=========
+ceres_prereq
+============
 
-This role will install k3s lightweight kubernetes.
-
-This is a bare bones role for installing k3s for use with AWX for the ceres_awx project.
+This role will get a vm ready as a target for the ceres_awx project.
 
 Requirements
 ------------
@@ -20,8 +18,6 @@ Dependencies
 
 The following collections may be needed:
 *  community.general
-*  containers.podman
-*  kubernetes.core
 
 Example Playbook
 ----------------

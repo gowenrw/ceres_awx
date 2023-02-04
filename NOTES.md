@@ -29,7 +29,7 @@ Add to Vagrantfile for plugin
 node.vbguest.installer_options = { allow_kernel_upgrade: true }
 ```
 
-Resize the root partition (if vagrant.disksize made the disk larger)
+Resize the root partition and filesystem (if vagrant.disksize made the disk larger)
 Within the guest use parted for the partition and resize2fs for ext4 filesystem
 ```
 # parted

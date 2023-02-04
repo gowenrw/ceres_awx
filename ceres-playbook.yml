@@ -1,0 +1,12 @@
+---
+- name: Prepare VM(s)
+  hosts: ceres-a
+  become: true
+
+  tasks:
+  - name: Import role ceres_prereq
+    ansible.builtin.import_role:
+      name: ceres_prereq
+    vars:
+      ceres_prereq_testvar: "test1234"
+

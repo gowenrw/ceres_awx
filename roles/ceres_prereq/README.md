@@ -16,8 +16,9 @@ These are defined in [defults/main.yml](defults/main.yml) and [vars/main.yml](va
 Dependencies
 ------------
 
-The following collections may be needed:
+The following collections are used by this role:
 *  community.general
+*  ansible.posix
 
 Example Playbook
 ----------------

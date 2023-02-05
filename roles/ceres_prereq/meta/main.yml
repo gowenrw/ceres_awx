@@ -8,6 +8,6 @@ galaxy_info:
 
   galaxy_tags: []
 
-dependencies: []
-  # Might need the following collections - need to confirm
-  # community.general
+dependencies:
+  - community.general
+  - ansible.posix

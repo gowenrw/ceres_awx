@@ -83,3 +83,137 @@
     - reg_resize_disk_free_gb is defined
     - reg_resize_disk_free_gb.stdout | int > 1
     - ansible_distribution == 'CentOS'
+
+## DISABLE SELINUX & FIREWALLD
+#
+# selinux
+- name: Disable SELinux
+  ansible.posix.selinux:
+    state: disabled
+#
+# firewalld
+- name: Stop and Disable FirewallD
+  ansible.builtin.service:
+    name: firewalld
+    state: stopped
+    enabled: False
+
+## IP FORWARDING
+# 
+# Set ip forwarding on in /proc and in the sysctl file and reload if necessary
+- ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: True
+    state: present
+    reload: True
+
+## MODPROBE BR_NETFILTER MODULE
+#
+# Add Modprobe br_netfilter module
+- name: Add br_netfilter to /etc/modules-load.d/
+  ansible.builtin.template:
+    src: "br_netfilter.conf.j2"
+    dest: "/etc/modules-load.d/br_netfilter.conf"
+    owner: root
+    group: root
+    mode: 0600
+#
+# Load Modprobe br_netfilter module
+- name: Load br_netfilter
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+
+## SUDO SECURE_PATH
+#
+# Add /usr/local/bin to sudo secure_path
+- name: Add /usr/local/bin to sudo secure_path
+  ansible.builtin.lineinfile:
+    line: Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+    regexp: Defaults(\s)*secure_path(\s)*=
+    state: present
+    insertafter: EOF
+    path: /etc/sudoers
+    validate: visudo -cf %s
+
+
+## EPEL
+#
+# check if epel repo has already been configured
+- name: Check if EPEL repo is already configured.
+  stat:
+    path: "{{ ceres_prereq_epel_repofile_path }}"
+  register: reg_epel_repofile_result
+#
+# crb on centos
+- name: Enable codeready-builder repository on CentOS 
+  ansible.builtin.yum_repository:
+    name: crb
+    enabled: True
+  when: 
+    - not reg_epel_repofile_result.stat.exists
+    - ansible_distribution == 'CentOS'
+#
+# epel on centos
+- name: Install epel-release and epel-next-release on CentOS
+  ansible.builtin.yum_repository:
+    name:
+      - epel-release
+      - epel-next-release
+    state: latest
+    enabled: True
+  when: 
+    - not reg_epel_repofile_result.stat.exists
+    - ansible_distribution == 'CentOS'
+#
+# crb on rhel
+- name: Enable codeready-builder repository on RHEL
+  community.general.rhsm_repository:
+    name: codeready-builder-for-rhel-{{ ansible_distribution_major_version }}-{{ ansible_facts.architecture }}-rpms
+  when: 
+    - not reg_epel_repofile_result.stat.exists
+    - ansible_distribution == 'Red Hat Enterprise Linux'
+#
+# gpg for epel on rhel
+- name: Import EPEL GPG key on RHEL
+  ansible.builtin.rpm_key:
+    key: "{{ ceres_prereq_epel_repo_gpg_key_url }}"
+    state: present
+  register: reg_epel_rhel_gpg_result
+  until: reg_epel_rhel_gpg_result is succeeded
+  retries: 3
+  delay: 10
+  when: 
+    - not reg_epel_repofile_result.stat.exists
+    - ansible_distribution == 'Red Hat Enterprise Linux'
+#
+# epel on rhel
+- name: Install EPEL repo.
+  ansible.builtin.yum:
+    name: "{{ ceres_prereq_epel_repo_url }}"
+    state: present
+  register: reg_epel_rhel_rhel_result
+  until: reg_epel_rhel_rhel_result is succeeded
+  retries: 3
+  delay: 10
+  when: 
+    - not reg_epel_repofile_result.stat.exists
+    - ansible_distribution == 'Red Hat Enterprise Linux'
+
+## YUM UPDATE
+#
+# update the yum cache and all installed packages after epel repo add
+- name: Update yum cache and all installed packages
+  ansible.builtin.yum:
+    name: '*'
+    state: latest
+    update_cache: yes
+    update_only: yes
+  register: reg_yum_update_result
+#
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: reg_yum_update_result
+    verbosity: 1

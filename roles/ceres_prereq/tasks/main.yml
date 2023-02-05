@@ -3,30 +3,29 @@
 
 # PREREQUISITES
 
-- name: Read disk /dev/sda information
-  community.general.parted: device=/dev/sda unit=GB
-  register: reg_sda_info
+- name: Read disk {{ ceres_prereq_resize_dev }} information
+  community.general.parted: device={{ ceres_prereq_resize_dev }} unit=MiB
+  register: reg_resize_info
 
-- name: Read root partition /dev/sda1 information
-  community.general.parted: device=/dev/sda1 unit=GB
-  register: reg_sda1_info
-
-- name: Debug disk /dev/sda information
+- name: Debug disk {{ ceres_prereq_resize_dev }} information
   ansible.builtin.debug:
-    var: reg_sda_info
+    var: reg_resize_info
     verbosity: 0
 
-- name: Debug root partition /dev/sda1 information
-  ansible.builtin.debug:
-    var: reg_sda_info
-    verbosity: 0
+- name: Extend partition to fill all available space
+  ansible.builtin.command: "echo -e 'resizepart\n{{ reg_resize_info.partitions | length }}\nYes\n100%\nprint free\nquit' | parted {{ ceres_prereq_resize_dev }} ---pretend-input-tty"
+  when: "{{ ceres_prereq_resize_root }}"
 
-- name: Debug ceres_prereq_testvar
-  ansible.builtin.debug:
-    var: ceres_prereq_testvar
-    verbosity: 0
+# this might work on non-mounted partitions but fails on root partition
+# saving this snippet for later
+#- name: Extend existing partition on /dev/sda to fill all available space
+#  community.general.parted:
+#    device: /dev/sda
+#    number: "{{ reg_resize_info.partitions | length }}"
+#    part_end: "100%"
+#    resize: true
+#    state: present
 
-- name: Debug test_sudo_pass
-  ansible.builtin.debug:
-    var: test_sudo_pass
-    verbosity: 0
+- name: Extend ext4 filesystem to fill all available space
+  ansible.builtin.command: "resize2fs {{ ceres_prereq_resize_dev }}{{ reg_resize_info.partitions | length }}"
+  when: "{{ ceres_prereq_resize_root }}"

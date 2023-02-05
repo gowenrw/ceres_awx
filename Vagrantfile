@@ -23,7 +23,7 @@ servers=[
     :ram => 8192,
     :vram => 16,
     :cpu => 2,
-    :disksize => "15GB",
+    :disksize => "20GB",
     :fwdguest => 80,
     :fwdhost => 8021
   },
@@ -36,7 +36,7 @@ servers=[
     :ram => 8192,
     :vram => 16,
     :cpu => 2,
-    :disksize => "15GB",
+    :disksize => "20GB",
     :fwdguest => 80,
     :fwdhost => 8022
   },
@@ -49,7 +49,7 @@ servers=[
     :ram => 16384,
     :vram => 16,
     :cpu => 4,
-    :disksize => "15GB",
+    :disksize => "20GB",
     :fwdguest => 80,
     :fwdhost => 8023
   },

@@ -3,36 +3,51 @@
 
 # PREREQUISITES
 
-# Resize Disk
+## Resize Disk Tasks ##
+#
+# Get disk free space info for resize block conditional check
+- name: Determine free space on disk
+  ansible.builtin.command: "parted {{ ceres_prereq_resize_dev }} unit GB print free | grep 'Free Space' | tail -n1 | awk '{print $3}' | sed 's/GB//'"
+  register: reg_resize_disk_free_gb
+#
+# Block for disk resize with conditionals
 - name: Resize Disk Block
   block:
-
+    #
+    # Get partition info for debugging
     - name: "Read disk {{ ceres_prereq_resize_dev }} information"
       community.general.parted: device={{ ceres_prereq_resize_dev }} unit=MiB
-      register: reg_resize_info
-
+      register: reg_resize_disk_info
+    #
+    # Dump the disk info if needed for troubleshooting
     - name: "Debug disk {{ ceres_prereq_resize_dev }} information"
       ansible.builtin.debug:
-        var: reg_resize_info
-        verbosity: 0
-
-    # this might work on non-mounted partitions but fails on root partition
-    # since we are messing with root for now on local vms, going with brute force
-    # saving this snippet for later when we mount data disks instead
+        var: reg_resize_disk_info
+        verbosity: 3
     #
-    #- name: Extend existing partition on /dev/sda to fill all available space
-    #  community.general.parted:
-    #    device: /dev/sda
-    #    number: "{{ reg_resize_info.partitions | length }}"
-    #    part_end: "100%"
-    #    resize: true
-    #    state: present
-
-    # brute force method 
-    - name: Extend partition to fill all available space
-      ansible.builtin.command: "echo -e 'resizepart\n{{ ceres_prereq_resize_part }}\nYes\n100%\nprint free\nquit' | parted {{ ceres_prereq_resize_dev }} ---pretend-input-tty"
-
+    # Nested block for extending partition to rescue failure with brute force task
+    - name: Extend Partition Block
+      block:
+        #
+        # This is the correct way to resize a partition but seems to fail for my vagrant vms
+        - name: Extend existing partition to fill all available space (nice way)
+          community.general.parted:
+            device: "{{ ceres_prereq_resize_dev }}"
+            number: "{{ ceres_prereq_resize_part }}"
+            part_end: "100%"
+            resize: true
+            state: present
+      rescue:
+        #
+        # This is an ugly brute force way to resize a partition
+        - name: Extend partition to fill all available space
+          ansible.builtin.command: "echo -e 'resizepart\n{{ ceres_prereq_resize_part }}\nYes\n100%\nprint free\nquit' | parted {{ ceres_prereq_resize_dev }} ---pretend-input-tty"
+    #
+    # Extend the ext4 filesystem
     - name: Extend ext4 filesystem to fill all available space
       ansible.builtin.command: "resize2fs {{ ceres_prereq_resize_dev }}{{ ceres_prereq_resize_part }}"
-
-  when: ceres_prereq_resize_disk
+  #
+  # Resize disk block conditionals
+  when: 
+    - ceres_prereq_resize_disk
+    - reg_resize_disk_free_gb > 1

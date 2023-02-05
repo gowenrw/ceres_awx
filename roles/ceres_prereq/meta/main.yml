@@ -8,6 +8,4 @@ galaxy_info:
 
   galaxy_tags: []
 
-dependencies:
-  - community.general
-  - ansible.posix
+dependencies: []

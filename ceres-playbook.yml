@@ -8,6 +8,6 @@
     ansible.builtin.import_role:
       name: ceres_prereq
     vars:
-      ceres_prereq_resize_root: True
+      ceres_prereq_resize_disk: True
       ceres_prereq_resize_dev: "/dev/sda"
 

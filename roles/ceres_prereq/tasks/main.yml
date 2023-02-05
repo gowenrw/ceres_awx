@@ -3,29 +3,36 @@
 
 # PREREQUISITES
 
-- name: Read disk {{ ceres_prereq_resize_dev }} information
-  community.general.parted: device={{ ceres_prereq_resize_dev }} unit=MiB
-  register: reg_resize_info
+# Resize Disk
+- name: Resize Disk Block
+  block:
 
-- name: Debug disk {{ ceres_prereq_resize_dev }} information
-  ansible.builtin.debug:
-    var: reg_resize_info
-    verbosity: 0
+    - name: "Read disk {{ ceres_prereq_resize_dev }} information"
+      community.general.parted: device={{ ceres_prereq_resize_dev }} unit=MiB
+      register: reg_resize_info
 
-- name: Extend partition to fill all available space
-  ansible.builtin.command: "echo -e 'resizepart\n{{ reg_resize_info.partitions | length }}\nYes\n100%\nprint free\nquit' | parted {{ ceres_prereq_resize_dev }} ---pretend-input-tty"
-  when: "{{ ceres_prereq_resize_root }}"
+    - name: "Debug disk {{ ceres_prereq_resize_dev }} information"
+      ansible.builtin.debug:
+        var: reg_resize_info
+        verbosity: 0
 
-# this might work on non-mounted partitions but fails on root partition
-# saving this snippet for later
-#- name: Extend existing partition on /dev/sda to fill all available space
-#  community.general.parted:
-#    device: /dev/sda
-#    number: "{{ reg_resize_info.partitions | length }}"
-#    part_end: "100%"
-#    resize: true
-#    state: present
+    # this might work on non-mounted partitions but fails on root partition
+    # since we are messing with root for now on local vms, going with brute force
+    # saving this snippet for later when we mount data disks instead
+    #
+    #- name: Extend existing partition on /dev/sda to fill all available space
+    #  community.general.parted:
+    #    device: /dev/sda
+    #    number: "{{ reg_resize_info.partitions | length }}"
+    #    part_end: "100%"
+    #    resize: true
+    #    state: present
 
-- name: Extend ext4 filesystem to fill all available space
-  ansible.builtin.command: "resize2fs {{ ceres_prereq_resize_dev }}{{ reg_resize_info.partitions | length }}"
-  when: "{{ ceres_prereq_resize_root }}"
+    # brute force method 
+    - name: Extend partition to fill all available space
+      ansible.builtin.command: "echo -e 'resizepart\n{{ ceres_prereq_resize_part }}\nYes\n100%\nprint free\nquit' | parted {{ ceres_prereq_resize_dev }} ---pretend-input-tty"
+
+    - name: Extend ext4 filesystem to fill all available space
+      ansible.builtin.command: "resize2fs {{ ceres_prereq_resize_dev }}{{ ceres_prereq_resize_part }}"
+
+  when: ceres_prereq_resize_disk

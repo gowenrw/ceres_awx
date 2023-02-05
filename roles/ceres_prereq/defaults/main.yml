@@ -2,5 +2,6 @@
 # defaults main.yml file
 
 ## Resize
-ceres_prereq_resize_root: False # If True resize root partition & filesystem (for local dev vms)
+ceres_prereq_resize_disk: False # If True resize partition & filesystem
 ceres_prereq_resize_dev: "/dev/sda"
+ceres_prereq_resize_part: 1

@@ -206,7 +206,7 @@
     name: '*'
     state: present
     update_cache: True
-    update_only: Trum
+    update_only: True
   register: reg_yum_update_result
 #
 # Dump the output of previous task if needed for troubleshooting

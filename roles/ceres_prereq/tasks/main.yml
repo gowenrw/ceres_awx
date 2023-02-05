@@ -158,7 +158,7 @@
   ansible.builtin.dnf:
     name:
       - epel-release
-      - epel-next-releas
+      - epel-next-release
     state: present
   when: 
     - not reg_epel_repofile_result.stat.exists

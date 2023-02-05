@@ -1,2 +1,22 @@
 ---
 # vars main.yml file
+
+## Build Packages
+ceres_prereg_pkgs_build_list:
+  - gcc 
+  - kernel-devel 
+  - kernel-headers 
+  - make 
+  - cmake 
+  - bzip2 
+  - perl
+
+## Quality of Life Packages
+ceres_prereq_pkgs_qol_list:
+ - git 
+ - vim 
+ - net-tools 
+ - traceroute 
+ - htop 
+ - python3-pip
+

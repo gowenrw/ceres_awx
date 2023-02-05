@@ -204,9 +204,9 @@
 - name: Update yum cache and all installed packages
   ansible.builtin.yum:
     name: '*'
-    state: latest
-    update_cache: yes
-    update_only: yes
+    state: present
+    update_cache: True
+    update_only: Trum
   register: reg_yum_update_result
 #
 # Dump the output of previous task if needed for troubleshooting
@@ -214,3 +214,36 @@
   ansible.builtin.debug:
     var: reg_yum_update_result
     verbosity: 1
+
+## INSTALL BUILD PKGS
+#
+# Install build packages
+- name: Install build packages
+  ansible.builtin.yum:
+    name: "(( ceres_prereg_pkgs_build_list ))"
+    state: present
+  register: reg_pkgs_build_result
+  when: ceres_prereq_pkgs_build_install
+#
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: reg_pkgs_build_result
+    verbosity: 1
+
+## INSTALL QUALITY OF LIFE PKGS
+#
+# Install quality of life packages
+- name: Install qol packages
+  ansible.builtin.yum:
+    name: "(( ceres_prereg_pkgs_qol_list ))"
+    state: present
+  register: reg_pkgs_qol_result
+  when: ceres_prereq_pkgs_qol_install
+#
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: reg_pkgs_qol_result
+    verbosity: 1
+

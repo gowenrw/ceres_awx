@@ -10,4 +10,6 @@
     vars:
       ceres_prereq_resize_disk: True
       ceres_prereq_resize_dev: "/dev/sda"
+      ceres_prereq_pkgs_build_install: True
+      ceres_prereq_pkgs_qol_install: True
 

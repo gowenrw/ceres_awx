@@ -148,21 +148,18 @@
 #
 # crb on centos
 - name: Enable codeready-builder repository on CentOS 
-  ansible.builtin.yum_repository:
-    name: crb
-    enabled: True
+  ansible.builtin.command: "dnf config-manager --set-enabled crb"
   when: 
     - not reg_epel_repofile_result.stat.exists
     - ansible_distribution == 'CentOS'
 #
 # epel on centos
 - name: Install epel-release and epel-next-release on CentOS
-  ansible.builtin.yum_repository:
+  ansible.builtin.dnf:
     name:
       - epel-release
-      - epel-next-release
-    state: latest
-    enabled: True
+      - epel-next-releas
+    state: present
   when: 
     - not reg_epel_repofile_result.stat.exists
     - ansible_distribution == 'CentOS'

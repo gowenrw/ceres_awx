@@ -3,14 +3,23 @@
 
 # PREREQUISITES
 
+## OS Check ##
+- name: OS Check
+  ansible.builtin.fail:
+    msg: The role currently only supports CentOS and RHEL distributions.
+  when: ansible_distribution not in ['CentOS', 'Red Hat Enterprise Linux']
+
 ## Resize Disk Tasks ##
 #
 # Get disk free space info for resize block conditional check
 - name: Determine free space on disk
-  ansible.builtin.command: "parted {{ ceres_prereq_resize_dev }} unit GB print free | grep 'Free Space' | tail -n1 | awk '{print $3}' | sed 's/GB//'"
+  ansible.builtin.shell: "parted {{ ceres_prereq_resize_dev }} unit GB print free | grep 'Free Space' | tail -n1 | awk '{print $3}' | sed 's/GB//'"
   register: reg_resize_disk_free_gb
+  when: 
+  - ceres_prereq_resize_disk
+  - ansible_distribution == 'CentOS'
 #
-# Block for disk resize with conditionals
+# Block for disk resize with conditionals for only CentOS, free space, etc.
 - name: Resize Disk Block
   block:
     #
@@ -23,7 +32,7 @@
     - name: "Debug disk {{ ceres_prereq_resize_dev }} information"
       ansible.builtin.debug:
         var: reg_resize_disk_info
-        verbosity: 3
+        verbosity: 1
     #
     # Nested block for extending partition to rescue failure with brute force task
     - name: Extend Partition Block
@@ -37,17 +46,40 @@
             part_end: "100%"
             resize: true
             state: present
+          register: reg_resize_part_nice
+        #
+        # Dump the output of previous task if needed for troubleshooting
+        - name: "Debug task output"
+          ansible.builtin.debug:
+            var: reg_resize_part_nice
+            verbosity: 1
       rescue:
         #
         # This is an ugly brute force way to resize a partition
         - name: Extend partition to fill all available space
-          ansible.builtin.command: "echo -e 'resizepart\n{{ ceres_prereq_resize_part }}\nYes\n100%\nprint free\nquit' | parted {{ ceres_prereq_resize_dev }} ---pretend-input-tty"
+          ansible.builtin.shell: "echo -e 'resizepart\n{{ ceres_prereq_resize_part }}\nYes\n100%\nprint free\nquit' | parted {{ ceres_prereq_resize_dev }} ---pretend-input-tty"
+          register: reg_resize_part_force
+        #
+        # Dump the output of previous task if needed for troubleshooting
+        - name: "Debug task output"
+          ansible.builtin.debug:
+            var: reg_resize_part_force
+            verbosity: 1
     #
     # Extend the ext4 filesystem
     - name: Extend ext4 filesystem to fill all available space
       ansible.builtin.command: "resize2fs {{ ceres_prereq_resize_dev }}{{ ceres_prereq_resize_part }}"
+      register: reg_resize_extfs
+    #
+    # Dump the output of previous task if needed for troubleshooting
+    - name: "Debug task output"
+      ansible.builtin.debug:
+        var: reg_resize_extfs
+        verbosity: 1
   #
   # Resize disk block conditionals
   when: 
     - ceres_prereq_resize_disk
-    - reg_resize_disk_free_gb > 1
+    - reg_resize_disk_free_gb is defined
+    - reg_resize_disk_free_gb.stdout | int > 1
+    - ansible_distribution == 'CentOS'

@@ -13,9 +13,9 @@ ceres_prereq_epel_repo_gpg_key_url: "https://dl.fedoraproject.org/pub/epel/RPM-G
 
 ## Install Build Packages if set to True
 ceres_prereq_pkgs_build_install: False
-ceres_prereg_pkgs_build_list: [] # see vars/main.yml for package list
+#ceres_prereg_pkgs_build_list: [] # see vars/main.yml for package list
 
 ## Install Quality of Life Packages if set to True
 ceres_prereq_pkgs_qol_install: False
-ceres_prereq_pkgs_qol_list: [] # see vars/main.yml for package list
+#ceres_prereq_pkgs_qol_list: [] # see vars/main.yml for package list
 

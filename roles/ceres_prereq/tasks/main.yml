@@ -220,9 +220,10 @@
 # Install build packages
 - name: Install build packages
   ansible.builtin.yum:
-    name: "(( ceres_prereg_pkgs_build_list ))"
+    name: "{{ item }}"
     state: present
   register: reg_pkgs_build_result
+  loop: "(( ceres_prereg_pkgs_build_list ))"
   when: ceres_prereq_pkgs_build_install
 #
 # Dump the output of previous task if needed for troubleshooting
@@ -236,9 +237,10 @@
 # Install quality of life packages
 - name: Install qol packages
   ansible.builtin.yum:
-    name: "(( ceres_prereg_pkgs_qol_list ))"
+    name: "{{ item }}"
     state: present
   register: reg_pkgs_qol_result
+  loop: "(( ceres_prereg_pkgs_qol_list ))"
   when: ceres_prereq_pkgs_qol_install
 #
 # Dump the output of previous task if needed for troubleshooting

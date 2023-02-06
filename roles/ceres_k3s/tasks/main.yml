@@ -3,7 +3,7 @@
 
 # SETUP
 - name: create required directories
-  file:
+  ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
     mode: "{{ item.mode }}"
@@ -25,13 +25,13 @@
 
 # DOWNLOAD
 - name: Download k3s installer
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ ceres_k3s_installer_url }}"
     dest: "{{ ceres_k3s_installer_directory }}/k3s-install.sh"
     mode: "0700"
 
 - name: Stat k3s binary
-  stat: path="{{ ceres_k3s_bin_directory }}/k3s"
+  ansible.builtin.stat: path="{{ ceres_k3s_bin_directory }}/k3s"
   register: reg_k3binary
 
 # INSTALL
@@ -47,7 +47,7 @@
           INSTALL_K3S_SKIP_START: "true"
 
     - name: Execute k3s installer
-      command:
+      ansible.builtin.command:
         cmd: "{{ ceres_k3s_installer_directory }}/k3s-install.sh"
         creates: "{{ ceres_k3s_bin_directory }}/k3s"
       environment: "{{ ceres_k3s_install_env }}"
@@ -55,7 +55,7 @@
 
   always:
     - name: Create k3s install logs
-      copy:
+      ansible.builtin.copy:
         dest: "{{ ceres_k3s_installer_directory }}/k3s-install.{{ item.type }}.log"
         content: |
           # k3s install log ({{ item.type }})
@@ -73,5 +73,5 @@
         - type: stderr
       when: reg_k3s_install.changed | bool
 
-  when: not k3binary.stat.exists or ceres_k3s_installer_reinstall
+  when: not reg_k3binary.stat.exists or ceres_k3s_installer_reinstall
 

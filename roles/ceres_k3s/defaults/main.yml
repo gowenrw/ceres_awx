@@ -11,3 +11,8 @@ ceres_k3s_installer_reinstall: False
 ## k3s environment
 ceres_k3s_bin_directory: /usr/local/bin
 ceres_k3s_exec_role: "server" # Valid values are server or agent
+ceres_k3s_storage_provider: local
+ceres_k3s_default_storage_path: /srv/data
+ceres_k3s_config_file: /etc/rancher/k3s/config.yaml
+ceres_k3s_ansible_token_file: /etc/rancher/k3s/ansible-node-token
+

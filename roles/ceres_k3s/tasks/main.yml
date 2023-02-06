@@ -1,6 +1,28 @@
 ---
 # tasks main.yml file
 
+# SETUP
+- name: create required directories
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+  loop:
+    - path: "{{ ceres_k3s_installer_directory }}"
+      mode: "0700"
+      owner: root
+      group: root
+    - path: "{{ ceres_k3s_bin_directory }}"
+      mode: "0755"
+    - path: "{{ ceres_k3s_default_storage_path }}"
+      mode: "0755"
+    - path: "{{ ceres_k3s_config_file | dirname }}"
+      mode: "0750"
+    - path: "{{ ceres_k3s_ansible_token_file | dirname }}"
+      mode: "0750"
+
 # DOWNLOAD
 - name: Download k3s installer
   get_url:
@@ -18,8 +40,8 @@
     - name: Set facts for installer environment
       set_fact:
         ceres_k3s_install_env:
-          INSTALL_K3S_VERSION: "{{ k3s_installer_version }}"
-          INSTALL_K3S_CHANNEL: "{{ k3s_installer_channel }}"
+          INSTALL_K3S_VERSION: "{{ ceres_k3s_installer_version }}"
+          INSTALL_K3S_CHANNEL: "{{ ceres_k3s_installer_channel }}"
           INSTALL_K3S_BIN_DIR: "{{ ceres_k3s_bin_directory }}"
           INSTALL_K3S_EXEC: "{{ ceres_k3s_exec_role }}"
           INSTALL_K3S_SKIP_START: "true"

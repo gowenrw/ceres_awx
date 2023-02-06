@@ -236,7 +236,7 @@
 # Install quality of life packages
 - name: Install qol packages
   ansible.builtin.yum:
-    name: "{{ ceres_prereg_pkgs_qol_list }}"
+    name: "{{ ceres_prereq_pkgs_qol_list }}"
     state: present
   register: reg_pkgs_qol_result
   when: ceres_prereq_pkgs_qol_install

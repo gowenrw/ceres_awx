@@ -2,7 +2,7 @@
 # vars main.yml file
 
 ## Build Packages
-ceres_prereg_pkgs_build_list: 
+ceres_prereg_pkgs_build_list:
   - gcc
   - kernel-devel
   - kernel-headers

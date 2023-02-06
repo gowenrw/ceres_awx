@@ -38,6 +38,11 @@ ceres-c
 ceres-ctrl
 ceres-rectal
 
+# Ceres dev test group
+[ceresdevtest:children]
+ceres-a
+ceres-b
+
 # Variables that will be applied to all local servers
 [cereslocal:vars]
 # prevent errors on first run, only seems to be needed once to record the ssh keys

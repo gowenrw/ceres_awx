@@ -1,6 +1,6 @@
 ---
-- name: Prepare VM(s)
-  hosts: ceres-a
+- name: Dev Test Playbook
+  hosts: ceresdevtest
   become: true
 
   tasks:
@@ -13,3 +13,10 @@
       ceres_prereq_pkgs_build_install: True
       ceres_prereq_pkgs_qol_install: True
 
+  - name: Import role ceres_k3s
+    ansible.builtin.import_role:
+      name: ceres_k3s
+    vars:
+      ceres_k3s_installer_version: "v1.25.6+k3s1"
+      ceres_k3s_installer_channel: "stable"
+      ceres_k3s_exec_role: "server"

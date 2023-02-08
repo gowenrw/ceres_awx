@@ -19,3 +19,7 @@ ceres_localenv_pkgs_build_list: [] # see vars/main.yml for package list
 ceres_localenv_pkgs_qol_install: False
 ceres_localenv_pkgs_qol_list: [] # see vars/main.yml for package list
 
+## Install Ansible Packages if set to True
+ceres_localenv_pkgs_ansible_install: False
+
+

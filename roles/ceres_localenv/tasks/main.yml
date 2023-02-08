@@ -207,3 +207,37 @@
     var: reg_pkgs_qol_result
     verbosity: 1
 
+## INSTALL ANSIBLE PKGS
+#
+# Install ansible and podman
+- name: Install ansible and podman packages
+  ansible.builtin.yum:
+    name:
+      - ansible
+      - podman
+    state: present
+  register: reg_pkgs_ans_result
+  when: 
+    - ceres_localenv_pkgs_ansible_install
+    - ansible_distribution == 'CentOS'
+#
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: reg_pkgs_ans_result
+    verbosity: 1
+#
+# Install ansible-navigator pip
+- name: Install ansible-navigator pip package
+  ansible.builtin.pip:
+    name: ansible-navigator
+  register: reg_pkgs_ansn_result
+  when: 
+    - ceres_localenv_pkgs_ansible_install
+    - ansible_distribution == 'CentOS'
+#
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: reg_pkgs_ansn_result
+    verbosity: 1

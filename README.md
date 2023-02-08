@@ -190,5 +190,5 @@ IMHO EE's are much easier to deal with than setting up local python virtual envi
 
 To allow for the easy creation of local custom execution environments I created an Ansible playbook and config files in the [build-ee](./build-ee/) directory which has its own [README](./build-ee/README.md) file explaining its use.
 
-The [build-ee](./build-ee/) config files have been set to include all the [galaxy collections and thier required python modules](./build-ee/config-ee-galaxy-requirements.yml) as well as some [additional python modules](./build-ee/config-ee-python-requirements.txt) that exist in the default ```creator-ee`` image along with the additional requirements for this project.
+The [build-ee](./build-ee/) config files have been set to include all the [galaxy collections and thier required python modules](./build-ee/config-ee-galaxy-requirements.yml) as well as some [additional python modules](./build-ee/config-ee-python-requirements.txt) that exist in the default ```creator-ee``` image along with the additional requirements for this project.
 

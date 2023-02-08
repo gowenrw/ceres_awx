@@ -2,7 +2,14 @@
 - name: Control Node Playbook
   hosts: cerescontrol
   become: true
-
+#
+# Note that this playbook cannot be run against localhost
+# since it is messing with root partition and rebooting etc.
+# 
+# To build my ansible control vm I usually first spin up a temp vm
+# and just install ansible core on it to run this playbook
+# against the ansible control vm and delete the temp vm when complete
+#
   tasks:
   # 
   # Call role ceres_localenv to resize root partition and
@@ -15,4 +22,5 @@
       ceres_localenv_resize_dev: "/dev/sda"
       ceres_localenv_pkgs_build_install: True
       ceres_localenv_pkgs_qol_install: True
+      ceres_localenv_pkgs_ansible_install: True
 

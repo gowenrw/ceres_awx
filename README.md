@@ -13,19 +13,19 @@ This project will use CentOS Stream 9 locally and Redhat Enterprise Linux 9 in t
 A final goal is to meet the first two goals in a way that is accessible to those with limited Ansible knowledge (i.e., lots of documentation and examples).
 
 These are the Ansible AWX configurations this project should automate provisioning for:
-*  DEV - AWX in a single VM on a local machine
-  *  The local VM needs to be provisioned manually prior to these AWX automation jobs
-  *  Will be tested with Virtualbox as the local hypervisor using Vagrant for local VM provisioning
-  *  Automation will install everything for a fully functional AWX system on that local VM.
-*  QA - AWX in a single IaaS VM on Microsoft Azure.
-  *  The Azure landing zone (RG/VNET/Subnet/etc.) needs to be provisioned prior to these AWX automation jobs
-  *  An Azure AD Service Principal (SPN) account (with access to the RG) is needed by these AWX automation jobs
-  *  Automation will provision the Azure VM installing everything for a fully functional AWX system.
-*  PROD - AWX distributed IaaS/PaaS environment on Microsoft Azure.
-  *  The Azure resource group needs to be provisioned prior to these AWX automation jobs
-    *  Note that unlike QA, this automation will create its landing zone (VNET/Subnet(s)/etc.) in the RG
-  *  An Azure AD Service Principal (SPN) account (with access to the RG) is needed by these AWX automation jobs
-  *  Automation will provision Azure resources installing everything for a fully functional AWX system.
+* DEV - AWX in a single VM on a local machine
+  * The local VM needs to be provisioned manually prior to these AWX automation jobs
+  * Will be tested with Virtualbox as the local hypervisor using Vagrant for local VM provisioning
+  * Automation will install everything for a fully functional AWX system on that local VM.
+* QA - AWX in a single IaaS VM on Microsoft Azure.
+  * The Azure landing zone (RG/VNET/Subnet/etc.) needs to be provisioned prior to these AWX automation jobs
+  * An Azure AD Service Principal (SPN) account (with access to the RG) is needed by these AWX automation jobs
+  * Automation will provision the Azure VM installing everything for a fully functional AWX system.
+* PROD - AWX distributed IaaS/PaaS environment on Microsoft Azure.
+  * The Azure resource group needs to be provisioned prior to these AWX automation jobs
+    * Note that unlike QA, this automation will create its landing zone (VNET/Subnet(s)/etc.) in the RG
+  * An Azure AD Service Principal (SPN) account (with access to the RG) is needed by these AWX automation jobs
+  * Automation will provision Azure resources installing everything for a fully functional AWX system.
 
 # How To Use This Project
 
@@ -76,9 +76,9 @@ You can inspect these files to determine which variable names are used to set wh
 
 The Ansible variable order of precedence dictates that a variable defined in a playbook will take precedence over (i.e., overwrite the value of) that same variable name defined in a role.
 Here is a simplified variable order of precedence list as applies to this project:
-*  Vars in ./playbook.yml take precedence over ./roles/role-name/vars/main.yml
-*  Vars in ./roles/role-name/vars/main.yml take precedence over ./roles/role-name/defaults/main.yml
-*  Vars in ./roles/role-name/defaults/main.yml take precedence over ./group_vars/all.yml
+* Vars in ./playbook.yml take precedence over ./roles/role-name/vars/main.yml
+* Vars in ./roles/role-name/vars/main.yml take precedence over ./roles/role-name/defaults/main.yml
+* Vars in ./roles/role-name/defaults/main.yml take precedence over ./group_vars/all.yml
 
 ## Playbooks
 
@@ -108,12 +108,12 @@ Since AWX DEV will be on a local machine it is important to note the local envir
 
 Here is the local environment this was tested with:
 
-*  Host OS: Windows 10
-*  VirtualBox version 7.0.6
-*  Vagrant version 2.3.4
-*  Git for Windows 2.37.3
-*  VSCode 1.75.0
-*  PuTTy 0.78
+* Host OS: Windows 10
+* VirtualBox version 7.0.6
+* Vagrant version 2.3.4
+* Git for Windows 2.37.3
+* VSCode 1.75.0
+* PuTTy 0.78
 
 I do testing on two different machines (not at the same time) with the setup above using MS OneDrive to sync this folder between them.
 
@@ -129,8 +129,8 @@ Note: these scripts lookup the Windows Hostname for conditionals and will need t
 
 Since I want to use PuTTy to connect to the vagrant managed virtualbox VMs I wrote a script to copy and convert the vagrant ssh keys to the PuTTy ppk format.
 This script ```vkeyconvert.sh``` will only work from a linux vm (not Git Bash or WSL) since the windows version of puttygen does not support CLI options the way the linux version does.
-So, when I first connect to my Ansible control vm I do so via the vagrant ssh method and then I install putty on it (see [Notes.md](Notes.md) for details on my Ansible control vm config).
-Then from the Ansible control vm I can cd to the shared folder /vagrant and execute the script which generates the ppk keys for all the vagrant vms.
+So, when I first connect to my Ansible control vm I do so via the vagrant ssh method and then I install putty on it (see [Notes.md](./NOTES.md) for details on my Ansible control vm config).
+Then from the Ansible control vm I can clone this git repository and execute the script which generates the ppk keys for all the vagrant vms.
 
 On my local Ansible control node vm I perform a seperate git clone of this project for running these jobs.
 While it is possible to use the shared folder, given the file and permission differences between the windows host and the linux guest this usually causes issues.
@@ -173,10 +173,10 @@ If you plan to use ansible-playbook to run the playbooks in this project then yo
 If you plan to use ansible-navigator to run the playbooks in this project then you just need to [build your execution environment using the scripts provided](#ansible-execution-environments) which this config file references.
 
 This config file set up ansible-navigator to:
-*  Use the local execution environment image named ```my-creator-ee:1``` using podman to pull it
-*  Use a local log file named ```_ansible-navigator.log``` for troubleshooting
-*  Disable the creation of playbook artifact files
-*  Set the mode to ```stdout`` instead of the default of interactive
+* Use the local execution environment image named ```my-creator-ee:1``` using podman to pull it
+* Use a local log file named ```_ansible-navigator.log``` for troubleshooting
+* Disable the creation of playbook artifact files
+* Set the mode to ```stdout`` instead of the default of interactive
 
 # Ansible Execution Environments
 

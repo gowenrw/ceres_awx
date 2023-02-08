@@ -1,7 +1,7 @@
-ceres_prereq
+ceres_localenv
 ============
 
-This role will get a vm ready as a target for the ceres_awx project.
+This role will update a vms local environment as needed by use case (e.g., ansible control node).
 
 Requirements
 ------------

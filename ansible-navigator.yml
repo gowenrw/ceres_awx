@@ -1,5 +1,5 @@
 ---
-# ANSOBLE-NAVIGATOR PROJECT CONFIG
+# ANSIBLE-NAVIGATOR PROJECT CONFIG
 #
 # This will change the navigator defaults to:
 # * Change default execution environment 'my-creator-ee' (see ./build-ee/README.md)

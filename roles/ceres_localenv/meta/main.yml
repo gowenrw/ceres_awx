@@ -1,6 +1,6 @@
 galaxy_info:
   author: Richard Gowen
-  description: This role will get a vm ready as a target for the ceres_awx project.
+  description: This role will update a vms local environment as needed by use case (e.g., ansible control node).
 
   license: MIT
 

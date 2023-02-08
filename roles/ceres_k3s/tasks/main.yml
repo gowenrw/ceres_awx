@@ -1,6 +1,67 @@
 ---
 # tasks main.yml file
 
+# PREREQUISITES
+
+## OS Check ##
+- name: OS Check
+  ansible.builtin.fail:
+    msg: The role currently only supports CentOS and RHEL distributions.
+  when: ansible_distribution not in ['CentOS', 'Red Hat Enterprise Linux']
+
+## DISABLE SELINUX & FIREWALLD
+#
+# selinux
+- name: Disable SELinux
+  ansible.posix.selinux:
+    state: disabled
+#
+# firewalld
+- name: Stop and Disable FirewallD
+  ansible.builtin.service:
+    name: firewalld
+    state: stopped
+    enabled: False
+
+## IP FORWARDING
+# 
+# Set ip forwarding on in /proc and in the sysctl file and reload if necessary
+- ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: True
+    state: present
+    reload: True
+
+## MODPROBE BR_NETFILTER MODULE
+#
+# Add Modprobe br_netfilter module
+- name: Add br_netfilter to /etc/modules-load.d/
+  ansible.builtin.template:
+    src: "br_netfilter.conf.j2"
+    dest: "/etc/modules-load.d/br_netfilter.conf"
+    owner: root
+    group: root
+    mode: 0600
+#
+# Load Modprobe br_netfilter module
+- name: Load br_netfilter
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+
+## SUDO SECURE_PATH
+#
+# Add /usr/local/bin to sudo secure_path
+- name: Add /usr/local/bin to sudo secure_path
+  ansible.builtin.lineinfile:
+    line: Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+    regexp: Defaults(\s)*secure_path(\s)*=
+    state: present
+    insertafter: EOF
+    path: /etc/sudoers
+    validate: visudo -cf %s
+
 # SETUP
 - name: create required directories
   ansible.builtin.file:

@@ -1,0 +1,26 @@
+---
+- name: Dev Test Playbook
+  hosts: ceresdev
+  become: true
+
+  tasks:
+  # 
+  # Call role ceres_localenv to resize root partition on vm for DEV AWX
+  - name: Import role ceres_localenv
+    ansible.builtin.import_role:
+      name: ceres_localenv
+    vars:
+      ceres_localenv_resize_disk: True
+      ceres_localenv_resize_dev: "/dev/sda"
+      ceres_localenv_pkgs_build_install: False
+      ceres_localenv_pkgs_qol_install: False
+
+  #
+  # Call role ceres_k3s to install k3s varient of Kubernetes on vm for DEV AWX
+  - name: Import role ceres_k3s
+    ansible.builtin.import_role:
+      name: ceres_k3s
+    vars:
+      ceres_k3s_installer_version: "v1.25.6+k3s1"
+      ceres_k3s_installer_channel: "stable"
+      ceres_k3s_exec_role: "server"

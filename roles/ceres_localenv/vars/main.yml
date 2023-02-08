@@ -2,7 +2,7 @@
 # vars main.yml file
 
 ## Build Packages
-ceres_prereg_pkgs_build_list:
+ceres_localenv_pkgs_build_list:
   - gcc
   - kernel-devel
   - kernel-headers
@@ -12,7 +12,7 @@ ceres_prereg_pkgs_build_list:
   - perl
 
 ## Quality of Life Packages
-ceres_prereq_pkgs_qol_list:
+ceres_localenv_pkgs_qol_list:
   - git
   - vim
   - net-tools

@@ -31,6 +31,7 @@
 ceres.yourcloud.ninja ansible_ssh_user=azureuser ansible_ssh_private_key_file=./ssh.ceres.az_key.pem
 
 # Ceres local group
+#   All local VMs
 [cereslocal:children]
 ceres-a
 ceres-b
@@ -38,8 +39,15 @@ ceres-c
 ceres-ctrl
 ceres-rectal
 
-# Ceres dev test group
-[ceresdevtest:children]
+# Ceres control group
+#   Ansible control node VMs
+[ceresdev:children]
+ceres-ctrl
+ceres-rectal
+
+# Ceres dev group
+#   VMs to test DEV AWX automation against
+[ceresdev:children]
 ceres-a
 ceres-b
 

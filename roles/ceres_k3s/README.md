@@ -20,6 +20,7 @@ Dependencies
 
 The following collections may be needed:
 *  community.general
+*  ansible.posix
 *  containers.podman
 *  kubernetes.core
 

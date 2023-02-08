@@ -1,0 +1,18 @@
+---
+- name: Control Node Playbook
+  hosts: cerescontrol
+  become: true
+
+  tasks:
+  # 
+  # Call role ceres_localenv to resize root partition and
+  # install some packages on control node vm
+  - name: Import role ceres_localenv
+    ansible.builtin.import_role:
+      name: ceres_localenv
+    vars:
+      ceres_localenv_resize_disk: True
+      ceres_localenv_resize_dev: "/dev/sda"
+      ceres_localenv_pkgs_build_install: True
+      ceres_localenv_pkgs_qol_install: True
+

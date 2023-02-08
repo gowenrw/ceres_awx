@@ -13,10 +13,10 @@
 #
 # Get disk free space info for resize block conditional check
 - name: Determine free space on disk
-  ansible.builtin.shell: "parted {{ ceres_prereq_resize_dev }} unit GB print free | grep 'Free Space' | tail -n1 | awk '{print $3}' | sed 's/GB//'"
+  ansible.builtin.shell: "parted {{ ceres_localenv_resize_dev }} unit GB print free | grep 'Free Space' | tail -n1 | awk '{print $3}' | sed 's/GB//'"
   register: reg_resize_disk_free_gb
   when: 
-  - ceres_prereq_resize_disk
+  - ceres_localenv_resize_disk
   - ansible_distribution == 'CentOS'
 #
 # Block for disk resize with conditionals for only CentOS, free space, etc.
@@ -24,12 +24,12 @@
   block:
     #
     # Get partition info for debugging
-    - name: "Read disk {{ ceres_prereq_resize_dev }} information"
-      community.general.parted: device={{ ceres_prereq_resize_dev }} unit=MiB
+    - name: "Read disk {{ ceres_localenv_resize_dev }} information"
+      community.general.parted: device={{ ceres_localenv_resize_dev }} unit=MiB
       register: reg_resize_disk_info
     #
     # Dump the disk info if needed for troubleshooting
-    - name: "Debug disk {{ ceres_prereq_resize_dev }} information"
+    - name: "Debug disk {{ ceres_localenv_resize_dev }} information"
       ansible.builtin.debug:
         var: reg_resize_disk_info
         verbosity: 1
@@ -41,8 +41,8 @@
         # This is the correct way to resize a partition but seems to fail for my vagrant vms
         - name: Extend existing partition to fill all available space (nice way)
           community.general.parted:
-            device: "{{ ceres_prereq_resize_dev }}"
-            number: "{{ ceres_prereq_resize_part }}"
+            device: "{{ ceres_localenv_resize_dev }}"
+            number: "{{ ceres_localenv_resize_part }}"
             part_end: "100%"
             resize: true
             state: present
@@ -57,7 +57,7 @@
         #
         # This is an ugly brute force way to resize a partition
         - name: Extend partition to fill all available space
-          ansible.builtin.shell: "echo -e 'resizepart\n{{ ceres_prereq_resize_part }}\nYes\n100%\nprint free\nquit' | parted {{ ceres_prereq_resize_dev }} ---pretend-input-tty"
+          ansible.builtin.shell: "echo -e 'resizepart\n{{ ceres_localenv_resize_part }}\nYes\n100%\nprint free\nquit' | parted {{ ceres_localenv_resize_dev }} ---pretend-input-tty"
           register: reg_resize_part_force
         #
         # Dump the output of previous task if needed for troubleshooting
@@ -68,7 +68,7 @@
     #
     # Extend the ext4 filesystem
     - name: Extend ext4 filesystem to fill all available space
-      ansible.builtin.command: "resize2fs {{ ceres_prereq_resize_dev }}{{ ceres_prereq_resize_part }}"
+      ansible.builtin.command: "resize2fs {{ ceres_localenv_resize_dev }}{{ ceres_localenv_resize_part }}"
       register: reg_resize_extfs
     #
     # Dump the output of previous task if needed for troubleshooting
@@ -79,7 +79,7 @@
   #
   # Resize disk block conditionals
   when: 
-    - ceres_prereq_resize_disk
+    - ceres_localenv_resize_disk
     - reg_resize_disk_free_gb is defined
     - reg_resize_disk_free_gb.stdout | int > 1
     - ansible_distribution == 'CentOS'
@@ -98,52 +98,12 @@
     state: stopped
     enabled: False
 
-## IP FORWARDING
-# 
-# Set ip forwarding on in /proc and in the sysctl file and reload if necessary
-- ansible.posix.sysctl:
-    name: net.ipv4.ip_forward
-    value: '1'
-    sysctl_set: True
-    state: present
-    reload: True
-
-## MODPROBE BR_NETFILTER MODULE
-#
-# Add Modprobe br_netfilter module
-- name: Add br_netfilter to /etc/modules-load.d/
-  ansible.builtin.template:
-    src: "br_netfilter.conf.j2"
-    dest: "/etc/modules-load.d/br_netfilter.conf"
-    owner: root
-    group: root
-    mode: 0600
-#
-# Load Modprobe br_netfilter module
-- name: Load br_netfilter
-  community.general.modprobe:
-    name: br_netfilter
-    state: present
-
-## SUDO SECURE_PATH
-#
-# Add /usr/local/bin to sudo secure_path
-- name: Add /usr/local/bin to sudo secure_path
-  ansible.builtin.lineinfile:
-    line: Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
-    regexp: Defaults(\s)*secure_path(\s)*=
-    state: present
-    insertafter: EOF
-    path: /etc/sudoers
-    validate: visudo -cf %s
-
-
 ## EPEL
 #
 # check if epel repo has already been configured
 - name: Check if EPEL repo is already configured.
   stat:
-    path: "{{ ceres_prereq_epel_repofile_path }}"
+    path: "{{ ceres_localenv_epel_repofile_path }}"
   register: reg_epel_repofile_result
 #
 # crb on centos
@@ -175,7 +135,7 @@
 # gpg for epel on rhel
 - name: Import EPEL GPG key on RHEL
   ansible.builtin.rpm_key:
-    key: "{{ ceres_prereq_epel_repo_gpg_key_url }}"
+    key: "{{ ceres_localenv_epel_repo_gpg_key_url }}"
     state: present
   register: reg_epel_rhel_gpg_result
   until: reg_epel_rhel_gpg_result is succeeded
@@ -188,7 +148,7 @@
 # epel on rhel
 - name: Install EPEL repo.
   ansible.builtin.yum:
-    name: "{{ ceres_prereq_epel_repo_url }}"
+    name: "{{ ceres_localenv_epel_repo_url }}"
     state: present
   register: reg_epel_rhel_rhel_result
   until: reg_epel_rhel_rhel_result is succeeded
@@ -220,10 +180,10 @@
 # Install build packages
 - name: Install build packages
   ansible.builtin.yum:
-    name: "{{ ceres_prereg_pkgs_build_list }}"
+    name: "{{ ceres_localenv_pkgs_build_list }}"
     state: present
   register: reg_pkgs_build_result
-  when: ceres_prereq_pkgs_build_install
+  when: ceres_localenv_pkgs_build_install
 #
 # Dump the output of previous task if needed for troubleshooting
 - name: "Debug task output"
@@ -236,10 +196,10 @@
 # Install quality of life packages
 - name: Install qol packages
   ansible.builtin.yum:
-    name: "{{ ceres_prereq_pkgs_qol_list }}"
+    name: "{{ ceres_localenv_pkgs_qol_list }}"
     state: present
   register: reg_pkgs_qol_result
-  when: ceres_prereq_pkgs_qol_install
+  when: ceres_localenv_pkgs_qol_install
 #
 # Dump the output of previous task if needed for troubleshooting
 - name: "Debug task output"

@@ -143,19 +143,17 @@ This has its own [README](./build-ee/README.md) with details on how to use it.
 
 # quick setup of a temp vm to build an ansible control vm
 
-Install EPEL for CentOS S9
+These commands Install EPEL, Ansible core and required collections
 ```
 dnf config-manager --set-enabled crb
 dnf -y install epel-release epel-next-release
 dnf -y update
-```
-
-Install Ansible Core and required collections
-```
 dnf -y install ansible
 ansible-galaxy collection install community.general
 ansible-galaxy collection install ansible.posix
 ```
+
+The script ```tempsetup.sh``` included here performs the above tasks.
 
 Clone the Git Repo and change into it
 ```

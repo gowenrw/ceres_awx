@@ -20,16 +20,26 @@
         chdir: "{{ ee_dir }}"
         cmd: "ansible-builder create --file config-ee.yml"
 
-    - name: Build the EE - This can take a LONG time - set a 15min async timeout
-      ansible.builtin.shell:
-        chdir: "{{ ee_dir }}"
-        cmd: "podman build -f context/Containerfile --tag={{ ee_name }}:{{ ee_version }} context"
-      async: 900
-      poll: 15
-
-    - name: Prune unused images
-      ansible.builtin.shell:
-        cmd: "podman image prune -f"
+    - name: EE Build Block
+      block:
+        - name: Build the EE - This can take a LONG time - set a 20min async timeout
+          ansible.builtin.shell:
+            chdir: "{{ ee_dir }}"
+            cmd: "podman build -f context/Containerfile --tag={{ ee_name }}:{{ ee_version }} context"
+          async: 1200
+          poll: 15
+          register: reg_buildee_result
+      always:
+        # Make sure we prune all the temp images even in a failure
+        - name: Prune unused images
+          ansible.builtin.shell:
+            cmd: "podman image prune -f"
+        # Show build results
+        - name: "Show build results"
+          ansible.builtin.debug:
+            var: reg_buildee_result
+            # Change this to 1 to suppress output without -v
+            verbosity: 0
 
     - name: Publish the ee image to a container registry
       ansible.builtin.shell:

@@ -46,10 +46,10 @@ servers=[
     :ip => "192.168.65.23",
     :box => "CentOS-Stream-Vagrant-9-20230123.0.x86_64",
     :boxurl => "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230123.0.x86_64.vagrant-virtualbox.box",
-    :ram => 16384,
+    :ram => 2048,
     :vram => 16,
-    :cpu => 4,
-    :disksize => "20GB",
+    :cpu => 2,
+    :disksize => "15GB",
     :fwdguest => 80,
     :fwdhost => 8023
   },
@@ -78,6 +78,19 @@ servers=[
     :disksize => "30GB",
     :fwdguest => 80,
     :fwdhost => 8025
+  },
+  {
+    :hostname => "ceres-tst",
+    :log => "ceres-tst-console.log",
+    :ip => "192.168.65.26",
+    :box => "CentOS-Stream-Vagrant-9-20230123.0.x86_64",
+    :boxurl => "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230123.0.x86_64.vagrant-virtualbox.box",
+    :ram => 2048,
+    :vram => 16,
+    :cpu => 2,
+    :disksize => "0", # Set to zero to prevent disk resizing
+    :fwdguest => 80,
+    :fwdhost => 8026
   }
 ]
 #
@@ -103,8 +116,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         config.vm.define machine[:hostname] do |node|
             node.vm.box = machine[:box]
             node.vm.box_url = machine[:boxurl]
-            # Uncomment below line to change disk size
-            node.disksize.size = machine[:disksize]
+            # Uncomment below lines to change disk size if defined
+            if machine[:disksize] != "0"
+                node.disksize.size = machine[:disksize]
+            end
             # Uncomment below line to disable vbguest install
             # node.vbguest.auto_update = false
             # Uncomment below line to allow kernel update for vbguest install

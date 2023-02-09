@@ -141,4 +141,41 @@ Since the default execution environment ```creator-ee``` does not contain the Mi
 To make this as easy as possible to build this ee and modify later I created an ansible playbook and scripts in the directory [build-ee](./build-ee/).
 This has its own [README](./build-ee/README.md) with details on how to use it.
 
+# quick setup of a temp vm to build an ansible control vm
 
+Install EPEL for CentOS S9
+```
+dnf config-manager --set-enabled crb
+dnf -y install epel-release epel-next-release
+dnf -y update
+```
+
+Install Ansible Core and required collections
+```
+dnf -y install ansible
+ansible-galaxy collection install community.general
+ansible-galaxy collection install ansible.posix
+```
+
+Clone the Git Repo and change into it
+```
+git clone https://github.com/gowenrw/ceres_awx.git
+cd ceres_awx
+```
+
+Copy vagrant keys so we can connect to the ansible control vm
+```
+./wkeycp.sh
+```
+
+Set up our vault keyfile
+```
+vi .ansible-vault.private_key
+```
+
+Run the automation job to configure the ansible control vm
+```
+ansible-playbook ceres-playbook-control.yml
+```
+
+When completed (sucessfully) we can log off of and destroy the temp vm

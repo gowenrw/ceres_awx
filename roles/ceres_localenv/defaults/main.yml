@@ -19,7 +19,12 @@ ceres_localenv_pkgs_build_list: [] # see vars/main.yml for package list
 ceres_localenv_pkgs_qol_install: False
 ceres_localenv_pkgs_qol_list: [] # see vars/main.yml for package list
 
+## Install PuTTy Package from source if set to True
+ceres_localenv_pkgs_putty_install: False
+ceres_localenv_pkgs_putty_url: "https://the.earth.li/~sgtatham/putty/0.78/putty-0.78.tar.gz"
+ceres_localenv_pkgs_putty_file: "/tmp/putty-0.78.tar.gz"
+ceres_localenv_pkgs_putty_dir: "/tmp/putty-0.78/"
+ceres_localenv_pkgs_putty_bin: "/usr/local/bin/puttygen"
+
 ## Install Ansible Packages if set to True
 ceres_localenv_pkgs_ansible_install: False
-
-

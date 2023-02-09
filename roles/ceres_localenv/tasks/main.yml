@@ -28,12 +28,6 @@
       community.general.parted: device={{ ceres_localenv_resize_dev }} unit=MiB
       register: reg_resize_disk_info
     #
-    # Dump the disk info if needed for troubleshooting
-    - name: "Debug disk {{ ceres_localenv_resize_dev }} information"
-      ansible.builtin.debug:
-        var: reg_resize_disk_info
-        verbosity: 1
-    #
     # Nested block for extending partition to rescue failure with brute force task
     - name: Extend Partition Block
       block:
@@ -47,35 +41,17 @@
             resize: true
             state: present
           register: reg_resize_part_nice
-        #
-        # Dump the output of previous task if needed for troubleshooting
-        - name: "Debug task output"
-          ansible.builtin.debug:
-            var: reg_resize_part_nice
-            verbosity: 1
       rescue:
         #
         # This is an ugly brute force way to resize a partition
         - name: Extend partition to fill all available space
           ansible.builtin.shell: "echo -e 'resizepart\n{{ ceres_localenv_resize_part }}\nYes\n100%\nprint free\nquit' | parted {{ ceres_localenv_resize_dev }} ---pretend-input-tty"
           register: reg_resize_part_force
-        #
-        # Dump the output of previous task if needed for troubleshooting
-        - name: "Debug task output"
-          ansible.builtin.debug:
-            var: reg_resize_part_force
-            verbosity: 1
     #
     # Extend the ext4 filesystem
     - name: Extend ext4 filesystem to fill all available space
       ansible.builtin.command: "resize2fs {{ ceres_localenv_resize_dev }}{{ ceres_localenv_resize_part }}"
       register: reg_resize_extfs
-    #
-    # Dump the output of previous task if needed for troubleshooting
-    - name: "Debug task output"
-      ansible.builtin.debug:
-        var: reg_resize_extfs
-        verbosity: 1
   #
   # Resize disk block conditionals
   when: 
@@ -83,6 +59,18 @@
     - reg_resize_disk_free_gb is defined
     - reg_resize_disk_free_gb.stdout | int > 1
     - ansible_distribution == 'CentOS'
+  # Resize disk block Debugging
+  always:
+    #
+    # Dump the output of block tasks if needed for troubleshooting
+    - name: "Debug block tasks output"
+      ansible.builtin.debug:
+        msg:
+        - "{{ omit if reg_resize_disk_info is not defined else reg_resize_disk_info }}"
+        - "{{ omit if reg_resize_part_nice is not defined else reg_resize_part_nice}}"
+        - "{{ omit if reg_resize_part_force is not defined else reg_resize_part_force}}"
+        - "{{ omit if reg_resize_extfs is not defined else reg_resize_extfs}}"
+        verbosity: 1
 
 ## DISABLE SELINUX & FIREWALLD
 #
@@ -206,6 +194,64 @@
   ansible.builtin.debug:
     var: reg_pkgs_qol_result
     verbosity: 1
+
+## INSTALL PUTTY PKG FROM SOURCE
+#
+# Check if PuTTy is already installed
+- name: Check if PuTTy is already installed.
+  stat:
+    path: "{{ ceres_localenv_pkgs_putty_bin }}"
+  register: reg_pkgs_puttybin_result
+  when:
+    - ceres_localenv_pkgs_putty_install
+    - ansible_distribution == 'CentOS'
+#
+# Putty Install Block
+- name: PuTTy Install Block
+  block:
+    #
+    # Download putty source tarball
+    - name: Download PuTTy source tarball
+      ansible.builtin.get_url:
+        url: "{{ ceres_localenv_pkgs_putty_url }}"
+        dest: "{{ ceres_localenv_pkgs_putty_file }}"
+      register: reg_pkgs_puttyurl_result
+    #
+    # Extract putty source tarball
+    - name: Extract PuTTy source tarball
+      ansible.builtin.unarchive:
+        src: "{{ ceres_localenv_pkgs_putty_file }}"
+        dest: "/tmp/"
+      register: reg_pkgs_puttytar_result
+    #
+    # Build putty from source and install
+    - name: Run cmake in PuTTy source directory
+      ansible.builtin.shell:
+        cmd: cmake .; cmake --build .
+        chdir: "{{ ceres_localenv_pkgs_putty_dir }}"
+      register: reg_pkgs_puttycmake_result
+    - name: Run cmake install in PuTTy source directory
+      ansible.builtin.shell:
+        cmd: cmake --build . --target install
+        chdir: "{{ ceres_localenv_pkgs_putty_dir }}"
+      register: reg_pkgs_puttycminstall_result
+  # Putty Install Block Conditional
+  when:
+    - ceres_localenv_pkgs_putty_install
+    - ansible_distribution == 'CentOS'
+    - not reg_pkgs_puttybin_result.stat.exists
+  # Putty Install Block Debugging
+  always:
+    #
+    # Dump the output of block tasks if needed for troubleshooting
+    - name: "Debug block tasks output"
+      ansible.builtin.debug:
+        msg:
+        - "{{ omit if reg_pkgs_puttyurl_result is not defined else reg_pkgs_puttyurl_result }}"
+        - "{{ omit if reg_pkgs_puttytar_result is not defined else reg_pkgs_puttytar_result}}"
+        - "{{ omit if reg_pkgs_puttycmake_result is not defined else reg_pkgs_puttycmake_result}}"
+        - "{{ omit if reg_pkgs_puttycminstall_result is not defined else reg_pkgs_puttycminstall_result}}"
+        verbosity: 1
 
 ## INSTALL ANSIBLE PKGS
 #

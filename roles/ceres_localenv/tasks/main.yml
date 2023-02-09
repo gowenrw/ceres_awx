@@ -222,6 +222,7 @@
       ansible.builtin.unarchive:
         src: "{{ ceres_localenv_pkgs_putty_file }}"
         dest: "/tmp/"
+        remote_src: yes
       register: reg_pkgs_puttytar_result
     #
     # Build putty from source and install

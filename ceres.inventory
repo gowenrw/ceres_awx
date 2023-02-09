@@ -41,7 +41,7 @@ ceres-rectal
 
 # Ceres control group
 #   Ansible control node VMs
-[ceresdev:children]
+[cerescontrol:children]
 ceres-ctrl
 ceres-rectal
 

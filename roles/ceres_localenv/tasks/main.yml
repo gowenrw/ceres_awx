@@ -152,7 +152,7 @@
 - name: Update yum cache and all installed packages
   ansible.builtin.yum:
     name: '*'
-    state: present
+    state: latest
     update_cache: True
     update_only: True
   register: reg_yum_update_result

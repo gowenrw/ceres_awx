@@ -164,16 +164,14 @@
     state: started
     enabled: true
 
-- name: pause 5 seconds to wait for k3s
-  ansible.builtin.pause:
-    seconds: 5
-#- name: Wait for node-token
-#  wait_for:
-#    path: "{{ k3s_server_location }}/server/node-token"
+- name: Wait for kubeconfig file
+  ansible.builtin.wait_for:
+    path: "{{ ceres_k3s_kubeconfig_file }}"
+    state: present
 
 - name: create root's kubeconfig
   ansible.builtin.copy:
-    src: /etc/rancher/k3s/k3s.yaml
+    src: "{{ ceres_k3s_kubeconfig_file }}"
     remote_src: true
     dest: /root/.kube/config
     owner: root

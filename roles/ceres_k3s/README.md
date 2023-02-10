@@ -5,6 +5,10 @@ This role will install k3s lightweight kubernetes.
 
 This is a bare bones role for installing k3s for use with AWX for the ceres_awx project.
 
+Currently it will install k3s in a single server configuration without HA/Cluster/Agent settings.
+
+Might add those additional configuration options later.
+
 Requirements
 ------------
 

@@ -1,7 +1,11 @@
 ---
 # tasks main.yml file
 
+#########################
+#
 # PREREQUISITES
+#
+#########################
 
 ## OS Check ##
 - name: OS Check
@@ -62,7 +66,9 @@
     path: /etc/sudoers
     validate: visudo -cf %s
 
-# SETUP
+## Setup Dirs
+#
+# Make sure the directories we need exist
 - name: create required directories
   ansible.builtin.file:
     path: "{{ item.path }}"
@@ -84,18 +90,34 @@
     - path: "{{ ceres_k3s_ansible_token_file | dirname }}"
       mode: "0750"
 
-# DOWNLOAD
+#########################
+#
+# DOWNLOAD AND INSTALL
+#
+#########################
+
+## Check if k3s already installed
+- name: Stat k3s binary
+  ansible.builtin.stat: path="{{ ceres_k3s_bin_directory }}/k3s"
+  register: reg_k3binary
+
+## Download installer if needed
 - name: Download k3s installer
   ansible.builtin.get_url:
     url: "{{ ceres_k3s_installer_url }}"
     dest: "{{ ceres_k3s_installer_directory }}/k3s-install.sh"
     mode: "0700"
+  when: not reg_k3binary.stat.exists or ceres_k3s_installer_reinstall
 
-- name: Stat k3s binary
-  ansible.builtin.stat: path="{{ ceres_k3s_bin_directory }}/k3s"
-  register: reg_k3binary
+#- name: create k3s server config file
+#  template:
+#    src: "k3s-server-config.yaml.j2"
+#    dest: "{{ ceres_k3s_config_file }}"
+#    owner: root
+#    group: root
+#    mode: "0440"
 
-# INSTALL
+## INSTALL BLOCK
 - name: Install Block
   block:
     - name: Set facts for installer environment
@@ -106,14 +128,14 @@
           INSTALL_K3S_BIN_DIR: "{{ ceres_k3s_bin_directory }}"
           INSTALL_K3S_EXEC: "{{ ceres_k3s_exec_role }}"
           INSTALL_K3S_SKIP_START: "true"
-
+    # Install k3s using defined environment
     - name: Execute k3s installer
       ansible.builtin.command:
         cmd: "{{ ceres_k3s_installer_directory }}/k3s-install.sh"
         creates: "{{ ceres_k3s_bin_directory }}/k3s"
       environment: "{{ ceres_k3s_install_env }}"
       register: reg_k3s_install
-
+  # Always create the logs even if install fails
   always:
     - name: Create k3s install logs
       ansible.builtin.copy:
@@ -133,6 +155,68 @@
         - type: stdout
         - type: stderr
       when: reg_k3s_install.changed | bool
-
+  # Install block conditionals
   when: not reg_k3binary.stat.exists or ceres_k3s_installer_reinstall
+
+
+- name: create k3s server config file
+  template:
+    src: "{{ __k3s_config_template }}"
+    dest: "{{ __k3s_config_file }}"
+    owner: root
+    group: root
+    mode: "0440"
+  tags: config
+
+
+
+
+
+
+
+#### from titan
+
+# Start the k3s service
+#- name: Enable and check K3s service
+#  systemd:
+#    name: k3s
+#    daemon_reload: yes
+#    state: restarted
+#    enabled: yes
+
+#- name: Wait for node-token
+#  wait_for:
+#    path: "{{ k3s_server_location }}/server/node-token"
+
+# Create User Config Directory
+#- name: Create directory .kube
+#  file:
+#    path: ~{{ ansible_user }}/.kube
+#    state: directory
+#    owner: "{{ ansible_user }}"
+#    mode: "u=rwx,g=rx,o="
+
+# Copy config file to user home directory
+#- name: Copy config file to user home directory
+#  copy:
+#    src: /etc/rancher/k3s/k3s.yaml
+#    dest: ~{{ ansible_user }}/.kube/config
+#    remote_src: yes
+#    owner: "{{ ansible_user }}"
+#    mode: "u=rw,g=r,o=r"
+
+# Symlink for kubectl
+#- name: Create kubectl symlink
+#  file:
+#    src: /usr/local/bin/k3s
+#    dest: /usr/local/bin/kubectl
+#    state: link
+
+# Symlinks for crictl
+#- name: Create crictl symlink
+#  file:
+#    src: /usr/local/bin/k3s
+#    dest: /usr/local/bin/crictl
+#    state: link
+
 

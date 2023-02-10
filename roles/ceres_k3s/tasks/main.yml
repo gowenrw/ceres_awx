@@ -87,8 +87,6 @@
       mode: "0755"
     - path: "{{ ceres_k3s_config_file | dirname }}"
       mode: "0750"
-    - path: "{{ ceres_k3s_ansible_token_file | dirname }}"
-      mode: "0750"
 
 #########################
 #

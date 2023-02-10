@@ -87,6 +87,10 @@
       mode: "0755"
     - path: "{{ ceres_k3s_config_file | dirname }}"
       mode: "0750"
+    - path: "{{ ceres_k3s_kubeconfig_file_root | dirname }}"
+      mode: "0700"
+      owner: root
+      group: root
 
 #########################
 #
@@ -173,9 +177,8 @@
   ansible.builtin.copy:
     src: "{{ ceres_k3s_kubeconfig_file }}"
     remote_src: true
-    dest: /root/.kube/config
+    dest: "{{ ceres_k3s_kubeconfig_file_root }}"
     owner: root
     group: root
     mode: "0600"
-    directory_mode: "0700"
 

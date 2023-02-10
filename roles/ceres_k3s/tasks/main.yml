@@ -109,19 +109,21 @@
     mode: "0700"
   when: not reg_k3binary.stat.exists or ceres_k3s_installer_reinstall
 
-#- name: create k3s server config file
-#  template:
-#    src: "k3s-server-config.yaml.j2"
-#    dest: "{{ ceres_k3s_config_file }}"
-#    owner: root
-#    group: root
-#    mode: "0440"
-
 ## INSTALL BLOCK
 - name: Install Block
   block:
+    # Server Config File
+    - name: create k3s server config file
+      ansible.builtin.template:
+        src: "k3s-server-config.yaml.j2"
+        dest: "{{ ceres_k3s_config_file }}"
+        owner: root
+        group: root
+        mode: "0440"
+      when: ceres_k3s_exec_role == "server"
+    # Define installer environment
     - name: Set facts for installer environment
-      set_fact:
+      ansible.builtin.set_fact:
         ceres_k3s_install_env:
           INSTALL_K3S_VERSION: "{{ ceres_k3s_installer_version }}"
           INSTALL_K3S_CHANNEL: "{{ ceres_k3s_installer_channel }}"
@@ -158,65 +160,26 @@
   # Install block conditionals
   when: not reg_k3binary.stat.exists or ceres_k3s_installer_reinstall
 
+- name: Start and enable the k3s server service
+  ansible.builtin.service:
+    name: "{{ ceres_k3s_service_name }}"
+    state: started
+    enabled: true
 
-- name: create k3s server config file
-  template:
-    src: "{{ __k3s_config_template }}"
-    dest: "{{ __k3s_config_file }}"
-    owner: root
-    group: root
-    mode: "0440"
-  tags: config
-
-
-
-
-
-
-
-#### from titan
-
-# Start the k3s service
-#- name: Enable and check K3s service
-#  systemd:
-#    name: k3s
-#    daemon_reload: yes
-#    state: restarted
-#    enabled: yes
-
+- name: pause 5 seconds to wait for k3s
+  ansible.builtin.pause:
+    seconds: 5
 #- name: Wait for node-token
 #  wait_for:
 #    path: "{{ k3s_server_location }}/server/node-token"
 
-# Create User Config Directory
-#- name: Create directory .kube
-#  file:
-#    path: ~{{ ansible_user }}/.kube
-#    state: directory
-#    owner: "{{ ansible_user }}"
-#    mode: "u=rwx,g=rx,o="
-
-# Copy config file to user home directory
-#- name: Copy config file to user home directory
-#  copy:
-#    src: /etc/rancher/k3s/k3s.yaml
-#    dest: ~{{ ansible_user }}/.kube/config
-#    remote_src: yes
-#    owner: "{{ ansible_user }}"
-#    mode: "u=rw,g=r,o=r"
-
-# Symlink for kubectl
-#- name: Create kubectl symlink
-#  file:
-#    src: /usr/local/bin/k3s
-#    dest: /usr/local/bin/kubectl
-#    state: link
-
-# Symlinks for crictl
-#- name: Create crictl symlink
-#  file:
-#    src: /usr/local/bin/k3s
-#    dest: /usr/local/bin/crictl
-#    state: link
-
+- name: create root's kubeconfig
+  ansible.builtin.copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    remote_src: true
+    dest: /root/.kube/config
+    owner: root
+    group: root
+    mode: "0600"
+    directory_mode: "0700"
 

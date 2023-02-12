@@ -208,6 +208,20 @@
     var: reg_pkgs_qol_result
     verbosity: 1
 
+## Custom color prompt
+#
+# Install custom color prompt
+- name: Install custom color prompt to /etc/profile.d
+  ansible.builtin.template:
+    src: "setPS1.sh.j2"
+    dest: "/etc/profile.d/setPS1.sh"
+    owner: root
+    group: root
+    mode: "0444"
+  when: 
+    - ansible_distribution == 'CentOS'
+    - ceres_localenv_custom_color_prompt
+
 ## INSTALL PUTTY PKG FROM SOURCE
 #
 # Check if PuTTy is already installed

@@ -85,6 +85,8 @@
       mode: "0755"
     - path: "{{ ceres_k3s_default_storage_path }}"
       mode: "0755"
+    - path: "{{ ceres_k3s_kube_app_defs_path }}"
+      mode: "0750"
     - path: "{{ ceres_k3s_config_file | dirname }}"
       mode: "0750"
     - path: "{{ ceres_k3s_kubeconfig_file_root | dirname }}"
@@ -181,4 +183,85 @@
     owner: root
     group: root
     mode: "0600"
+
+## Kube Dashboard
+#
+# Check if dashboard is already deployed
+#- name: Query k3s to see if kubernetes-dashboard deployment exists
+#  ansible.builtin.set_fact:
+#    ceres_k3s_kube_dashboard_deployment_q: "{{ query('kubernetes.core.k8s', kind='Deployment', namespace='kubernetes-dashboard', resource_name='kubernetes-dashboard') }}"
+# Dump the output of query task if needed for troubleshooting
+#- name: "Debug query tasks output"
+#  ansible.builtin.debug:
+#    msg:
+#    - "{{ omit if ceres_k3s_kube_dashboard_deployment_q is not defined else ceres_k3s_kube_dashboard_deployment_q }}"
+#    verbosity: 0
+# Deployment Block
+- name: Kube Dashboard Block
+  block:
+    # Define Kube Dashboard installer environment
+    - name: Get Kube Dashboard Version
+      ansible.builtin.shell:
+        cmd: "curl -w '%{url_effective}' -I -L -s -S https://github.com/kubernetes/dashboard/releases/latest -o /dev/null | sed -e 's|.*/||'"
+      register: reg_kube_dashboard_version
+    - name: Set facts for Kube Dashboard installer environment
+      ansible.builtin.set_fact:
+        ceres_k3s_kube_dashboard_install_env:
+          VERSION_KUBE_DASHBOARD: "{{ reg_kube_dashboard_version.stdout }}"
+    # Install Kube Dashboard using defined environment
+    - name: Install Kube Dashboard
+      ansible.builtin.command:
+        cmd: "k3s kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/${VERSION_KUBE_DASHBOARD}/aio/deploy/recommended.yaml"
+        #cmd: "k3s kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/${VERSION_KUBE_DASHBOARD}/aio/deploy/alternative.yaml"
+      environment: "{{ ceres_k3s_kube_dashboard_install_env }}"
+      register: reg_kube_dashboard_install
+    # Dashboard Admin User Definitions
+    - name: Dashboard admin user definition file
+      ansible.builtin.template:
+        src: "dashboard.admin-user.yml.j2"
+        dest: "{{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user.yml"
+        owner: root
+        group: root
+        mode: "0440"
+    - name: Dashboard admin rbac definition file
+      ansible.builtin.template:
+        src: "dashboard.admin-user-role.yml.j2"
+        dest: "{{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user-role.yml"
+        owner: root
+        group: root
+        mode: "0440"
+    # Deploy admin user config
+    - name: Deploy admin user config in Kube Dashboard
+      ansible.builtin.command:
+        cmd: "k3s kubectl create -f {{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user.yml -f {{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user-role.yml"
+      register: reg_kube_dashboard_deploy
+    # Get admin token
+    - name: Create the admin token for Kube Dashboard
+      ansible.builtin.command:
+        cmd: "k3s kubectl -n kubernetes-dashboard create token admin-user"
+      register: reg_kube_dashboard_admin_token
+  always:
+    #
+    # Dump the output of block tasks if needed for troubleshooting
+    - name: "Debug block tasks output"
+      ansible.builtin.debug:
+        msg:
+        - "{{ omit if reg_kube_dashboard_version is not defined else reg_kube_dashboard_version }}"
+        - "{{ omit if reg_kube_dashboard_install is not defined else reg_kube_dashboard_install }}"
+        - "{{ omit if reg_kube_dashboard_deploy is not defined else reg_kube_dashboard_deploy}}"
+        - "{{ omit if reg_kube_dashboard_admin_token is not defined else reg_kube_dashboard_admin_token}}"
+        verbosity: 0
+#
+# Check if dashboard is already deployed
+#- name: Query k3s to see if kubernetes-dashboard deployment exists
+#  ansible.builtin.set_fact:
+#    ceres_k3s_kube_dashboard_deployment_r: "{{ query('kubernetes.core.k8s', kind='Deployment', namespace='kubernetes-dashboard', resource_name='kubernetes-dashboard') }}"
+# Dump the output of query task if needed for troubleshooting
+#- name: "Debug query tasks output"
+#  ansible.builtin.debug:
+#    msg:
+#    - "{{ omit if ceres_k3s_kube_dashboard_deployment_r is not defined else ceres_k3s_kube_dashboard_deployment_r }}"
+#    verbosity: 0
+
+
 

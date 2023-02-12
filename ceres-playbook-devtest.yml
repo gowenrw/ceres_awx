@@ -12,8 +12,7 @@
     vars:
       ceres_localenv_resize_disk: True
       ceres_localenv_resize_dev: "/dev/sda"
-      ceres_localenv_pkgs_build_install: False
-      ceres_localenv_pkgs_qol_install: False
+      ceres_localenv_pkgs_qol_install: True
 
   #
   # Call role ceres_k3s to install k3s varient of Kubernetes on vm for DEV AWX

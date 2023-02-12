@@ -1,0 +1,63 @@
+#!/bin/bash
+# target is /etc/profile.d/setPS1.sh
+#BASH TERMINAL CODES 
+#https://ss64.com/bash/syntax-prompt.html 
+#      search bash color codes  
+ 
+# \d   The date, in "Weekday Month Date" format (e.g., "Tue May 26").  
+# \h   The hostname, up to the first . (e.g. deckard)  
+# \H   The hostname. (e.g. deckard.SS64.com) 
+# \j   The number of jobs currently managed by the shell.  
+# \l   The basename of the shell's terminal device name.  
+# \s   The name of the shell, the basename of $0 (the portion following  
+#      the final slash).  
+# \t   The time, in 24-hour HH:MM:SS format.  
+# \T   The time, in 12-hour HH:MM:SS format.  
+# \@   The time, in 12-hour am/pm format.  
+# \u   The username of the current user.  
+# \v   The version of Bash (e.g., 2.00)  
+# \V   The release of Bash, version + patchlevel (e.g., 2.00.0)  
+# \w   The current working directory.  
+# \W   The basename of $PWD.  
+# \!   The history number of this command.  
+# \#   The command number of this command.  
+# \$   If you are not root, inserts a "$"; if you are root, you get a "#"  (root uid = 0)  
+# 
+# \nnn   The character whose ASCII code is the octal value nnn.  
+# \n   A newline.  
+# \r   A carriage return.  
+# \e   An escape character (typically a color code).  
+# \a   A bell character. 
+# \\   A backslash.  
+# \[   Begin a sequence of non-printing characters. (like color escape sequences). This 
+#      allows bash to calculate word wrapping correctly. 
+# \]   End a sequence of non-printing characters. 
+#  Place this script within /etc/profile.d 
+#  
+RESET='\[\e[0m\]' 
+black='\[\e[30m\]' 
+BLACK='\[\e[90m\]' 
+red='\[\e[31m\]' 
+RED='\[\e[91m\]' 
+green='\[\e[32m\]' 
+GREEN='\[\e[92m\]' 
+yellow='\[\e[33m\]' 
+YELLOW='\[\e[93m\]' 
+blue='\[\e[34m\]' 
+BLUE='\[\e[94m\]' 
+mauve='\[\e[35m\]' 
+MAUVE='\[\e[95m\]' 
+cyan='\[\e[36m\]' 
+CYAN='\[\e[96m\]' 
+white='\[\e[37m\]' 
+WHITE='\[\e[97m\]' 
+# no 38m  98m 
+# no 39m  99m 
+ 
+if [ $EUID = 0 ]; 
+then 
+ PS1="${RED}\u${white}@${GREEN}\h${white}:${BLUE}\w${white}\\$ ${RESET}" 
+else 
+ PS1="${YELLOW}\u${white}@${GREEN}\h${white}:${BLUE}\w${white}\\$ ${RESET}" 
+fi 
+export PS1 

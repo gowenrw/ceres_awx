@@ -103,7 +103,7 @@
 #
 # check if epel repo has already been configured
 - name: Check if EPEL repo is already configured.
-  stat:
+  ansible.builtin.stat:
     path: "{{ ceres_localenv_epel_repofile_path }}"
   register: reg_epel_repofile_result
 #
@@ -226,7 +226,7 @@
 #
 # Check if PuTTy is already installed
 - name: Check if PuTTy is already installed.
-  stat:
+  ansible.builtin.stat:
     path: "{{ ceres_localenv_pkgs_putty_bin }}"
   register: reg_pkgs_puttybin_result
   when:

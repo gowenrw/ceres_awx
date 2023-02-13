@@ -119,21 +119,45 @@
       - "{{ omit if reg_k3s_pippkg_result is not defined else reg_k3s_pippkg_result }}"
     verbosity: 1
 
-## Set Node IP
+## Set Node IP and FQDN
 #
-# Since ansible_host can be ip or name need test and dig if needed
-- name: Check if ansible_host is an IP
+# Since ansible_host or inventory_hostname can be ip or name or fqdn
+# We need to parse out the ip and fqdn as seperate variables for use later
+#
+# Test if we were given an IP
+- name: Test for IP in ansible_host
   ansible.builtin.set_fact:
-    ceres_k3s_node_ip_address: "{{ ansible_host | ansible.utils.ipaddr }}"
-- name: Dig for IP if ansible_host is a name
+    reg_testip_ah: "{{ ansible_host | ansible.utils.ipaddr }}"
+  when: ansible_host is defined
+- name: Test for IP in inventory_hostname
   ansible.builtin.set_fact:
-    ceres_k3s_node_ip_address: "{{ lookup('community.general.dig', ansible_host) }}"
+    reg_testip_ih: "{{ inventory_hostname | ansible.utils.ipaddr }}"
+# Set the IP based on given value or dig or gather facts value
+- name: Set IP if we found one above
+  ansible.builtin.set_fact:
+    ceres_k3s_node_ip_address: "{{ reg_testip_ah if reg_testip_ah else reg_testip_ih }}"
+  when: reg_testip_ah or reg_testip_ih
+- name: Dig for IP if we only have names
+  ansible.builtin.set_fact:
+    ceres_k3s_node_ip_address: "{{ lookup('community.general.dig', ansible_host if ansible_host is defined else inventory_hostname ) | ansible.utils.ipaddr }}"
+  when: not reg_testip_ah and not reg_testip_ih
+- name: Set IP to ansible_default_ipv4 (last resort) if dig does not provide a valid IP
+  ansible.builtin.set_fact:
+    ceres_k3s_node_ip_address: "{{ ansible_default_ipv4 }}"
   when: not ceres_k3s_node_ip_address
+# Set the FQDN based on given value or gather facts value
+- name: Set FQDN from inventory fqdn or inventory short-name + domain or use ansible_fqdn (last resort)
+  ansible.builtin.set_fact:
+    ceres_k3s_node_fqdn: "{{ ( ansible_host if '.' in ansible_host else ansible_host + '.' + ceres_k3s_node_domain ) if ansible_host is defined and not reg_testip_ah else ( inventory_hostname if '.' in inventory_hostname else inventory_hostname + '.' + ceres_k3s_node_domain ) if not reg_testip_ih else ansible_fqdn }}"
 #
-# Dump the output of previous task if needed for troubleshooting
+# Dump the output of previous tasks if needed for troubleshooting
 - name: "Debug task output"
   ansible.builtin.debug:
-    var: ceres_k3s_node_ip_address
+    msg:
+    - "{{ omit if reg_testip_ah is not defined else reg_testip_ah }}"
+    - "{{ omit if reg_testip_ih is not defined else reg_testip_ih }}"
+    - "{{ omit if ceres_k3s_node_ip_address is not defined else ceres_k3s_node_ip_address}}"
+    - "{{ omit if ceres_k3s_node_fqdn is not defined else ceres_k3s_node_fqdn}}"
     verbosity: 1
 
 ## Get or set ansible node token
@@ -378,12 +402,12 @@
     # Deploy admin user config
     - name: Deploy admin user config in Kube Dashboard
       ansible.builtin.command:
-        cmd: "k3s kubectl create -f {{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user.yml -f {{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user-role.yml"
+        cmd: "kubectl create -f {{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user.yml -f {{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user-role.yml --save-config"
       register: reg_kube_dashboard_deploy
     # Create admin token
     - name: Create the admin token for Kube Dashboard
       ansible.builtin.command:
-        cmd: "k3s kubectl -n kubernetes-dashboard create token admin-user"
+        cmd: "kubectl -n kubernetes-dashboard create token admin-user"
       register: ceres_k3s_kube_dashboard_token
     # Write token file
     - name: write k3s ansible token file
@@ -473,7 +497,33 @@
     - not ceres_k3s_nginx_ingress_query.resources | default(None) or ceres_k3s_nginx_ingress_reinstall
     - ceres_k3s_nginx_ingress_install
 
-
-
-
+## DASHBOARD INGRESS
+#
+- name: Dashboard Ingress definition file
+  ansible.builtin.template:
+    src: "dashboard-ingress.yml.j2"
+    dest: "{{ ceres_k3s_kube_app_defs_path }}/dashboard-ingress.yml"
+    owner: root
+    group: root
+    mode: "0440"
+# Create/Update dashboard ingress from definition
+- name: Create / Update dashboard ingress from definition
+  block:
+    - name: Create Dashboard Ingress from definition
+      ansible.builtin.command:
+        cmd: "kubectl create -f {{ ceres_k3s_kube_app_defs_path }}/dashboard-ingress.yml --save-config"
+      register: reg_dashboard_ingress_create
+  rescue:
+    - name: Update Dashboard Ingress from definition
+      ansible.builtin.command:
+        cmd: "kubectl apply -f {{ ceres_k3s_kube_app_defs_path }}/dashboard-ingress.yml"
+      register: reg_dashboard_ingress_update
+  always:
+    # Dump the output of block tasks if needed for troubleshooting
+    - name: "Debug block tasks output"
+      ansible.builtin.debug:
+        msg:
+        - "{{ omit if reg_dashboard_ingress_create is not defined else reg_dashboard_ingress_create }}"
+        - "{{ omit if reg_dashboard_ingress_update is not defined else reg_dashboard_ingress_update }}"
+        verbosity: 1
 

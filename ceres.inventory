@@ -1,12 +1,20 @@
 # file: ceres.inventory
 # Inventory configs for my ansible ceres environment
 
+# The following Public DNS names have been configured for ease of use here
+# ceres-a.awx.altbier.us 192.168.65.21
+# ceres-b.awx.altbier.us 192.168.65.22
+# ceres-c.awx.altbier.us 192.168.65.23
+# Feel free to use these dns names for as long as they exist
+# or you can change the ansible_host values to your own dns or local host names or ip addresses
+# Note that the k3s role looks for a FQDN to use for ingress (see role/playbook for details)
+
 # Ceres dev group
 #   VMs to test DEV AWX automation against
 [ceresdev]
-ceres-a ansible_host=192.168.65.21 ansible_ssh_user=vagrant ansible_ssh_private_key_file=./ssh.ceres-a.private_key
-ceres-b ansible_host=192.168.65.22 ansible_ssh_user=vagrant ansible_ssh_private_key_file=./ssh.ceres-b.private_key
-ceres-c ansible_host=192.168.65.23 ansible_ssh_user=vagrant ansible_ssh_private_key_file=./ssh.ceres-c.private_key
+ceres-a ansible_host=ceres-a.awx.altbier.us ansible_ssh_user=vagrant ansible_ssh_private_key_file=./ssh.ceres-a.private_key
+ceres-b ansible_host=ceres-b.awx.altbier.us ansible_ssh_user=vagrant ansible_ssh_private_key_file=./ssh.ceres-b.private_key
+ceres-c ansible_host=ceres-c.awx.altbier.us ansible_ssh_user=vagrant ansible_ssh_private_key_file=./ssh.ceres-c.private_key
 
 # Ceres control group
 #   Ansible control node VMs

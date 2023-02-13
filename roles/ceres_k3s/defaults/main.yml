@@ -21,8 +21,14 @@ ceres_k3s_kube_app_defs_path: /root/kube_app_defs
 ceres_k3s_service_name: "k3s.service"
 ceres_k3s_cluster_cidr: "10.42.0.0/16"
 ceres_k3s_service_cidr: "10.43.0.0/16"
-ceres_k3s_node_ip_address:
 ceres_k3s_exec_role: "server" # [server|agent] only server supported at this time
+
+## k3s node references
+#    IP and FQDN to be calculated based on inventory values
+ceres_k3s_node_ip_address:
+ceres_k3s_node_fqdn:
+#    Default domain to be used for FQDN in case not provided by inventory
+ceres_k3s_node_domain: "localdomain"
 
 ## Kube Dashboard
 ceres_k3s_kube_dashboard_install: True # Set to false to prevent install or remove install

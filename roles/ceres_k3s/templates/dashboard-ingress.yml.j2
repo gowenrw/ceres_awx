@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  namespace: kubernetes-dashboard
+  name: kubernetes-dashboard-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    # Uncomment next if you use https://cert-manager.io/
+    #cert-manager.io/cluster-issuer: "<YOUR CLUSTER ISSUER>"
+spec:
+  tls:
+  - hosts:
+    - {{ ceres_k3s_node_fqdn }}
+    secretName: kubernetes-dashboard-cert   # if doesnt exist will create self-signed certs
+  rules:
+  - host: {{ ceres_k3s_node_fqdn }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: kubernetes-dashboard
+          servicePort: 443

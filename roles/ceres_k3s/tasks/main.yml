@@ -94,6 +94,83 @@
       owner: root
       group: root
 
+## Install required packages
+#
+# Install yum packages
+- name: Install required packages via yum
+  ansible.builtin.yum:
+    name:
+      - bzip2
+      - python3-pip
+    state: present
+  register: reg_k3s_yumpkg_result
+#
+# Install pip packages
+- name: Install required packages via pip
+  ansible.builtin.pip:
+    name: kubernetes
+  register: reg_k3s_pippkg_result
+#
+# Dump the output of previous tasks if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    msg: 
+      - "{{ omit if reg_k3s_yumpkg_result is not defined else reg_k3s_yumpkg_result }}"
+      - "{{ omit if reg_k3s_pippkg_result is not defined else reg_k3s_pippkg_result }}"
+    verbosity: 1
+
+## Set Node IP
+#
+# Since ansible_host can be ip or name need test and dig if needed
+- name: Check if ansible_host is an IP
+  ansible.builtin.set_fact:
+    ceres_k3s_node_ip_address: "{{ ansible_host | ansible.utils.ipaddr }}"
+- name: Dig for IP if ansible_host is a name
+  ansible.builtin.set_fact:
+    ceres_k3s_node_ip_address: "{{ lookup('community.general.dig', ansible_host) }}"
+  when: not ceres_k3s_node_ip_address
+#
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: ceres_k3s_node_ip_address
+    verbosity: 1
+
+## Get or set ansible node token
+#
+- name: Ansible node token block
+  block:
+    # Get token contents if token file exists on host
+    - name: lookup k3s ansible token
+      ansible.builtin.slurp:
+        src: "{{ ceres_k3s_ansible_token_file }}"
+      register: reg_slurp_k3s_ansible_token
+    # Decode token contents for ansible use
+    - name: set fact for k3s ansible token
+      ansible.builtin.set_fact:
+        ceres_k3s_ansible_token: "{{ reg_slurp_k3s_ansible_token['content'] | b64decode }}"
+  rescue:
+    # If token file does not exist then create token
+    - name: generate k3s ansible token
+      ansible.builtin.set_fact:
+        ceres_k3s_ansible_token: "{{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,ascii_uppercase,digits length=96') }}"
+  always:
+    # Write token file
+    - name: write k3s ansible token file
+      ansible.builtin.copy:
+        dest: "{{ ceres_k3s_ansible_token_file }}"
+        owner: root
+        group: root
+        mode: 0400
+        content: "{{ ceres_k3s_ansible_token }}"
+#
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: ceres_k3s_ansible_token
+    verbosity: 1
+
+
 #########################
 #
 # DOWNLOAD AND INSTALL
@@ -105,17 +182,15 @@
   ansible.builtin.stat: path="{{ ceres_k3s_bin_directory }}/k3s"
   register: reg_k3binary
 
-## Download installer if needed
-- name: Download k3s installer
-  ansible.builtin.get_url:
-    url: "{{ ceres_k3s_installer_url }}"
-    dest: "{{ ceres_k3s_installer_directory }}/k3s-install.sh"
-    mode: "0700"
-  when: not reg_k3binary.stat.exists or ceres_k3s_installer_reinstall
-
 ## INSTALL BLOCK
 - name: Install Block
   block:
+    # Download installer
+    - name: Download k3s installer
+      ansible.builtin.get_url:
+        url: "{{ ceres_k3s_installer_url }}"
+        dest: "{{ ceres_k3s_installer_directory }}/k3s-install.sh"
+        mode: "0700"
     # Server Config File
     - name: create k3s server config file
       ansible.builtin.template:
@@ -164,17 +239,28 @@
   # Install block conditionals
   when: not reg_k3binary.stat.exists or ceres_k3s_installer_reinstall
 
+
+#########################
+#
+# START AND INITIAL TASKS
+#
+#########################
+
+## Start k3s
+#
 - name: Start and enable the k3s server service
   ansible.builtin.service:
     name: "{{ ceres_k3s_service_name }}"
     state: started
     enabled: true
-
+# Make sure it is fully up before continuing
 - name: Wait for kubeconfig file
   ansible.builtin.wait_for:
     path: "{{ ceres_k3s_kubeconfig_file }}"
     state: present
 
+## Root kubeconfig
+#
 - name: create root's kubeconfig
   ansible.builtin.copy:
     src: "{{ ceres_k3s_kubeconfig_file }}"
@@ -187,16 +273,74 @@
 ## Kube Dashboard
 #
 # Check if dashboard is already deployed
-#- name: Query k3s to see if kubernetes-dashboard deployment exists
-#  ansible.builtin.set_fact:
-#    ceres_k3s_kube_dashboard_deployment_q: "{{ query('kubernetes.core.k8s', kind='Deployment', namespace='kubernetes-dashboard', resource_name='kubernetes-dashboard') }}"
+- name: Query k3s to see if kubernetes-dashboard deployment exists
+  kubernetes.core.k8s_info:
+    kind: "Deployment"
+    namespace: "kubernetes-dashboard"
+    name: "kubernetes-dashboard"
+    api_key: "{{ ceres_k3s_ansible_token }}"
+  register: ceres_k3s_kube_dashboard_query
+#
 # Dump the output of query task if needed for troubleshooting
-#- name: "Debug query tasks output"
-#  ansible.builtin.debug:
-#    msg:
-#    - "{{ omit if ceres_k3s_kube_dashboard_deployment_q is not defined else ceres_k3s_kube_dashboard_deployment_q }}"
-#    verbosity: 0
-# Deployment Block
+- name: "Debug query tasks output"
+  ansible.builtin.debug:
+    var: ceres_k3s_kube_dashboard_query
+    verbosity: 1
+#
+# Dashboard Uninstall
+- name: Kube Dashboard Remove Block
+  block:
+    - name: Remove Dashboard ClusterRoleBinding admin-user
+      kubernetes.core.k8s:
+        api_key: "{{ ceres_k3s_ansible_token }}"
+        kind: ClusterRoleBinding
+        state: absent
+        name: "admin-user"
+    - name: Remove Dashboard ClusterRoleBinding kubernetes-dashboard
+      kubernetes.core.k8s:
+        api_key: "{{ ceres_k3s_ansible_token }}"
+        kind: ClusterRoleBinding
+        state: absent
+        name: "kubernetes-dashboard"
+    - name: Remove Dashboard ClusterRole kubernetes-dashboard
+      kubernetes.core.k8s:
+        api_key: "{{ ceres_k3s_ansible_token }}"
+        kind: ClusterRole
+        state: absent
+        name: "kubernetes-dashboard"
+    - name: Remove Dashboard ServiceAccount admin-user
+      kubernetes.core.k8s:
+        api_key: "{{ ceres_k3s_ansible_token }}"
+        kind: ServiceAccount
+        state: absent
+        name: "admin-user"
+    # Remove kubernetes-dashboard namespace
+    - name: Remove kubernetes-dashboard namespace
+      kubernetes.core.k8s:
+        api_key: "{{ ceres_k3s_ansible_token }}"
+        kind: Namespace
+        state: absent
+        name: "kubernetes-dashboard"
+    # Remove installation files
+    - name: Remove token file
+      ansible.builtin.file:
+        path: "{{ ceres_k3s_kube_dashboard_token_file }}"
+        state: absent
+    - name: Remove admin rbac definition file
+      ansible.builtin.file:
+        path: "{{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user-role.yml"
+        state: absent
+    - name: Remove admin user definition file
+      ansible.builtin.file:
+        path: "{{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user.yml"
+        state: absent
+  # Dashboard Deployment Block conditionals
+  when: 
+    - ceres_k3s_kube_dashboard_query.resources != None
+    - ceres_k3s_kube_dashboard_query.resources | length >0
+    - not ceres_k3s_kube_dashboard_install or ceres_k3s_kube_dashboard_reinstall
+#
+# Dashboard Install and Deployment Block
 - name: Kube Dashboard Block
   block:
     # Define Kube Dashboard installer environment
@@ -211,6 +355,7 @@
     # Install Kube Dashboard using defined environment
     - name: Install Kube Dashboard
       ansible.builtin.command:
+        # Recommended uses tls alternative is http
         cmd: "k3s kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/${VERSION_KUBE_DASHBOARD}/aio/deploy/recommended.yaml"
         #cmd: "k3s kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/${VERSION_KUBE_DASHBOARD}/aio/deploy/alternative.yaml"
       environment: "{{ ceres_k3s_kube_dashboard_install_env }}"
@@ -235,11 +380,19 @@
       ansible.builtin.command:
         cmd: "k3s kubectl create -f {{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user.yml -f {{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user-role.yml"
       register: reg_kube_dashboard_deploy
-    # Get admin token
+    # Create admin token
     - name: Create the admin token for Kube Dashboard
       ansible.builtin.command:
         cmd: "k3s kubectl -n kubernetes-dashboard create token admin-user"
-      register: reg_kube_dashboard_admin_token
+      register: ceres_k3s_kube_dashboard_token
+    # Write token file
+    - name: write k3s ansible token file
+      ansible.builtin.copy:
+        dest: "{{ ceres_k3s_kube_dashboard_token_file }}"
+        owner: root
+        group: root
+        mode: 0400
+        content: "{{ ceres_k3s_kube_dashboard_token.stdout }}"
   always:
     #
     # Dump the output of block tasks if needed for troubleshooting
@@ -249,19 +402,78 @@
         - "{{ omit if reg_kube_dashboard_version is not defined else reg_kube_dashboard_version }}"
         - "{{ omit if reg_kube_dashboard_install is not defined else reg_kube_dashboard_install }}"
         - "{{ omit if reg_kube_dashboard_deploy is not defined else reg_kube_dashboard_deploy}}"
-        - "{{ omit if reg_kube_dashboard_admin_token is not defined else reg_kube_dashboard_admin_token}}"
-        verbosity: 0
+        verbosity: 1
+  # Dashboard Deployment Block conditionals
+  when: 
+    - not ceres_k3s_kube_dashboard_query.resources | default(None) or ceres_k3s_kube_dashboard_reinstall
+    - ceres_k3s_kube_dashboard_install
+
+## NGINX INGRESS
 #
-# Check if dashboard is already deployed
-#- name: Query k3s to see if kubernetes-dashboard deployment exists
-#  ansible.builtin.set_fact:
-#    ceres_k3s_kube_dashboard_deployment_r: "{{ query('kubernetes.core.k8s', kind='Deployment', namespace='kubernetes-dashboard', resource_name='kubernetes-dashboard') }}"
+# Check if nginx ingress is already deployed
+- name: Query k3s to see if ingress-nginx-controller deployment exists
+  kubernetes.core.k8s_info:
+    kind: "Deployment"
+    namespace: "ingress-nginx"
+    name: "ingress-nginx-controller"
+    api_key: "{{ ceres_k3s_ansible_token }}"
+  register: ceres_k3s_nginx_ingress_query
+#
 # Dump the output of query task if needed for troubleshooting
-#- name: "Debug query tasks output"
-#  ansible.builtin.debug:
-#    msg:
-#    - "{{ omit if ceres_k3s_kube_dashboard_deployment_r is not defined else ceres_k3s_kube_dashboard_deployment_r }}"
-#    verbosity: 0
+- name: "Debug query tasks output"
+  ansible.builtin.debug:
+    var: ceres_k3s_nginx_ingress_query
+    verbosity: 1
+#
+# NGINX INGRESS Uninstall
+- name: NGINX INGRESS Remove Block
+  block:
+    # Remove ingress-nginx namespace
+    - name: Remove ingress-nginx namespace
+      kubernetes.core.k8s:
+        api_key: "{{ ceres_k3s_ansible_token }}"
+        kind: Namespace
+        state: absent
+        name: "ingress-nginx"
+  # Dashboard Deployment Block conditionals
+  when: 
+    - ceres_k3s_nginx_ingress_query.resources != None
+    - ceres_k3s_nginx_ingress_query.resources | length >0
+    - not ceres_k3s_nginx_ingress_install or ceres_k3s_nginx_ingress_reinstall
+#
+# NGINX INGRESS Install and Deployment Block
+- name: NGINX INGRESS Block
+  block:
+    # Define NGINX INGRESS installer environment
+    - name: Get NGINX INGRESS Version
+      ansible.builtin.shell:
+        cmd: "curl -w '%{url_effective}' -I -L -s -S https://github.com/kubernetes/ingress-nginx/releases/latest -o /dev/null | sed -e 's|.*/||'"
+      register: reg_nginx_ingress_version
+    - name: Set facts for NGINX INGRESS installer environment
+      ansible.builtin.set_fact:
+        ceres_k3s_nginx_ingress_install_env:
+          VERSION_INGRESS_NGINX: "{{ reg_nginx_ingress_version.stdout }}"
+    # Install NGINX INGRESS using defined environment
+    - name: Install NGINX INGRESS
+      ansible.builtin.command:
+        cmd: "kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/${VERSION_INGRESS_NGINX}/deploy/static/provider/cloud/deploy.yaml"
+      environment: "{{ ceres_k3s_nginx_ingress_install_env }}"
+      register: reg_nginx_ingress_install
+  always:
+    #
+    # Dump the output of block tasks if needed for troubleshooting
+    - name: "Debug block tasks output"
+      ansible.builtin.debug:
+        msg:
+        - "{{ omit if reg_nginx_ingress_version is not defined else reg_nginx_ingress_version }}"
+        - "{{ omit if reg_nginx_ingress_install is not defined else reg_nginx_ingress_install }}"
+        verbosity: 1
+  # NGINX INGRESS Block conditionals
+  when: 
+    - not ceres_k3s_nginx_ingress_query.resources | default(None) or ceres_k3s_nginx_ingress_reinstall
+    - ceres_k3s_nginx_ingress_install
+
+
 
 
 

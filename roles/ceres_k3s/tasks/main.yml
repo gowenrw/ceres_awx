@@ -506,6 +506,7 @@
     owner: root
     group: root
     mode: "0440"
+  register: reg_dashboard_ingress_def
 # Create/Update dashboard ingress from definition
 - name: Create / Update dashboard ingress from definition
   block:
@@ -526,4 +527,6 @@
         - "{{ omit if reg_dashboard_ingress_create is not defined else reg_dashboard_ingress_create }}"
         - "{{ omit if reg_dashboard_ingress_update is not defined else reg_dashboard_ingress_update }}"
         verbosity: 1
+  # Only run the create/update block if the definition file changed
+  when: reg_dashboard_ingress_def.changed
 

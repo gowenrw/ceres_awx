@@ -35,6 +35,8 @@ ceres_k3s_kube_dashboard_install: True # Set to false to prevent install or remo
 ceres_k3s_kube_dashboard_reinstall: False
 ceres_k3s_kube_dashboard_token_file: /etc/rancher/k3s/dashboard-token
 ceres_k3s_kube_dashboard_token:
+# This fqdn value must be set in inventory or playbook since node fqdn will be used by awx
+ceres_k3s_kube_dashboard_fqdn:
 
 ## NGINX INGRESS CONTROLLER
 ceres_k3s_nginx_ingress_install: True # Set to false to prevent install or remove install

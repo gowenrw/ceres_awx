@@ -408,15 +408,15 @@
     - name: Create the admin token for Kube Dashboard
       ansible.builtin.command:
         cmd: "kubectl -n kubernetes-dashboard create token admin-user"
-      register: ceres_k3s_kube_dashboard_token
+      register: reg_k3s_kube_dashboard_token
     # Write token file
-    - name: write k3s ansible token file
+    - name: write kube dashboard token file
       ansible.builtin.copy:
         dest: "{{ ceres_k3s_kube_dashboard_token_file }}"
         owner: root
         group: root
         mode: 0400
-        content: "{{ ceres_k3s_kube_dashboard_token.stdout }}"
+        content: "{{ reg_k3s_kube_dashboard_token.stdout }}"
   always:
     #
     # Dump the output of block tasks if needed for troubleshooting
@@ -430,6 +430,14 @@
   # Dashboard Deployment Block conditionals
   when: 
     - not ceres_k3s_kube_dashboard_query.resources | default(None) or ceres_k3s_kube_dashboard_reinstall
+    - ceres_k3s_kube_dashboard_install
+#
+# Register dashboard token from file
+- name: lookup kube dashboard token
+  ansible.builtin.slurp:
+    src: "{{ ceres_k3s_kube_dashboard_token_file }}"
+  register: ceres_k3s_kube_dashboard_token
+  when: 
     - ceres_k3s_kube_dashboard_install
 
 ## NGINX INGRESS
@@ -483,6 +491,9 @@
         cmd: "kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/${VERSION_INGRESS_NGINX}/deploy/static/provider/cloud/deploy.yaml"
       environment: "{{ ceres_k3s_nginx_ingress_install_env }}"
       register: reg_nginx_ingress_install
+    - name: Pause for a few seconds to let nginx ingress controller finish setup
+      ansible.builtin.pause:
+        seconds: 20
   always:
     #
     # Dump the output of block tasks if needed for troubleshooting
@@ -499,6 +510,7 @@
 
 ## DASHBOARD INGRESS
 #
+# Create the dashboard ingress def file
 - name: Dashboard Ingress definition file
   ansible.builtin.template:
     src: "dashboard-ingress.yml.j2"
@@ -507,6 +519,18 @@
     group: root
     mode: "0440"
   register: reg_dashboard_ingress_def
+  when: 
+    - ceres_k3s_kube_dashboard_install
+    - ceres_k3s_nginx_ingress_install
+    - ceres_k3s_kube_dashboard_fqdn is defined
+    - ceres_k3s_kube_dashboard_fqdn | length >0
+# Remove the dashboard ingress def file if exists and no ingress
+- name: Remove the dashboard ingress def file if exists and no ingress
+  ansible.builtin.file:
+    path: "{{ ceres_k3s_kube_app_defs_path }}/dashboard-ingress.yml"
+    state: absent
+  when: 
+    - not ceres_k3s_kube_dashboard_install or not ceres_k3s_nginx_ingress_install
 # Create/Update dashboard ingress from definition
 - name: Create / Update dashboard ingress from definition
   block:
@@ -521,12 +545,25 @@
       register: reg_dashboard_ingress_update
   always:
     # Dump the output of block tasks if needed for troubleshooting
-    - name: "Debug block tasks output"
+    - name: Debug block tasks output
       ansible.builtin.debug:
         msg:
         - "{{ omit if reg_dashboard_ingress_create is not defined else reg_dashboard_ingress_create }}"
         - "{{ omit if reg_dashboard_ingress_update is not defined else reg_dashboard_ingress_update }}"
         verbosity: 1
+    - name: Print Dashboard Ingress Connect Details
+      ansible.builtin.debug:
+        msg:
+        - "Kubernetes Dashboard URL - https://{{ ceres_k3s_kube_dashboard_fqdn }}/#/login"
+        - "Authentication token file - {{ ceres_k3s_kube_dashboard_token_file }}"
+        - "Authentication token - "
+        - "{{ ceres_k3s_kube_dashboard_token.content }}"
+        verbosity: 0
   # Only run the create/update block if the definition file changed
-  when: reg_dashboard_ingress_def.changed
+  when: 
+    - ceres_k3s_kube_dashboard_install
+    - ceres_k3s_nginx_ingress_install
+    - ceres_k3s_kube_dashboard_fqdn is defined
+    - ceres_k3s_kube_dashboard_fqdn | length >0
+    - reg_dashboard_ingress_def.changed
 

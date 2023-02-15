@@ -12,10 +12,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - {{ ceres_k3s_node_fqdn }}
+    - {{ ceres_k3s_kube_dashboard_fqdn }}
     secretName: kubernetes-dashboard-cert   # if doesnt exist will create self-signed certs
   rules:
-  - host: {{ ceres_k3s_node_fqdn }}
+  - host: {{ ceres_k3s_kube_dashboard_fqdn }}
     http:
       paths:
       - path: /

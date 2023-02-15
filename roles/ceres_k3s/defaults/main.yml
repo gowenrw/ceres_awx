@@ -8,6 +8,9 @@ ceres_k3s_installer_version: ""
 ceres_k3s_installer_channel: "stable"
 ceres_k3s_installer_reinstall: False
 
+## helm installer (set to empty to disable installation)
+ceres_k3s_helm_installer_url: "https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3"
+
 ## k3s environment
 ceres_k3s_bin_directory: /usr/local/bin
 ceres_k3s_storage_provider: local

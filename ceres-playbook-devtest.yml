@@ -25,3 +25,14 @@
       ceres_k3s_exec_role: "server"
       ceres_k3s_kube_dashboard_install: True
       ceres_k3s_nginx_ingress_install: True
+
+  #
+  # Call role ceres_awx to install awx on vm for DEV AWX
+  - name: Import role ceres_awx
+    ansible.builtin.import_role:
+      name: ceres_awx
+    vars:
+      #ceres_awx_ansible_token: "{{ ceres_k3s_ansible_token }}"
+      ceres_awx_node_ip_address: "{{ omit if ceres_k3s_node_ip_address is not defined else ceres_k3s_node_ip_address }}"
+      ceres_awx_node_fqdn: "{{ omit if ceres_k3s_node_fqdn is not defined else ceres_k3s_node_fqdn }}"
+

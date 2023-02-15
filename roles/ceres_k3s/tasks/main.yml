@@ -206,8 +206,8 @@
   ansible.builtin.stat: path="{{ ceres_k3s_bin_directory }}/k3s"
   register: reg_k3binary
 
-## INSTALL BLOCK
-- name: Install Block
+## K3S INSTALL BLOCK
+- name: K3S Install Block
   block:
     # Download installer
     - name: Download k3s installer
@@ -264,6 +264,30 @@
   when: not reg_k3binary.stat.exists or ceres_k3s_installer_reinstall
 
 
+## Check if helm already installed
+- name: Stat helm binary
+  ansible.builtin.stat: path="{{ ceres_k3s_bin_directory }}/helm"
+  register: reg_helmbinary
+
+## HELM INSTALL BLOCK
+- name: Download and install helm
+  block:
+    - name: Download helm installer
+      get_url:
+        url: "{{ ceres_k3s_helm_installer_url }}"
+        dest: "{{ ceres_k3s_installer_directory }}/get-helm-3.sh"
+        mode: "0750"
+    - name: Install helm
+      command:
+        cmd: "{{ ceres_k3s_installer_directory }}/get-helm-3.sh"
+        creates: "{{ ceres_k3s_bin_directory }}/helm"
+      environment:
+        HELM_INSTALL_DIR: "{{ ceres_k3s_bin_directory }}"
+        PATH: "{{ ceres_k3s_bin_directory }}:{{ ansible_env.PATH }}"
+  when:
+    - not reg_helmbinary.stat.exists
+    - ceres_k3s_helm_installer_url | default("", true) != ""
+
 #########################
 #
 # START AND INITIAL TASKS
@@ -294,7 +318,12 @@
     group: root
     mode: "0600"
 
-## Kube Dashboard
+#########################
+#
+# Kube Dashboard
+#
+#########################
+
 #
 # Check if dashboard is already deployed
 - name: Query k3s to see if kubernetes-dashboard deployment exists
@@ -440,7 +469,12 @@
   when: 
     - ceres_k3s_kube_dashboard_install
 
-## NGINX INGRESS
+#########################
+#
+# NGINX INGRESS
+#
+#########################
+
 #
 # Check if nginx ingress is already deployed
 - name: Query k3s to see if ingress-nginx-controller deployment exists
@@ -491,6 +525,17 @@
         cmd: "kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/${VERSION_INGRESS_NGINX}/deploy/static/provider/cloud/deploy.yaml"
       environment: "{{ ceres_k3s_nginx_ingress_install_env }}"
       register: reg_nginx_ingress_install
+    # Wait for deployment to finish
+    - name: Wait for nginx ingress controller deployment to finish
+      kubernetes.core.k8s_info:
+        api_key: "{{ ceres_k3s_ansible_token }}"
+        kind: Deployment
+        namespace: ingress-nginx
+        name: ingress-nginx-controller
+        wait: True
+        wait_sleep: 15
+        wait_timeout: 120
+    # Pause an extra few seconds to make sure its up
     - name: Pause for a few seconds to let nginx ingress controller finish setup
       ansible.builtin.pause:
         seconds: 20
@@ -508,7 +553,12 @@
     - not ceres_k3s_nginx_ingress_query.resources | default(None) or ceres_k3s_nginx_ingress_reinstall
     - ceres_k3s_nginx_ingress_install
 
-## DASHBOARD INGRESS
+#########################
+#
+# DASHBOARD INGRESS
+#
+#########################
+
 #
 # Create the dashboard ingress def file
 - name: Dashboard Ingress definition file
@@ -551,14 +601,6 @@
         - "{{ omit if reg_dashboard_ingress_create is not defined else reg_dashboard_ingress_create }}"
         - "{{ omit if reg_dashboard_ingress_update is not defined else reg_dashboard_ingress_update }}"
         verbosity: 1
-    - name: Print Dashboard Ingress Connect Details
-      ansible.builtin.debug:
-        msg:
-        - "Kubernetes Dashboard URL - https://{{ ceres_k3s_kube_dashboard_fqdn }}/#/login"
-        - "Authentication token file - {{ ceres_k3s_kube_dashboard_token_file }}"
-        - "Authentication token - "
-        - "{{ ceres_k3s_kube_dashboard_token.content }}"
-        verbosity: 0
   # Only run the create/update block if the definition file changed
   when: 
     - ceres_k3s_kube_dashboard_install
@@ -566,4 +608,17 @@
     - ceres_k3s_kube_dashboard_fqdn is defined
     - ceres_k3s_kube_dashboard_fqdn | length >0
     - reg_dashboard_ingress_def.changed
-
+# Print connection info
+- name: Print Dashboard Ingress Connect Details
+  ansible.builtin.debug:
+    msg:
+    - "Kubernetes Dashboard URL - https://{{ ceres_k3s_kube_dashboard_fqdn }}/#/login"
+    - "Authentication token file - {{ ceres_k3s_kube_dashboard_token_file }}"
+    - "Authentication token - "
+    - "{{ ceres_k3s_kube_dashboard_token['content'] | b64decode }}"
+    verbosity: 0
+  when: 
+    - ceres_k3s_kube_dashboard_install
+    - ceres_k3s_nginx_ingress_install
+    - ceres_k3s_kube_dashboard_fqdn is defined
+    - ceres_k3s_kube_dashboard_fqdn | length >0

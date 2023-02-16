@@ -66,5 +66,14 @@
     repo_url: "{{ ceres_awx_oper_helm_repo_url }}"
 
 #helm install -n awx --create-namespace my-awx-operator awx-operator/awx-operator
-
+- name: Use helm to deploy awx operator inside awx namespace (create namespace if needed)
+  kubernetes.core.helm:
+    api_key: "{{ ceres_awx_ansible_token }}"
+    name: "{{ ceres_awx_oper_helm_deploy_name }}"
+    chart_ref: "{{ ceres_awx_oper_helm_deploy_chart_ref }}"
+    release_state: present
+    release_namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
+    create_namespace: True
+    wait: True
+    update_repo_cache: True
 

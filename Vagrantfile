@@ -8,9 +8,8 @@
 # Some box images have small disks so the plugin vagrant-disksize resizes them
 # Note that resizing the disk does not resize the partition on that disk, use parted
 #
-# CentOS Stream box images:
-# CentOS 8 Stream URL - https://cloud.centos.org/centos/8-stream/x86_64/images/CentOS-Stream-Vagrant-8-20220913.0.x86_64.vagrant-virtualbox.box
-# CentOS 9 Stream URL - https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230123.0.x86_64.vagrant-virtualbox.box
+# CentOS Stream box image:
+# CentOS 9 Stream URL - https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230207.0.x86_64.vagrant-virtualbox.box
 #
 # Define Server Variables Here
 servers=[
@@ -18,8 +17,8 @@ servers=[
     :hostname => "ceres-a",
     :log => "ceres-a-console.log",
     :ip => "192.168.65.21",
-    :box => "CentOS-Stream-Vagrant-9-20230123.0.x86_64",
-    :boxurl => "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230123.0.x86_64.vagrant-virtualbox.box",
+    :box => "CentOS-Stream-Vagrant-9-20230207.0.x86_64",
+    :boxurl => "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230207.0.x86_64.vagrant-virtualbox.box",
     :ram => 8192,
     :vram => 16,
     :cpu => 2,
@@ -31,8 +30,8 @@ servers=[
     :hostname => "ceres-b",
     :log => "ceres-b-console.log",
     :ip => "192.168.65.22",
-    :box => "CentOS-Stream-Vagrant-9-20230123.0.x86_64",
-    :boxurl => "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230123.0.x86_64.vagrant-virtualbox.box",
+    :box => "CentOS-Stream-Vagrant-9-20230207.0.x86_64",
+    :boxurl => "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230207.0.x86_64.vagrant-virtualbox.box",
     :ram => 4096,
     :vram => 16,
     :cpu => 2,
@@ -44,8 +43,8 @@ servers=[
     :hostname => "ceres-c",
     :log => "ceres-c-console.log",
     :ip => "192.168.65.23",
-    :box => "CentOS-Stream-Vagrant-9-20230123.0.x86_64",
-    :boxurl => "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230123.0.x86_64.vagrant-virtualbox.box",
+    :box => "CentOS-Stream-Vagrant-9-20230207.0.x86_64",
+    :boxurl => "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230207.0.x86_64.vagrant-virtualbox.box",
     :ram => 2048,
     :vram => 16,
     :cpu => 2,
@@ -57,8 +56,8 @@ servers=[
     :hostname => "ceres-ctrl",
     :log => "ceres-ctrl-console.log",
     :ip => "192.168.65.24",
-    :box => "CentOS-Stream-Vagrant-9-20230123.0.x86_64",
-    :boxurl => "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230123.0.x86_64.vagrant-virtualbox.box",
+    :box => "CentOS-Stream-Vagrant-9-20230207.0.x86_64",
+    :boxurl => "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230207.0.x86_64.vagrant-virtualbox.box",
     :ram => 4096,
     :vram => 16,
     :cpu => 2,
@@ -70,8 +69,8 @@ servers=[
     :hostname => "ceres-rectal",
     :log => "ceres-rectal-console.log",
     :ip => "192.168.65.25",
-    :box => "CentOS-Stream-Vagrant-9-20230123.0.x86_64",
-    :boxurl => "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230123.0.x86_64.vagrant-virtualbox.box",
+    :box => "CentOS-Stream-Vagrant-9-20230207.0.x86_64",
+    :boxurl => "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230207.0.x86_64.vagrant-virtualbox.box",
     :ram => 4096,
     :vram => 16,
     :cpu => 2,
@@ -83,8 +82,8 @@ servers=[
     :hostname => "ceres-tst",
     :log => "ceres-tst-console.log",
     :ip => "192.168.65.26",
-    :box => "CentOS-Stream-Vagrant-9-20230123.0.x86_64",
-    :boxurl => "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230123.0.x86_64.vagrant-virtualbox.box",
+    :box => "CentOS-Stream-Vagrant-9-20230207.0.x86_64",
+    :boxurl => "https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-Vagrant-9-20230207.0.x86_64.vagrant-virtualbox.box",
     :ram => 2048,
     :vram => 16,
     :cpu => 2,

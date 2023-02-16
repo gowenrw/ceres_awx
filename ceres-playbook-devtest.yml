@@ -3,6 +3,11 @@
   hosts: ceresdev
   become: true
 
+  vars:
+    launch_role_localenv: True
+    launch_role_k3s: True
+    launch_role_awx: True
+
   tasks:
   # 
   # Call role ceres_localenv to resize root partition on vm for DEV AWX
@@ -13,6 +18,7 @@
       ceres_localenv_resize_disk: True
       ceres_localenv_resize_dev: "/dev/sda"
       ceres_localenv_pkgs_qol_install: True
+    when: launch_role_localenv
 
   #
   # Call role ceres_k3s to install k3s varient of Kubernetes on vm for DEV AWX
@@ -25,6 +31,7 @@
       ceres_k3s_exec_role: "server"
       ceres_k3s_kube_dashboard_install: True
       ceres_k3s_nginx_ingress_install: True
+    when: launch_role_k3s
 
   #
   # Call role ceres_awx to install awx on vm for DEV AWX
@@ -35,4 +42,4 @@
       #ceres_awx_ansible_token: "{{ ceres_k3s_ansible_token }}"
       ceres_awx_node_ip_address: "{{ omit if ceres_k3s_node_ip_address is not defined else ceres_k3s_node_ip_address }}"
       ceres_awx_node_fqdn: "{{ omit if ceres_k3s_node_fqdn is not defined else ceres_k3s_node_fqdn }}"
-
+    when: launch_role_awx

@@ -534,7 +534,7 @@
         name: ingress-nginx-controller
         wait: True
         wait_sleep: 15
-        wait_timeout: 120
+        wait_timeout: 300
     # Pause an extra few seconds to make sure its up
     - name: Pause for a few seconds to let nginx ingress controller finish setup
       ansible.builtin.pause:

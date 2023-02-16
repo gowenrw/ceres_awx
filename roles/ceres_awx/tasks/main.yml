@@ -65,9 +65,21 @@
     api_key: "{{ ceres_awx_ansible_token }}"
     name: "{{ ceres_awx_oper_helm_deploy_name }}"
     chart_ref: "{{ ceres_awx_oper_helm_deploy_chart_ref }}"
+    values_files:
+      - "{{ ceres_awx_kube_app_defs_path }}/awx-values.yaml"
     release_state: present
     release_namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
     create_namespace: True
     update_repo_cache: True
     wait: True
   when: ceres_awx_oper_install
+
+# Ger the admin password
+- name: Get the awx admin password
+  ansible.builtin.command:
+    cmd: "kubectl get secret {{ ceres_awx_value_resourcename }}-admin-password -o jsonpath='{.data.password}' | base64 --decode ; echo"
+  register: reg_awx_admin_passwd
+- name: Make sure we got it
+  ansible.builtin.debug:
+    var: reg_awx_admin_passwd
+    verbosity: 0

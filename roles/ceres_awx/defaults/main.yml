@@ -14,5 +14,9 @@ ceres_awx_kube_app_defs_path: /root/kube_app_defs
 ceres_awx_ansible_token_file: /etc/rancher/k3s/ansible-node-token
 ceres_awx_ansible_token:
 
-## 
+## awx values
+ceres_awx_value_resourcename: awx
+ceres_awx_value_admin_user: admin
+
+
 

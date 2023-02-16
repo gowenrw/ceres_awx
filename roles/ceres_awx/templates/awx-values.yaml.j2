@@ -2,9 +2,9 @@
 AWX:
   # enable use of awx-deploy template
   enabled: true
-  name: awx
+  name: {{ ceres_awx_value_resourcename }}
   spec:
-    admin_user: admin
+    admin_user: {{ ceres_awx_value_admin_user }}
     postgres_resource_requirements:
       requests:
         cpu: 500m

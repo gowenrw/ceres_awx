@@ -1,0 +1,40 @@
+---
+AWX:
+  # enable use of awx-deploy template
+  enabled: true
+  name: awx
+  spec:
+    admin_user: admin
+    postgres_resource_requirements:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+    postgres_storage_requirements:
+      requests:
+        storage: 2Gi
+      limits:
+        storage: 5Gi
+    web_resource_requirements:
+      requests:
+        cpu: 250m
+        memory: 500Mi
+      limits:
+        cpu: 750m
+        memory: 1Gi
+    task_resource_requirements:
+      requests:
+        cpu: 250m
+        memory: 500Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+    ee_resource_requirements:
+      requests:
+        cpu: 250m
+        memory: 100Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi

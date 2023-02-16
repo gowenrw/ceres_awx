@@ -608,15 +608,14 @@
     - ceres_k3s_kube_dashboard_fqdn is defined
     - ceres_k3s_kube_dashboard_fqdn | length >0
     - reg_dashboard_ingress_def.changed
-# Print connection info
-- name: Print Dashboard Ingress Connect Details
-  ansible.builtin.debug:
-    msg:
-    - "Kubernetes Dashboard URL - https://{{ ceres_k3s_kube_dashboard_fqdn }}/#/login"
-    - "Authentication token file - {{ ceres_k3s_kube_dashboard_token_file }}"
-    - "Authentication token - "
-    - "{{ ceres_k3s_kube_dashboard_token['content'] | b64decode }}"
-    verbosity: 0
+# Save connection info
+- name: Save Dashboard Ingress Connect Details
+  ansible.builtin.set_fact:
+    ceres_k3s_dashboard_ingress_connect: |-
+      Kubernetes Dashboard URL - https://{{ ceres_k3s_kube_dashboard_fqdn }}/#/login
+      Authentication token file - {{ ceres_k3s_kube_dashboard_token_file }}
+      Authentication token - 
+      {{ ceres_k3s_kube_dashboard_token['content'] | b64decode }}
   when: 
     - ceres_k3s_kube_dashboard_install
     - ceres_k3s_nginx_ingress_install

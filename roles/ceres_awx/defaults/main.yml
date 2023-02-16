@@ -7,8 +7,10 @@ ceres_awx_oper_helm_repo_name: awx-operator
 ceres_awx_oper_helm_deploy_name: awx-operator
 ceres_awx_oper_helm_deploy_chart_ref: awx-operator/awx-operator
 ceres_awx_oper_helm_deploy_namespace: awx
+ceres_awx_oper_install: True
 
 ## k3s env
+ceres_awx_kube_app_defs_path: /root/kube_app_defs
 ceres_awx_ansible_token_file: /etc/rancher/k3s/ansible-node-token
 ceres_awx_ansible_token:
 

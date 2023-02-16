@@ -1,28 +1,6 @@
 ---
 # tasks main.yml file
 
-#$ helm repo add awx-operator https://ansible.github.io/awx-operator/
-#"awx-operator" has been added to your repositories
-#
-#$ helm repo update
-#Hang tight while we grab the latest from your chart repositories...
-#...Successfully got an update from the "awx-operator" chart repository
-#Update Complete. ⎈Happy Helming!⎈
-#
-#$ helm search repo awx-operator
-#NAME                            CHART VERSION   APP VERSION     DESCRIPTION
-#awx-operator/awx-operator       0.17.1          0.17.1          A Helm chart for the AWX Operator
-#
-#$ helm install -n awx --create-namespace my-awx-operator awx-operator/awx-operator
-#NAME: my-awx-operator
-#LAST DEPLOYED: Thu Feb 17 22:09:05 2022
-#NAMESPACE: default
-#STATUS: deployed
-#REVISION: 1
-#TEST SUITE: None
-#NOTES:
-#Helm Chart 0.17.1
-
 ## OS Check ##
 - name: OS Check
   ansible.builtin.fail:
@@ -58,14 +36,30 @@
     var: ceres_awx_ansible_token
     verbosity: 1
 
+## AWX Values File
+- name: Add AWX Values definition file
+  ansible.builtin.template:
+    src: "awx-values.yaml.j2"
+    dest: "{{ ceres_awx_kube_app_defs_path }}/awx-values.yaml"
+    owner: root
+    group: root
+    mode: "0440"
+  when: ceres_awx_oper_install
+- name: Remove AWX Values definition file
+  ansible.builtin.file:
+    path: "{{ ceres_awx_kube_app_defs_path }}/awx-values.yaml"
+    state: absent
+  when: not ceres_awx_oper_install
+
 ## Add helm repo for awx operator
 #
 - name: Add awx operator helm repository
   kubernetes.core.helm_repository:
     name: "{{ ceres_awx_oper_helm_repo_name }}"
     repo_url: "{{ ceres_awx_oper_helm_repo_url }}"
+  when: ceres_awx_oper_install
 
-#helm install -n awx --create-namespace my-awx-operator awx-operator/awx-operator
+# Deploy awx operator
 - name: Use helm to deploy awx operator inside awx namespace (create namespace if needed)
   kubernetes.core.helm:
     api_key: "{{ ceres_awx_ansible_token }}"
@@ -74,6 +68,6 @@
     release_state: present
     release_namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
     create_namespace: True
-    wait: True
     update_repo_cache: True
-
+    wait: True
+  when: ceres_awx_oper_install

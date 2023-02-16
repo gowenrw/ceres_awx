@@ -44,3 +44,6 @@ ceres_k3s_kube_dashboard_fqdn:
 ## NGINX INGRESS CONTROLLER
 ceres_k3s_nginx_ingress_install: True # Set to false to prevent install or remove install
 ceres_k3s_nginx_ingress_reinstall: False
+
+# Dashboard Ingress Connection Details
+ceres_k3s_dashboard_ingress_connect:

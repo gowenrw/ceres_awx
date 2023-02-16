@@ -39,7 +39,15 @@
     ansible.builtin.import_role:
       name: ceres_awx
     vars:
-      #ceres_awx_ansible_token: "{{ ceres_k3s_ansible_token }}"
+      ceres_awx_ansible_token: "{{ omit if ceres_k3s_ansible_token is not defined else ceres_k3s_ansible_token }}"
       ceres_awx_node_ip_address: "{{ omit if ceres_k3s_node_ip_address is not defined else ceres_k3s_node_ip_address }}"
       ceres_awx_node_fqdn: "{{ omit if ceres_k3s_node_fqdn is not defined else ceres_k3s_node_fqdn }}"
     when: launch_role_awx
+
+
+  # Print final status messages
+  - name: Dashboard Ingress Connection Info
+    debug:
+      msg: "{{ ceres_k3s_dashboard_ingress_connect.split('\n') }}"
+      verbosity: 0
+    when: ceres_k3s_dashboard_ingress_connect is defined

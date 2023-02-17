@@ -454,7 +454,7 @@
       register: reg_k3s_kube_dashboard_token_create
     # Get admin token
     - name: Get the admin token
-      ansible.builtin.command:
+      ansible.builtin.shell:
         cmd: "kubectl get secret/admin-user-secret -n kubernetes-dashboard -o jsonpath='{.data.token}' | base64 --decode"
       register: reg_k3s_kube_dashboard_token
     # Write token file

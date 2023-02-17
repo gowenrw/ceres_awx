@@ -10,10 +10,10 @@ metadata:
     # Uncomment next if you use https://cert-manager.io/
     #cert-manager.io/cluster-issuer: "<YOUR CLUSTER ISSUER>"
 spec:
-  tls:
-  - hosts:
-    - {{ ceres_awx_node_fqdn }}
-    secretName: {{ ceres_awx_value_resourcename }}-cert   # if doesnt exist will create self-signed certs
+  #tls:
+  #- hosts:
+  #  - {{ ceres_awx_node_fqdn }}
+  #  secretName: {{ ceres_awx_value_resourcename }}-cert   # if doesnt exist will create self-signed certs
   rules:
   - host: {{ ceres_awx_node_fqdn }}
     http:

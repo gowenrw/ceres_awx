@@ -234,7 +234,7 @@
 - name: Save AWX Ingress Connect Details
   ansible.builtin.set_fact:
     ceres_awx_ingress_connect: |-
-      AWX URL - https://{{ ceres_awx_node_fqdn }}/#/login
+      AWX URL - http://{{ ceres_awx_node_fqdn }}/#/login
       Authentication user - {{ ceres_awx_value_admin_user }}
       Authentication pass file - {{ ceres_awx_admin_pass_file }}
       Authentication pass - 

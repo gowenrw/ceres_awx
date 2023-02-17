@@ -436,7 +436,7 @@
     # Create admin token
     - name: Create the admin token for Kube Dashboard
       ansible.builtin.command:
-        cmd: "kubectl -n kubernetes-dashboard create token admin-user"
+        cmd: "kubectl -n kubernetes-dashboard create token admin-user --duration=48h"
       register: reg_k3s_kube_dashboard_token
     # Write token file
     - name: write kube dashboard token file
@@ -445,7 +445,7 @@
         owner: root
         group: root
         mode: 0400
-        content: "{{ reg_k3s_kube_dashboard_token.stdout }}"
+        content: "{{ reg_k3s_kube_dashboard_token }}"
   always:
     #
     # Dump the output of block tasks if needed for troubleshooting
@@ -455,6 +455,7 @@
         - "{{ omit if reg_kube_dashboard_version is not defined else reg_kube_dashboard_version }}"
         - "{{ omit if reg_kube_dashboard_install is not defined else reg_kube_dashboard_install }}"
         - "{{ omit if reg_kube_dashboard_deploy is not defined else reg_kube_dashboard_deploy}}"
+        - "{{ omit if reg_k3s_kube_dashboard_token is not defined else reg_k3s_kube_dashboard_token}}"
         verbosity: 1
   # Dashboard Deployment Block conditionals
   when: 

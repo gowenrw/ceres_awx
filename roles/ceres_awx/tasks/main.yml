@@ -99,7 +99,7 @@
 # Ger the admin password
 - name: Get the awx admin password
   ansible.builtin.shell:
-    cmd: "kubectl get secret {{ ceres_awx_value_resourcename }}-admin-password -o jsonpath='{.data.password}' | base64 --decode ; echo"
+    cmd: "kubectl get secret {{ ceres_awx_value_resourcename }}-admin-password -n {{ ceres_awx_oper_helm_deploy_namespace }} -o jsonpath='{.data.password}' | base64 --decode ; echo"
   register: reg_awx_admin_passwd
   when: ceres_awx_oper_install
 - name: Make sure we got it

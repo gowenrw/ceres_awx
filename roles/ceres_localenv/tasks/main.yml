@@ -284,10 +284,10 @@
 ## INSTALL ANSIBLE PKGS
 #
 # Install ansible and podman
-- name: Install ansible and podman packages
+- name: Install ansible-core and podman packages
   ansible.builtin.yum:
     name:
-      - ansible
+      - ansible-core
       - podman
     state: present
   register: reg_pkgs_ans_result

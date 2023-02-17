@@ -387,6 +387,10 @@
       ansible.builtin.file:
         path: "{{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user.yml"
         state: absent
+    - name: Remove admin user token definition file
+      ansible.builtin.file:
+        path: "{{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user-token.yml"
+        state: absent
   # Dashboard Deployment Block conditionals
   when: 
     - ceres_k3s_kube_dashboard_query.resources != None
@@ -428,6 +432,13 @@
         owner: root
         group: root
         mode: "0440"
+    - name: Dashboard admin token definition file
+      ansible.builtin.template:
+        src: "dashboard.admin-user-token.yml.j2"
+        dest: "{{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user-token.yml"
+        owner: root
+        group: root
+        mode: "0440"
     # Deploy admin user config
     - name: Deploy admin user config in Kube Dashboard
       ansible.builtin.command:
@@ -436,7 +447,15 @@
     # Create admin token
     - name: Create the admin token for Kube Dashboard
       ansible.builtin.command:
-        cmd: "kubectl -n kubernetes-dashboard create token admin-user --duration=48h"
+        # this method creates a time limited token that cannot be retrieved after creation - not ideal
+        # cmd: "kubectl -n kubernetes-dashboard create token admin-user"
+        # this method uses a token def file to create a token without time limit that can be retrieved
+        cmd: "kubectl apply -f {{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user-token.yml"
+      register: reg_k3s_kube_dashboard_token_create
+    # Get admin token
+    - name: Get the admin token
+      ansible.builtin.command:
+        cmd: "kubectl get secret/admin-user-secret -n kubernetes-dashboard -o jsonpath="{.data.token}" | base64 --decode"
       register: reg_k3s_kube_dashboard_token
     # Write token file
     - name: write kube dashboard token file
@@ -616,7 +635,7 @@
       Kubernetes Dashboard URL - https://{{ ceres_k3s_kube_dashboard_fqdn }}/#/login
       Authentication token file - {{ ceres_k3s_kube_dashboard_token_file }}
       Authentication token - 
-      {{ ceres_k3s_kube_dashboard_token['content'] | b64decode }}
+      {{ ceres_k3s_kube_dashboard_token }}
   when: 
     - ceres_k3s_kube_dashboard_install
     - ceres_k3s_nginx_ingress_install

@@ -18,6 +18,7 @@
       ceres_localenv_resize_disk: True
       ceres_localenv_resize_dev: "/dev/sda"
       ceres_localenv_pkgs_qol_install: True
+      ceres_localenv_pkgs_ansible_install: True
     when: launch_role_localenv
 
   #

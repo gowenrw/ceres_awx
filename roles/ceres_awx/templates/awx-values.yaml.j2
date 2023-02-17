@@ -7,34 +7,34 @@ AWX:
     admin_user: {{ ceres_awx_value_admin_user }}
     postgres_resource_requirements:
       requests:
-        cpu: 500m
-        memory: 1Gi
+        cpu: {{ ceres_awx_value_requirements.postgres_resource_requirements.requests.cpu }}
+        memory: {{ ceres_awx_value_requirements.postgres_resource_requirements.requests.memory }}
       limits:
-        cpu: 1000m
-        memory: 2Gi
+        cpu: {{ ceres_awx_value_requirements.postgres_resource_requirements.limits.cpu }}
+        memory: {{ ceres_awx_value_requirements.postgres_resource_requirements.limits.memory }}
     postgres_storage_requirements:
       requests:
-        storage: 2Gi
+        storage: {{ ceres_awx_value_requirements.postgres_storage_requirements.requests.storage }}
       limits:
-        storage: 5Gi
+        storage: {{ ceres_awx_value_requirements.postgres_storage_requirements.limits.storage }}
     web_resource_requirements:
       requests:
-        cpu: 250m
-        memory: 500Mi
+        cpu: {{ ceres_awx_value_requirements.web_resource_requirements.requests.cpu }}
+        memory: {{ ceres_awx_value_requirements.web_resource_requirements.requests.memory }}
       limits:
-        cpu: 750m
-        memory: 1Gi
+        cpu: {{ ceres_awx_value_requirements.web_resource_requirements.limits.cpu }}
+        memory: {{ ceres_awx_value_requirements.web_resource_requirements.limits.memory }}
     task_resource_requirements:
       requests:
-        cpu: 250m
-        memory: 500Mi
+        cpu: {{ ceres_awx_value_requirements.task_resource_requirements.requests.cpu }}
+        memory: {{ ceres_awx_value_requirements.task_resource_requirements.requests.memory }}
       limits:
-        cpu: 1000m
-        memory: 1Gi
+        cpu: {{ ceres_awx_value_requirements.task_resource_requirements.limits.cpu }}
+        memory: {{ ceres_awx_value_requirements.task_resource_requirements.limits.memory }}
     ee_resource_requirements:
       requests:
-        cpu: 250m
-        memory: 100Mi
+        cpu: {{ ceres_awx_value_requirements.ee_resource_requirements.requests.cpu }}
+        memory: {{ ceres_awx_value_requirements.ee_resource_requirements.requests.memory }}
       limits:
-        cpu: 500m
-        memory: 1Gi
+        cpu: {{ ceres_awx_value_requirements.ee_resource_requirements.limits.cpu }}
+        memory: {{ ceres_awx_value_requirements.ee_resource_requirements.limits.memory }}

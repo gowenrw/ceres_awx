@@ -2,7 +2,7 @@
 
 AWX server provisioning for local and cloud
 
-The main goal of this project is to automate provisioning of several distinct Ansible AWX configurations (which cover dev, qa, and prod use cases).
+The main goal of this project is to automate provisioning of several distinct Ansible AWX configurations (which cover dev, and use cases - maybe a prod use case in the future).
 
 A secondary goal is to automate the creation of custom Ansible execution environments for use with ansible-navigator and Ansible AWX and to encourage the use of ansible-navigator versus ansible-playbook for running jobs.
 
@@ -21,11 +21,14 @@ These are the Ansible AWX configurations this project should automate provisioni
   * The Azure landing zone (RG/VNET/Subnet/etc.) needs to be provisioned prior to these AWX automation jobs
   * An Azure AD Service Principal (SPN) account (with access to the RG) is needed by these AWX automation jobs
   * Automation will provision the Azure VM installing everything for a fully functional AWX system.
+
+In the future we will look at a production use case using these parameters:
 * PROD - AWX distributed IaaS/PaaS environment on Microsoft Azure.
+  * This job should provision a PaaS Kubernetes service, a PaaS external database, and IaaS VMs as needed.
   * The Azure resource group needs to be provisioned prior to these AWX automation jobs
     * Note that unlike QA, this automation will create its landing zone (VNET/Subnet(s)/etc.) in the RG
   * An Azure AD Service Principal (SPN) account (with access to the RG) is needed by these AWX automation jobs
-  * Automation will provision Azure resources installing everything for a fully functional AWX system.
+  * Automation will provision Azure resources installing everything for a fully functional HA AWX system.
 
 # How To Use This Project
 

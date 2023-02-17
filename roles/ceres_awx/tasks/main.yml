@@ -183,7 +183,7 @@
 #
 #
 # Remove the ingress def file if exists and no ingress
-- name: Remove the dashboard ingress def file if exists and no ingress
+- name: Remove the AWX ingress def file if exists and no ingress
   ansible.builtin.file:
     path: "{{ ceres_awx_kube_app_defs_path }}/awx-ingress.yml"
     state: absent

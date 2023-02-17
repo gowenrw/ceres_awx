@@ -19,6 +19,11 @@ ceres_awx_admin_pass:
 ## awx values
 ceres_awx_value_resourcename: awx
 ceres_awx_value_admin_user: admin
+ceres_awx_value_servicename: awx-service
 
+## awx ingress
+ceres_awx_node_fqdn:
+ceres_awx_ingress_connect:
+ceres_awx_ingress_install: True
 
 

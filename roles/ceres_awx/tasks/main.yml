@@ -126,19 +126,31 @@
   when: 
     - not reg_awx_deployed.resources | default(None)
     - ceres_awx_oper_install
-- name: Wait for awx operator to deploy awx with postgres
+- name: Wait for awx operator to deploy awx service
   kubernetes.core.k8s_info:
     api_key: "{{ ceres_awx_ansible_token }}"
-    kind: "Deployment"
+    kind: "Service"
     namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
-    name: "{{ ceres_awx_value_resourcename }}"
+    name: "{{ ceres_awx_value_servicename }}"
     wait_sleep: 15
     wait_timeout: 600
-  register: reg_oper_awx_deploy
+  register: reg_oper_awx_svc
   when: 
     - not reg_awx_deployed.resources | default(None)
     - ceres_awx_oper_install
 
+## AWX ADMIN
+#
+# Remove if ceres_awx_oper_install is False
+- name: Remove AWX Admin file
+  ansible.builtin.file:
+    path: "{{ ceres_awx_admin_pass_file }}"
+    state: absent
+  when: 
+    - reg_awx_deployed.resources != None
+    - reg_awx_deployed.resources | length >0
+    - not ceres_awx_oper_install
+#
 # Get the admin password
 - name: Get the awx admin password
   ansible.builtin.shell:
@@ -162,8 +174,74 @@
     owner: root
     group: root
     mode: 0400
-    content: "{{ ceres_awx_admin_pass }}"
+    content: "{{ ceres_awx_admin_pass.stdout }}"
   when: 
     - not reg_awx_deployed.resources | default(None)
     - ceres_awx_oper_install
+
+## AWX INGRESS
+#
+#
+# Remove the ingress def file if exists and no ingress
+- name: Remove the dashboard ingress def file if exists and no ingress
+  ansible.builtin.file:
+    path: "{{ ceres_awx_kube_app_defs_path }}/awx-ingress.yml"
+    state: absent
+  when: 
+    - not ceres_awx_oper_install or not ceres_awx_ingress_install
+# Create the ingress def file
+- name: AWX Ingress definition file
+  ansible.builtin.template:
+    src: "awx-ingress.yml.j2"
+    dest: "{{ ceres_awx_kube_app_defs_path }}/awx-ingress.yml"
+    owner: root
+    group: root
+    mode: "0440"
+  register: reg_awx_ingress_def
+  when: 
+    - ceres_awx_oper_install
+    - ceres_awx_ingress_install
+    - ceres_awx_node_fqdn is defined
+    - ceres_awx_node_fqdn | length >0
+# Create/Update awx ingress from definition
+- name: Create / Update awx ingress from definition
+  block:
+    - name: Create AWX Ingress from definition
+      ansible.builtin.command:
+        cmd: "kubectl create -f {{ ceres_awx_kube_app_defs_path }}/awx-ingress.yml --save-config"
+      register: reg_awx_ingress_create
+  rescue:
+    - name: Update AWX Ingress from definition
+      ansible.builtin.command:
+        cmd: "kubectl apply -f {{ ceres_awx_kube_app_defs_path }}/awx-ingress.yml"
+      register: reg_awx_ingress_update
+  always:
+    # Dump the output of block tasks if needed for troubleshooting
+    - name: Debug block tasks output
+      ansible.builtin.debug:
+        msg:
+        - "{{ omit if reg_awx_ingress_create is not defined else reg_awx_ingress_create }}"
+        - "{{ omit if reg_awx_ingress_update is not defined else reg_awx_ingress_update }}"
+        verbosity: 1
+  # Only run the create/update block if the definition file changed
+  when: 
+    - ceres_awx_oper_install
+    - ceres_awx_ingress_install
+    - ceres_awx_node_fqdn is defined
+    - ceres_awx_node_fqdn | length >0
+    - reg_awx_ingress_def.changed
+# Save connection info
+- name: Save AWX Ingress Connect Details
+  ansible.builtin.set_fact:
+    ceres_awx_ingress_connect: |-
+      AWX URL - https://{{ ceres_awx_node_fqdn }}/#/login
+      Authentication user - {{ ceres_awx_value_admin_user }}
+      Authentication pass file - {{ ceres_awx_admin_pass_file }}
+      Authentication pass - 
+      {{ ceres_awx_admin_pass.stdout }}
+  when: 
+    - ceres_awx_oper_install
+    - ceres_awx_ingress_install
+    - ceres_awx_node_fqdn is defined
+    - ceres_awx_node_fqdn | length >0
 

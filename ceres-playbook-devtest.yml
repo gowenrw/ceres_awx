@@ -52,3 +52,9 @@
       msg: "{{ ceres_k3s_dashboard_ingress_connect.split('\n') }}"
       verbosity: 0
     when: ceres_k3s_dashboard_ingress_connect is defined
+  - name: AWX Ingress Connection Info
+    debug:
+      msg: "{{ ceres_awx_ingress_connect.split('\n') }}"
+      verbosity: 0
+    when: ceres_awx_ingress_connect is defined
+

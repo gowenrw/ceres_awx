@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: {{ ceres_awx_oper_helm_deploy_namespace }}
+  name: {{ ceres_awx_value_resourcename }}-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    # Uncomment next if you use https://cert-manager.io/
+    #cert-manager.io/cluster-issuer: "<YOUR CLUSTER ISSUER>"
+spec:
+  tls:
+  - hosts:
+    - {{ ceres_awx_node_fqdn }}
+    secretName: {{ ceres_awx_value_resourcename }}-cert   # if doesnt exist will create self-signed certs
+  rules:
+  - host: {{ ceres_awx_node_fqdn }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ ceres_awx_value_resourcename }}
+            port:
+              number: 80

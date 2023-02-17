@@ -36,6 +36,22 @@
     var: ceres_awx_ansible_token
     verbosity: 1
 
+#
+# Check if awx is already deployed
+- name: Query k3s to see if awx deployment exists
+  kubernetes.core.k8s_info:
+    api_key: "{{ ceres_awx_ansible_token }}"
+    kind: "Deployment"
+    namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
+    name: "{{ ceres_awx_value_resourcename }}"
+  register: reg_awx_deployed
+#
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: reg_awx_deployed
+    verbosity: 1
+
 ## AWX Values File
 #
 # Remove if ceres_awx_oper_install is False
@@ -43,7 +59,10 @@
   ansible.builtin.file:
     path: "{{ ceres_awx_kube_app_defs_path }}/awx-values.yaml"
     state: absent
-  when: not ceres_awx_oper_install
+  when: 
+    - reg_awx_deployed.resources != None
+    - reg_awx_deployed.resources | length >0
+    - not ceres_awx_oper_install
 #
 # Add if ceres_awx_oper_install is True
 - name: Add AWX Values definition file
@@ -53,14 +72,18 @@
     owner: root
     group: root
     mode: "0440"
-  when: ceres_awx_oper_install
+  when: 
+    - not reg_awx_deployed.resources | default(None)
+    - ceres_awx_oper_install
 
 ## Add helm repo for awx operator
 - name: Add awx operator helm repository
   kubernetes.core.helm_repository:
     name: "{{ ceres_awx_oper_helm_repo_name }}"
     repo_url: "{{ ceres_awx_oper_helm_repo_url }}"
-  when: ceres_awx_oper_install
+  when: 
+    - not reg_awx_deployed.resources | default(None)
+    - ceres_awx_oper_install
 
 ## AWX OPERATOR
 #
@@ -72,14 +95,20 @@
     release_state: absent
     release_namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
     wait: True
-  when: not ceres_awx_oper_install
+  when: 
+    - reg_awx_deployed.resources != None
+    - reg_awx_deployed.resources | length >0
+    - not ceres_awx_oper_install
 - name: Remove awx namespace
   kubernetes.core.k8s:
     api_key: "{{ ceres_awx_ansible_token }}"
     kind: Namespace
     state: absent
     name: "{{ ceres_awx_oper_helm_deploy_namespace }}"
-  when: not ceres_awx_oper_install
+  when: 
+    - reg_awx_deployed.resources != None
+    - reg_awx_deployed.resources | length >0
+    - not ceres_awx_oper_install
 #
 # Add if ceres_awx_oper_install is True
 - name: Use helm to deploy awx operator inside awx namespace (create namespace if needed)
@@ -92,18 +121,49 @@
     release_state: present
     release_namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
     create_namespace: True
-    update_repo_cache: True
+    update_repo_cache: Truereg_awx_deployed
     wait: True
-  when: ceres_awx_oper_install
+  when: 
+    - not reg_awx_deployed.resources | default(None)
+    - ceres_awx_oper_install
+- name: Wait for awx operator to deploy awx with postgres
+  kubernetes.core.k8s_info:
+    api_key: "{{ ceres_awx_ansible_token }}"
+    kind: "Deployment"
+    namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
+    name: "{{ ceres_awx_value_resourcename }}"
+    wait_sleep: 15
+    wait_timeout: 600
+  register: reg_oper_awx_deploy
+  when: 
+    - not reg_awx_deployed.resources | default(None)
+    - ceres_awx_oper_install
 
-# Ger the admin password
+# Get the admin password
 - name: Get the awx admin password
   ansible.builtin.shell:
     cmd: "kubectl get secret {{ ceres_awx_value_resourcename }}-admin-password -n {{ ceres_awx_oper_helm_deploy_namespace }} -o jsonpath='{.data.password}' | base64 --decode ; echo"
-  register: reg_awx_admin_passwd
-  when: ceres_awx_oper_install
-- name: Make sure we got it
+  register: ceres_awx_admin_pass
+  when: 
+    - not reg_awx_deployed.resources | default(None)
+    - ceres_awx_oper_install
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
   ansible.builtin.debug:
-    var: reg_awx_admin_passwd
-    verbosity: 0
-  when: ceres_awx_oper_install
+    var: ceres_awx_admin_pass
+    verbosity: 1
+  when: 
+    - not reg_awx_deployed.resources | default(None)
+    - ceres_awx_oper_install
+# Write to file
+- name: write admin file
+  ansible.builtin.copy:
+    dest: "{{ ceres_awx_admin_pass_file }}"
+    owner: root
+    group: root
+    mode: 0400
+    content: "{{ ceres_awx_admin_pass }}"
+  when: 
+    - not reg_awx_deployed.resources | default(None)
+    - ceres_awx_oper_install
+

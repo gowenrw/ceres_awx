@@ -13,6 +13,8 @@ ceres_awx_oper_install: True  # If set to False will uninstall awx
 ceres_awx_kube_app_defs_path: /root/kube_app_defs
 ceres_awx_ansible_token_file: /etc/rancher/k3s/ansible-node-token
 ceres_awx_ansible_token:
+ceres_awx_admin_pass_file: /etc/rancher/k3s/awx-admin-pass
+ceres_awx_admin_pass:
 
 ## awx values
 ceres_awx_value_resourcename: awx

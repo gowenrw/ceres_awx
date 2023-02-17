@@ -639,7 +639,6 @@
   ansible.builtin.set_fact:
     ceres_k3s_dashboard_ingress_connect: |-
       Kubernetes Dashboard URL - https://{{ ceres_k3s_kube_dashboard_fqdn }}/#/login
-      Authentication token file - {{ ceres_k3s_kube_dashboard_token_file }}
       Authentication token - 
       {{ ceres_k3s_kube_dashboard_token }}
   when: 

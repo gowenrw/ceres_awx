@@ -44,6 +44,7 @@
       ceres_awx_node_ip_address: "{{ omit if ceres_k3s_node_ip_address is not defined else ceres_k3s_node_ip_address }}"
       ceres_awx_node_fqdn: "{{ omit if ceres_k3s_node_fqdn is not defined else ceres_k3s_node_fqdn }}"
       ceres_awx_oper_install: True
+      ceres_awx_ingress_install: True
     when: launch_role_awx
 
 

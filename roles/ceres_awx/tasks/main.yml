@@ -37,6 +37,15 @@
     verbosity: 1
 
 ## AWX Values File
+#
+# Remove if ceres_awx_oper_install is False
+- name: Remove AWX Values definition file
+  ansible.builtin.file:
+    path: "{{ ceres_awx_kube_app_defs_path }}/awx-values.yaml"
+    state: absent
+  when: not ceres_awx_oper_install
+#
+# Add if ceres_awx_oper_install is True
 - name: Add AWX Values definition file
   ansible.builtin.template:
     src: "awx-values.yaml.j2"
@@ -45,21 +54,34 @@
     group: root
     mode: "0440"
   when: ceres_awx_oper_install
-- name: Remove AWX Values definition file
-  ansible.builtin.file:
-    path: "{{ ceres_awx_kube_app_defs_path }}/awx-values.yaml"
-    state: absent
-  when: not ceres_awx_oper_install
 
 ## Add helm repo for awx operator
-#
 - name: Add awx operator helm repository
   kubernetes.core.helm_repository:
     name: "{{ ceres_awx_oper_helm_repo_name }}"
     repo_url: "{{ ceres_awx_oper_helm_repo_url }}"
   when: ceres_awx_oper_install
 
-# Deploy awx operator
+## AWX OPERATOR
+#
+# Remove if ceres_awx_oper_install is False
+- name: Use helm to delete awx operator
+  kubernetes.core.helm:
+    api_key: "{{ ceres_awx_ansible_token }}"
+    name: "{{ ceres_awx_oper_helm_deploy_name }}"
+    release_state: absent
+    release_namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
+    wait: True
+  when: not ceres_awx_oper_install
+- name: Remove awx namespace
+  kubernetes.core.k8s:
+    api_key: "{{ ceres_awx_ansible_token }}"
+    kind: Namespace
+    state: absent
+    name: "{{ ceres_awx_oper_helm_deploy_namespace }}"
+  when: not ceres_awx_oper_install
+#
+# Add if ceres_awx_oper_install is True
 - name: Use helm to deploy awx operator inside awx namespace (create namespace if needed)
   kubernetes.core.helm:
     api_key: "{{ ceres_awx_ansible_token }}"
@@ -76,10 +98,12 @@
 
 # Ger the admin password
 - name: Get the awx admin password
-  ansible.builtin.command:
+  ansible.builtin.shell:
     cmd: "kubectl get secret {{ ceres_awx_value_resourcename }}-admin-password -o jsonpath='{.data.password}' | base64 --decode ; echo"
   register: reg_awx_admin_passwd
+  when: ceres_awx_oper_install
 - name: Make sure we got it
   ansible.builtin.debug:
     var: reg_awx_admin_passwd
     verbosity: 0
+  when: ceres_awx_oper_install

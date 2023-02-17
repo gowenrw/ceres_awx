@@ -121,7 +121,7 @@
     release_state: present
     release_namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
     create_namespace: True
-    update_repo_cache: Truereg_awx_deployed
+    update_repo_cache: True
     wait: True
   when: 
     - not reg_awx_deployed.resources | default(None)

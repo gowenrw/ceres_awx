@@ -464,7 +464,7 @@
         owner: root
         group: root
         mode: 0400
-        content: "{{ reg_k3s_kube_dashboard_token }}"
+        content: "{{ reg_k3s_kube_dashboard_token.stdout }}"
   always:
     #
     # Dump the output of block tasks if needed for troubleshooting
@@ -481,11 +481,17 @@
     - not ceres_k3s_kube_dashboard_query.resources | default(None) or ceres_k3s_kube_dashboard_reinstall
     - ceres_k3s_kube_dashboard_install
 #
-# Register dashboard token from file
+# Get dashboard token contents from file
 - name: lookup kube dashboard token
   ansible.builtin.slurp:
     src: "{{ ceres_k3s_kube_dashboard_token_file }}"
-  register: ceres_k3s_kube_dashboard_token
+  register: reg_slurp_k3s_kube_dashboard_token
+  when: 
+    - ceres_k3s_kube_dashboard_install
+# Decode token contents for ansible use
+- name: set fact for kube dashboard token
+  ansible.builtin.set_fact:
+    ceres_k3s_kube_dashboard_token: "{{ reg_slurp_k3s_kube_dashboard_token['content'] | b64decode }}"
   when: 
     - ceres_k3s_kube_dashboard_install
 

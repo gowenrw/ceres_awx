@@ -9,7 +9,6 @@ This was written to be run from ansible core using ```ansible-playbook``` and no
 These are the configuration files
 * [config-ee.yml](./config-ee.yml)
   * This is the main config file that calls the other two
-  * The only thing you should need to change here is incrementing the version number
 * [config-ee-galaxy-requirements.yml](./config-ee-galaxy-requirements.yml)
   * This is the list of ansible collections to install in the ee
   * Python modules required by these collections will also be installed

@@ -29,6 +29,11 @@
           async: 1200
           poll: 15
           register: reg_buildee_result
+        - name: Tag the new EE build with latest
+          ansible.builtin.shell:
+            chdir: "{{ ee_dir }}"
+            cmd: "podman tag {{ ee_name }}:{{ ee_version }} {{ ee_name }}:latest"
+          register: reg_tagee_result
       always:
         # Make sure we prune all the temp images even in a failure
         - name: Prune unused images
@@ -40,6 +45,11 @@
             var: reg_buildee_result
             # Change this to 1 to suppress output without -v
             verbosity: 0
+        # Debug tag latest results
+        - name: "Debug tag latest results"
+          ansible.builtin.debug:
+            var: reg_tagee_result
+            verbosity: 1
 
     - name: Publish the ee image to a container registry
       ansible.builtin.shell:

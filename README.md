@@ -176,7 +176,7 @@ If you plan to use ansible-playbook to run the playbooks in this project then yo
 If you plan to use ansible-navigator to run the playbooks in this project then you just need to [build your execution environment using the scripts provided](#ansible-execution-environments) which this config file references.
 
 This config file set up ansible-navigator to:
-* Use the local execution environment image named ```my-creator-ee:1``` using podman to pull it
+* Use the local execution environment image named ```cloud-creator-awx-ee:1``` using podman to pull it
 * Use a local log file named ```_ansible-navigator.log``` for troubleshooting
 * Disable the creation of playbook artifact files
 * Set the mode to ```stdout`` instead of the default of interactive

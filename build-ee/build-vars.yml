@@ -1,6 +1,6 @@
 ---
 # Variable for build-ee playbook
-ee_name: my-creator-ee
+ee_name: cloud-creator-awx-ee
 ee_dir: "~/ee/{{ ee_name }}"
 ee_version: 1
 ee_publish: false

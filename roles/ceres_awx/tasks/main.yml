@@ -126,7 +126,7 @@
   when: 
     - not reg_awx_deployed.resources | default(None)
     - ceres_awx_oper_install
-- name: Wait for awx operator to deploy awx service
+- name: Wait for awx service
   kubernetes.core.k8s_info:
     api_key: "{{ ceres_awx_ansible_token }}"
     kind: "Service"
@@ -138,7 +138,19 @@
   when: 
     - not reg_awx_deployed.resources | default(None)
     - ceres_awx_oper_install
-- name: Pause for a few seconds to make sure the service setup finishes
+#- name: Wait for awx deployment
+#  kubernetes.core.k8s_info:
+#    api_key: "{{ ceres_awx_ansible_token }}"
+#    kind: "Deployment"
+#    namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
+#    name: "{{ ceres_awx_oper_helm_deploy_name }}"
+#    wait_sleep: 15
+#    wait_timeout: 600
+#  register: reg_oper_awx_dpl
+#  when: 
+#    - not reg_awx_deployed.resources | default(None)
+#    - ceres_awx_oper_install
+- name: Pause for a few seconds to make sure the deployment setup finished
   ansible.builtin.pause:
     seconds: 20
   when: 
@@ -237,7 +249,7 @@
 - name: Save AWX Ingress Connect Details
   ansible.builtin.set_fact:
     ceres_awx_ingress_connect: |-
-      AWX URL - http://{{ ceres_awx_node_fqdn }}/#/login
+      AWX URL - https://{{ ceres_awx_node_fqdn }}/#/login
       Authentication user - {{ ceres_awx_value_admin_user }}
       Authentication pass file - {{ ceres_awx_admin_pass_file }}
       Authentication pass - 

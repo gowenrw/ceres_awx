@@ -18,6 +18,7 @@ ansible-navigator:
     pull:
       arguments:
         - "--tls-verify=false"
+      policy: missing
   logging:
     level: info
     append: False

@@ -50,8 +50,29 @@
           ansible.builtin.debug:
             var: reg_tagee_result
             verbosity: 1
-
-    - name: Publish the ee image to a container registry
-      ansible.builtin.shell:
-        cmd: "podman push localhost/{{ ee_name }}:{{ ee_version }} docker://{{ ee_publish_fqdn }}/{{ ee_name }}:{{ ee_version }}"
+    - name: EE Build Block
+      block:
+        - name: Publish the ee image to a container registry
+          ansible.builtin.shell:
+            cmd: "podman push localhost/{{ ee_name }} docker://{{ ee_publush_url }}/{{ ee_name }}"
+          register: reg_publish_results
+      resuce:
+        # Debug Failure Results
+        - name: "Debug failure results"
+          ansible.builtin.debug:
+            var: reg_publish_results
+            verbosity: 0
+        # Print user friendly failure message
+        - name: Publish Failure Message
+          ansible.builtin.debug:
+            msg:
+              - "PUBLISH FAILED"
+              - "This is usually because of lack of permissions to the container registry"
+              - ""
+              - "You may need to log into your registry.  For docker hub that would look like this:"
+              - "podman login -u <docker-username> -p <docker-passwd-or-token> docker.io/<docker-username>"
+              - ""
+              - "Once you have logged in or provided other credentials you can try to publish again using this:"
+              - "podman push localhost/{{ ee_name }} docker://{{ ee_publush_url }}/{{ ee_name }}"
+            verbosity: 0
       when: ee_publish

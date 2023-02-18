@@ -4,6 +4,13 @@ A quick and dirty ansible playbook and artifacts to build a local execution envi
 
 This was written to be run from ansible core using ```ansible-playbook``` and not navigator.
 
+Note that building your own execution enviornment is optional in case you wish to tweak the contents.
+
+For the AWX playbooks here you can simply pull the pre-built ee from docker hub with this command:
+```
+podman pull docker.io/altbier/cloud-creator-awx-ee:latest
+```
+
 ## Configuring
 
 These are the configuration files

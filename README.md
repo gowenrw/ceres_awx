@@ -43,7 +43,12 @@ I use a Windows host with a linux vm for my Ansible control node.  You can see [
 This includes details about the [ansible.cfg](./ansible.cfg) file and [ansible-navigator.yml](./ansible-navigator.yml) file provided here and what they do.
 
 This project has been optimized for use with ```ansible-navigator``` to execute the Ansible playbooks for provisioning AWX.
-If you plan to use ```ansible-navigator``` then you need to [build your local execution environment using the scripts provided](#ansible-execution-environments).
+
+If you plan to use ```ansible-navigator``` then you need to either [build your local execution environment using the scripts provided](#ansible-execution-environments) or pull down the pre-built execution environment using the following command.
+```
+podman pull docker.io/altbier/cloud-creator-awx-ee:latest
+```
+
 If you plan to use ```ansible-playbook``` then you need to add the collections and python modules to your local environment, and you will need to adjust the example code provided as needed.
 
 ## Inventory File
@@ -173,10 +178,13 @@ The ansible-navigator config file ```ansible-navigator.yml``` included with this
 
 If you plan to use ansible-playbook to run the playbooks in this project then you will need to install the required galaxy collections and configure your python virtual environment with all the modules required by those collections.
 
-If you plan to use ansible-navigator to run the playbooks in this project then you just need to [build your execution environment using the scripts provided](#ansible-execution-environments) which this config file references.
+If you plan to use ```ansible-navigator``` to run the playbooks in this project then you need to either [build your local execution environment using the scripts provided](#ansible-execution-environments) or pull down the pre-built execution environment using the following command.
+```
+podman pull docker.io/altbier/cloud-creator-awx-ee:latest
+```
 
 This config file set up ansible-navigator to:
-* Use the local execution environment image named ```cloud-creator-awx-ee:1``` using podman to pull it
+* Use the local execution environment image named ```cloud-creator-awx-ee:latest``` using podman to pull it
 * Use a local log file named ```_ansible-navigator.log``` for troubleshooting
 * Disable the creation of playbook artifact files
 * Set the mode to ```stdout`` instead of the default of interactive
@@ -195,3 +203,24 @@ To allow for the easy creation of local custom execution environments I created 
 
 The [build-ee](./build-ee/) config files have been set to include all the [galaxy collections and thier required python modules](./build-ee/config-ee-galaxy-requirements.yml) as well as some [additional python modules](./build-ee/config-ee-python-requirements.txt) that exist in the default ```creator-ee``` image along with the additional requirements for this project.
 
+Note that building your own execution enviornment is optional in case you wish to tweak the contents.
+
+For the AWX playbooks here you can simply pull the pre-built ee from docker hub with this command:
+```
+podman pull docker.io/altbier/cloud-creator-awx-ee:latest
+```
+
+Here are the ansible-galaxy collections (and their python requirements) included in this EE
+```
+collections:
+  - name: ansible.posix
+  - name: ansible.windows
+  - name: ansible.utils
+  - name: awx.awx
+  - name: containers.podman
+  - name: kubernetes.core
+  - name: theforeman.foreman
+  - name: community.general
+  - name: azure.azcollection
+  - name: amazon.aws
+```

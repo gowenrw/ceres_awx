@@ -157,7 +157,6 @@
     cmd: "kubectl get secret {{ ceres_awx_value_resourcename }}-admin-password -n {{ ceres_awx_oper_helm_deploy_namespace }} -o jsonpath='{.data.password}' | base64 --decode ; echo"
   register: ceres_awx_admin_pass
   when: 
-    - not reg_awx_deployed.resources | default(None)
     - ceres_awx_oper_install
 # Dump the output of previous task if needed for troubleshooting
 - name: "Debug task output"
@@ -165,7 +164,6 @@
     var: ceres_awx_admin_pass
     verbosity: 1
   when: 
-    - not reg_awx_deployed.resources | default(None)
     - ceres_awx_oper_install
 # Write to file
 - name: write admin file
@@ -176,7 +174,6 @@
     mode: 0400
     content: "{{ ceres_awx_admin_pass.stdout }}"
   when: 
-    - not reg_awx_deployed.resources | default(None)
     - ceres_awx_oper_install
 
 ## AWX INGRESS

@@ -16,7 +16,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: {{ ceres_awx_value_resourcename }}-service
+            name: {{ ceres_awx_value_servicename }}
             port:
               number: 80
   tls:

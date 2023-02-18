@@ -2,7 +2,8 @@
 # ANSIBLE-NAVIGATOR PROJECT CONFIG
 #
 # This will change the navigator defaults to:
-# * Change default execution environment 'cloud-creator-awx-ee:latest' (see ./build-ee/README.md)
+# * Change default execution environment 'docker.io/altbier/cloud-creator-awx-ee:latest' 
+#   * To use a locally built EE change this value to '<your-image-name>:<version>' (see ./build-ee/README.md)
 # * Change default log level to info (from critical)
 # * Change default mode to stdout (from interactive)
 # * Change default playbook artifact creation to false (from true)
@@ -13,7 +14,7 @@
 ansible-navigator:
   execution-environment:
     container-engine: podman
-    image: cloud-creator-awx-ee:latest
+    image: docker.io/altbier/cloud-creator-awx-ee:latest
     pull:
       arguments:
         - "--tls-verify=false"

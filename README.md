@@ -48,6 +48,7 @@ If you plan to use ```ansible-navigator``` then you need to either [build your l
 ```
 podman pull docker.io/altbier/cloud-creator-awx-ee:latest
 ```
+Note that ansible-navigator will pull this image for you the first time it is run unless you changed its configuration file.
 
 If you plan to use ```ansible-playbook``` then you need to add the collections and python modules to your local environment, and you will need to adjust the example code provided as needed.
 
@@ -182,6 +183,7 @@ If you plan to use ```ansible-navigator``` to run the playbooks in this project 
 ```
 podman pull docker.io/altbier/cloud-creator-awx-ee:latest
 ```
+Note that ansible-navigator will pull this image for you the first time it is run unless you changed its configuration file.
 
 This config file set up ansible-navigator to:
 * Use the local execution environment image named ```cloud-creator-awx-ee:latest``` using podman to pull it
@@ -209,6 +211,7 @@ For the AWX playbooks here you can simply pull the pre-built ee from docker hub 
 ```
 podman pull docker.io/altbier/cloud-creator-awx-ee:latest
 ```
+Note that ansible-navigator will pull this image for you the first time it is run unless you changed its configuration file.
 
 Here are the ansible-galaxy collections (and their python requirements) included in this EE
 ```

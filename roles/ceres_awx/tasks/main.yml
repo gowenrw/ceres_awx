@@ -138,6 +138,12 @@
   when: 
     - not reg_awx_deployed.resources | default(None)
     - ceres_awx_oper_install
+- name: Pause for a few seconds to make sure the service setup finishes
+  ansible.builtin.pause:
+    seconds: 20
+  when: 
+    - not reg_awx_deployed.resources | default(None)
+    - ceres_awx_oper_install
 
 ## AWX ADMIN
 #

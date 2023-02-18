@@ -8,6 +8,8 @@
 # Some box images have small disks so the plugin vagrant-disksize resizes them
 # Note that resizing the disk does not resize the partition on that disk, use parted
 #
+# Find centos stream image links here:
+# https://cloud.centos.org/centos/9-stream/x86_64/images/?C=M;O=D
 
 #
 # Define box variables here

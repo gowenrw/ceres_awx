@@ -5,15 +5,15 @@ metadata:
   name: {{ ceres_awx_value_resourcename }}-ingress
   annotations:
     kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-    #nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    #
+    # nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    # nginx.ingress.kubernetes.io/ssl-passthrough: "true"
     # Uncomment next if you use https://cert-manager.io/
-    #cert-manager.io/cluster-issuer: "<YOUR CLUSTER ISSUER>"
+    # cert-manager.io/cluster-issuer: "<YOUR CLUSTER ISSUER>"
 spec:
-  #tls:
-  #- hosts:
-  #  - {{ ceres_awx_node_fqdn }}
-  #  secretName: {{ ceres_awx_value_resourcename }}-cert   # if doesnt exist will create self-signed certs
+  ingressClassName: nginx
   rules:
   - host: {{ ceres_awx_node_fqdn }}
     http:
@@ -22,6 +22,10 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: {{ ceres_awx_value_resourcename }}
+            name: {{ ceres_awx_value_resourcename }}-service
             port:
               number: 80
+  tls:
+  - hosts:
+    - {{ ceres_awx_node_fqdn }}
+    secretName: {{ ceres_awx_value_resourcename }}-cert   # if doesnt exist will create self-signed certs

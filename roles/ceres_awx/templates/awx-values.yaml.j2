@@ -5,11 +5,6 @@ AWX:
   name: {{ ceres_awx_value_resourcename }}
   spec:
     admin_user: {{ ceres_awx_value_admin_user }}
-    ingress_type: ingress
-    ingress_class_name: "nginx"
-    ingress_path: /
-    ingress_path_type: Prefix
-    hostname: {{ ceres_awx_node_fqdn }}
     postgres_resource_requirements:
       requests:
         cpu: {{ ceres_awx_value_requirements.postgres_resource_requirements.requests.cpu }}

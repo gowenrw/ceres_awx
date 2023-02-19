@@ -138,10 +138,10 @@
         wait_sleep: 15
         wait_timeout: 600
       register: reg_oper_awx_depl
-    # Sometime awx is not quite ready for ingress for a few seconds
-    - name: Pause for a bit to let k3s catch up
+    # AWX needs time to set up things before it is ready
+    - name: Pause for a bit to let k3s and awx catch up before doing anything else
       ansible.builtin.pause:
-        seconds: 30
+        seconds: 90
   always:
     # Dump the output of block tasks if needed for troubleshooting
     - name: "Debug block tasks output"

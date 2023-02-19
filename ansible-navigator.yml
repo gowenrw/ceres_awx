@@ -2,11 +2,12 @@
 # ANSIBLE-NAVIGATOR PROJECT CONFIG
 #
 # This will change the navigator defaults to:
-# * Change default execution environment 'docker.io/altbier/cloud-creator-awx-ee:latest' 
+# * Changed default execution environment 'docker.io/altbier/cloud-creator-awx-ee:latest' 
 #   * To use a locally built EE change this value to '<your-image-name>:<version>' (see ./build-ee/README.md)
-# * Change default log level to info (from critical)
-# * Change default mode to stdout (from interactive)
-# * Change default playbook artifact creation to false (from true)
+# * Changed default pull policy to 'missing' (i.e., only pull if not locally available)
+# * Changed default log level to info (from critical)
+# * Changed default mode to stdout (from interactive)
+# * Changed default playbook artifact creation to false (from true)
 #
 # This should simplify the running of playbooks removing the need for many cli options
 # e.g., ansible-navigator run ceres-playbook.yml

@@ -1,0 +1,65 @@
+---
+- name: QA Test Playbook
+  hosts: ceresazure
+  become: true
+
+  vars:
+    launch_role_localenv: True
+    launch_role_k3s: True
+    launch_role_awx: True
+
+  tasks:
+  # 
+  # Call role ceres_localenv to resize root partition on vm for DEV AWX
+  - name: Import role ceres_localenv
+    ansible.builtin.import_role:
+      name: ceres_localenv
+    vars:
+      ceres_localenv_resize_disk: False
+      ceres_localenv_pkgs_qol_install: True
+      ceres_localenv_pkgs_ansible_install: False
+    when: launch_role_localenv
+
+  #
+  # Call role ceres_k3s to install k3s varient of Kubernetes on vm for DEV AWX
+  - name: Import role ceres_k3s
+    ansible.builtin.import_role:
+      name: ceres_k3s
+    vars:
+      ceres_k3s_installer_version: "v1.25.6+k3s1"
+      ceres_k3s_installer_channel: "stable"
+      ceres_k3s_exec_role: "server"
+      ceres_k3s_kube_dashboard_install: True
+      ceres_k3s_nginx_ingress_install: True
+    when: launch_role_k3s
+
+  #
+  # Call role ceres_awx to install awx on vm for DEV AWX
+  - name: Import role ceres_awx
+    ansible.builtin.import_role:
+      name: ceres_awx
+    vars:
+      ceres_awx_ansible_token: "{{ omit if ceres_k3s_ansible_token is not defined else ceres_k3s_ansible_token }}"
+      ceres_awx_node_ip_address: "{{ omit if ceres_k3s_node_ip_address is not defined else ceres_k3s_node_ip_address }}"
+      ceres_awx_node_fqdn: "{{ omit if ceres_k3s_node_fqdn is not defined else ceres_k3s_node_fqdn }}"
+      ceres_awx_oper_install: True
+      ceres_awx_ingress_install: True
+    when: launch_role_awx
+
+
+  # Print final status messages
+  - name: Dashboard Ingress Connection Info
+    debug:
+      msg: "{{ ceres_k3s_dashboard_ingress_connect.split('\n') }}"
+      verbosity: 0
+    when: 
+      - ceres_k3s_dashboard_ingress_connect is defined
+      - ceres_k3s_dashboard_ingress_connect != None
+  - name: AWX Ingress Connection Info
+    debug:
+      msg: "{{ ceres_awx_ingress_connect.split('\n') }}"
+      verbosity: 0
+    when: 
+      - ceres_awx_ingress_connect is defined
+      - ceres_awx_ingress_connect != None
+

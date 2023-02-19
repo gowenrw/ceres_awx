@@ -38,14 +38,21 @@ ansible_python_interpreter=/usr/bin/python3
 
 # Azure server details
 # resource group: ceres-rg
-# "hardwareProfile":
-#    "vmSize": "Standard_A4_v2" (4 vCPUs, 8 GiB Memory)
-# "imageReference":
-#    "publisher": "canonical",
-#    "offer": "0001-com-ubuntu-server-focal", (Ubuntu Server 20.04 From Marketplace)
-#    "sku": "20_04-lts"
-# Set up an SSH key pair and used a basic dynamic public IP tied to a DNS name
+# SKU = B2ms = 2 vCPUs, 8 GiB Memory
+# "hardwareProfile": 
+#    "vmSize": "Standard_B2ms"
+# OS IMAGE = RHEL 9 latest with LVM
+#  "imageReference": { 
+#      "publisher": "RedHat",
+#      "offer": "RHEL",
+#      "sku": "9-lvm-gen2",
+#      "version": "latest",
+#      "exactVersion": "9.1.2022112101"
+#  },
+#
+# Set up an SSH key pair and used a basic public IP tied to a DNS name
 # Opened inbound NSG rules for my home IP to access it using port 22
 # Update the details below with your server DNS name and key file location
+#
 [ceresazure]
-ceres-az ansible_host=ceres-az.awx.yourcloud.ninja ansible_ssh_user=azureuser ansible_ssh_private_key_file=./ssh.ceres.az_key.pem
+ceres-az1 ansible_host=ceres-az1.awx.yourcloud.ninja ceres_k3s_kube_dashboard_fqdn=ceres-az1.k3s.yourcloud.ninja ansible_ssh_user=azureuser ansible_ssh_private_key_file=./ssh.ceres.az_key.pem

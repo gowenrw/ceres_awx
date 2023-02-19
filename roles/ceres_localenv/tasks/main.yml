@@ -219,7 +219,6 @@
     group: root
     mode: "0444"
   when: 
-    - ansible_distribution == 'CentOS'
     - ceres_localenv_custom_color_prompt
 
 ## INSTALL PUTTY PKG FROM SOURCE
@@ -293,7 +292,6 @@
   register: reg_pkgs_ans_result
   when: 
     - ceres_localenv_pkgs_ansible_install
-    - ansible_distribution == 'CentOS'
 #
 # Dump the output of previous task if needed for troubleshooting
 - name: "Debug task output"
@@ -308,7 +306,6 @@
   register: reg_pkgs_ansn_result
   when: 
     - ceres_localenv_pkgs_ansible_install
-    - ansible_distribution == 'CentOS'
 #
 # Dump the output of previous task if needed for troubleshooting
 - name: "Debug task output"

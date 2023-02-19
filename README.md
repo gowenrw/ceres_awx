@@ -18,9 +18,12 @@ These are the Ansible AWX configurations this project should automate provisioni
   * Will be tested with Virtualbox as the local hypervisor using Vagrant for local VM provisioning
   * Automation will install everything for a fully functional AWX system on that local VM.
 * QA - AWX in a single IaaS VM on Microsoft Azure.
-  * The Azure landing zone (RG/VNET/Subnet/etc.) needs to be provisioned prior to these AWX automation jobs
-  * An Azure AD Service Principal (SPN) account (with access to the RG) is needed by these AWX automation jobs
-  * Automation will provision the Azure VM installing everything for a fully functional AWX system.
+  * Phase one will automate against a manually provisioned VM in Azure similar to the dev jobs
+  * Phase two will automate the provisioning of the AWX VM in an existing azure network
+  * Phase three will automate the provisioning of the AWX VM and its network landing zone in azure
+  * Azure details will need to be provided for these automation jobs
+  * An Azure AD Service Principal (SPN) account (with contributor access to a RG) will be needed
+  * Automation will install everything for a fully functional AWX system as per the phases above.
 
 In the future we will look at a production use case using these parameters:
 * PROD - AWX distributed IaaS/PaaS environment on Microsoft Azure.

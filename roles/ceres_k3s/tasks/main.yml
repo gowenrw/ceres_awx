@@ -98,28 +98,31 @@
 
 ## Install required packages
 #
-# Install yum packages
-- name: Install required packages via yum
-  ansible.builtin.yum:
-    name:
-      - bzip2
-      - python3-pip
-    state: present
-  register: reg_k3s_yumpkg_result
-#
-# Install pip packages
-- name: Install required packages via pip
-  ansible.builtin.pip:
-    name: kubernetes
-  register: reg_k3s_pippkg_result
-#
-# Dump the output of previous tasks if needed for troubleshooting
-- name: "Debug task output"
-  ansible.builtin.debug:
-    msg: 
-      - "{{ omit if reg_k3s_yumpkg_result is not defined else reg_k3s_yumpkg_result }}"
-      - "{{ omit if reg_k3s_pippkg_result is not defined else reg_k3s_pippkg_result }}"
-    verbosity: 1
+- name: Package Install Block
+  block:
+    # Install yum packages
+    - name: Install required packages via yum
+      ansible.builtin.yum:
+        name:
+          - bzip2
+          - python3-pip
+        state: present
+      register: reg_k3s_yumpkg_result
+    #
+    # Install pip packages
+    - name: Install required packages via pip
+      ansible.builtin.pip:
+        name: "{{ ceres_k3s_python_client }}"
+      register: reg_k3s_pippkg_result
+  always:
+    #
+    # Dump the output of previous tasks if needed for troubleshooting
+    - name: "Debug task output"
+      ansible.builtin.debug:
+        msg: 
+          - "{{ omit if reg_k3s_yumpkg_result is not defined else reg_k3s_yumpkg_result }}"
+          - "{{ omit if reg_k3s_pippkg_result is not defined else reg_k3s_pippkg_result }}"
+        verbosity: 1
 
 ## Set Node IP and FQDN
 #

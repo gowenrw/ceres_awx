@@ -29,6 +29,7 @@
       ceres_k3s_installer_version: "v1.25.6+k3s1"
       ceres_k3s_installer_channel: "stable"
       ceres_k3s_exec_role: "server"
+      ceres_k3s_python_client: "kubernetes==25.3.0"
       ceres_k3s_kube_dashboard_install: True
       ceres_k3s_nginx_ingress_install: True
     when: launch_role_k3s

@@ -17,7 +17,7 @@
     vars:
       ceres_localenv_resize_disk: False
       ceres_localenv_pkgs_qol_install: True
-      ceres_localenv_pkgs_ansible_install: False
+      ceres_localenv_pkgs_ansible_install: True
     when: launch_role_localenv
 
   #

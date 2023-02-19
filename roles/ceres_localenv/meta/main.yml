@@ -1,6 +1,6 @@
 galaxy_info:
   author: Richard Gowen
-  description: This role will update a vms local environment as needed by use case (e.g., ansible control node).
+  description: This role will update a vms local environment as needed by use case.
 
   license: MIT
 
@@ -9,3 +9,6 @@ galaxy_info:
   galaxy_tags: []
 
 dependencies: []
+  # Uses the following collections
+  # ansible.posix
+  # community.general

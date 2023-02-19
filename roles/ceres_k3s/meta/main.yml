@@ -9,7 +9,8 @@ galaxy_info:
   galaxy_tags: []
 
 dependencies: []
-  # Might need the following collections - need to confirm
+  # Uses the following collections
+  # ansible.posix
+  # ansible.utils
   # community.general
-  # containers.podman
   # kubernetes.core

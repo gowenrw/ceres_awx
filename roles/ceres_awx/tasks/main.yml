@@ -126,10 +126,23 @@
   when: 
     - not reg_awx_deployed.resources | default(None)
     - ceres_awx_oper_install
-- name: Wait for awx service
+- name: Wait for awx deployment to finish
   kubernetes.core.k8s_info:
     api_key: "{{ ceres_awx_ansible_token }}"
-    kind: "Service"
+    kind: Deployment
+    namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
+    name: "{{ ceres_awx_oper_helm_deploy_name }}"
+    wait: True
+    wait_sleep: 15
+    wait_timeout: 600
+  register: reg_oper_awx_depl
+  when: 
+    - not reg_awx_deployed.resources | default(None)
+    - ceres_awx_oper_install
+- name: Check that awx service is ready
+  kubernetes.core.k8s_info:
+    api_key: "{{ ceres_awx_ansible_token }}"
+    kind: Service
     namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
     name: "{{ ceres_awx_value_servicename }}"
     wait: True
@@ -139,9 +152,9 @@
   when: 
     - not reg_awx_deployed.resources | default(None)
     - ceres_awx_oper_install
-- name: Pause for a bit to allow images to finish downloading
+- name: Pause for a bit to let k3s catch up
   ansible.builtin.pause:
-    seconds: 60
+    seconds: 30
   when: 
     - not reg_awx_deployed.resources | default(None)
     - ceres_awx_oper_install

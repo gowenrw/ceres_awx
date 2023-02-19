@@ -87,7 +87,7 @@
 
 ## AWX OPERATOR
 #
-# Remove if ceres_awx_oper_install is False
+# Remove AWX if ceres_awx_oper_install is False and we see it installed
 - name: Use helm to delete awx operator
   kubernetes.core.helm:
     api_key: "{{ ceres_awx_ansible_token }}"
@@ -110,51 +110,46 @@
     - reg_awx_deployed.resources | length >0
     - not ceres_awx_oper_install
 #
-# Add if ceres_awx_oper_install is True
-- name: Use helm to deploy awx operator inside awx namespace (create namespace if needed)
-  kubernetes.core.helm:
-    api_key: "{{ ceres_awx_ansible_token }}"
-    name: "{{ ceres_awx_oper_helm_deploy_name }}"
-    chart_ref: "{{ ceres_awx_oper_helm_deploy_chart_ref }}"
-    values_files:
-      - "{{ ceres_awx_kube_app_defs_path }}/awx-values.yaml"
-    release_state: present
-    release_namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
-    create_namespace: True
-    update_repo_cache: True
-    wait: True
-  when: 
-    - not reg_awx_deployed.resources | default(None)
-    - ceres_awx_oper_install
-- name: Wait for awx deployment to finish
-  kubernetes.core.k8s_info:
-    api_key: "{{ ceres_awx_ansible_token }}"
-    kind: Deployment
-    namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
-    name: "{{ ceres_awx_oper_helm_deploy_name }}"
-    wait: True
-    wait_sleep: 15
-    wait_timeout: 600
-  register: reg_oper_awx_depl
-  when: 
-    - not reg_awx_deployed.resources | default(None)
-    - ceres_awx_oper_install
-- name: Check that awx service is ready
-  kubernetes.core.k8s_info:
-    api_key: "{{ ceres_awx_ansible_token }}"
-    kind: Service
-    namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
-    name: "{{ ceres_awx_value_servicename }}"
-    wait: True
-    wait_sleep: 15
-    wait_timeout: 600
-  register: reg_oper_awx_svc
-  when: 
-    - not reg_awx_deployed.resources | default(None)
-    - ceres_awx_oper_install
-- name: Pause for a bit to let k3s catch up
-  ansible.builtin.pause:
-    seconds: 30
+# Install AWX if ceres_awx_oper_install is True and we dont see it installed
+- name: AWX Install block
+  block:
+    # Helm awx operator install with value file for awx-deploy
+    - name: Use helm to deploy awx operator inside awx namespace (create namespace if needed)
+      kubernetes.core.helm:
+        api_key: "{{ ceres_awx_ansible_token }}"
+        name: "{{ ceres_awx_oper_helm_deploy_name }}"
+        chart_ref: "{{ ceres_awx_oper_helm_deploy_chart_ref }}"
+        values_files:
+          - "{{ ceres_awx_kube_app_defs_path }}/awx-values.yaml"
+        release_state: present
+        release_namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
+        create_namespace: True
+        update_repo_cache: True
+        wait: True
+      register: reg_oper_helm
+    # Wait for deploy to finish before continuing
+    - name: Wait for awx deployment to finish
+      kubernetes.core.k8s_info:
+        api_key: "{{ ceres_awx_ansible_token }}"
+        kind: Deployment
+        namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
+        name: "{{ ceres_awx_value_resourcename }}"
+        wait: True
+        wait_sleep: 15
+        wait_timeout: 600
+      register: reg_oper_awx_depl
+    # Sometime awx is not quite ready for ingress for a few seconds
+    - name: Pause for a bit to let k3s catch up
+      ansible.builtin.pause:
+        seconds: 30
+  always:
+    # Dump the output of block tasks if needed for troubleshooting
+    - name: "Debug block tasks output"
+      ansible.builtin.debug:
+        msg:
+        - "{{ omit if reg_oper_helm is not defined else reg_oper_helm }}"
+        - "{{ omit if reg_oper_awx_depl is not defined else reg_oper_awx_depl }}"
+        verbosity: 1
   when: 
     - not reg_awx_deployed.resources | default(None)
     - ceres_awx_oper_install

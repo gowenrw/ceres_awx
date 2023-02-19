@@ -127,26 +127,26 @@
     - not reg_epel_repofile_result.stat.exists
     - ansible_distribution == 'CentOS'
 #
-# crb on rhel
-- name: Enable codeready-builder repository on RHEL
-  community.general.rhsm_repository:
-    name: codeready-builder-for-rhel-{{ ansible_distribution_major_version }}-{{ ansible_facts.architecture }}-rpms
-  when: 
-    - not reg_epel_repofile_result.stat.exists
-    - ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
+# crb on rhel - broken on azure rhel which uses RHUI license
+#- name: Enable codeready-builder repository on RHEL
+#  community.general.rhsm_repository:
+#    name: codeready-builder-for-rhel-{{ ansible_distribution_major_version }}-{{ ansible_facts.architecture }}-rpms
+#  when: 
+#    - not reg_epel_repofile_result.stat.exists
+#    - ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
 #
-# gpg for epel on rhel
-- name: Import EPEL GPG key on RHEL
-  ansible.builtin.rpm_key:
-    key: "{{ ceres_localenv_epel_repo_gpg_key_url }}"
-    state: present
-  register: reg_epel_rhel_gpg_result
-  until: reg_epel_rhel_gpg_result is succeeded
-  retries: 3
-  delay: 10
-  when: 
-    - not reg_epel_repofile_result.stat.exists
-    - ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
+# gpg for epel on rhel - broken on azure rhel which uses RHUI license
+#- name: Import EPEL GPG key on RHEL
+#  ansible.builtin.rpm_key:
+#    key: "{{ ceres_localenv_epel_repo_gpg_key_url }}"
+#    state: present
+#  register: reg_epel_rhel_gpg_result
+#  until: reg_epel_rhel_gpg_result is succeeded
+#  retries: 3
+#  delay: 10
+#  when: 
+#    - not reg_epel_repofile_result.stat.exists
+#    - ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
 #
 # epel on rhel
 - name: Install EPEL repo.

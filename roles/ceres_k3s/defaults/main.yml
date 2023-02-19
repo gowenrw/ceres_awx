@@ -8,10 +8,6 @@ ceres_k3s_installer_version: ""
 ceres_k3s_installer_channel: "stable"
 ceres_k3s_installer_reinstall: False
 
-## kubernetes client python module 
-#  Note: Can specify a version here for compatability with k3s version (e.g., kubernetes==25.3.0)
-ceres_k3s_python_client: "kubernetes"
-
 ## helm installer (set to empty to disable installation)
 ceres_k3s_helm_installer_url: "https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3"
 

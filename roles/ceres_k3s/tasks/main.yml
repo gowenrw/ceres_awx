@@ -112,7 +112,12 @@
     # Install pip packages
     - name: Install required packages via pip
       ansible.builtin.pip:
-        name: "{{ ceres_k3s_python_client }}"
+        name:
+          - oauthlib
+          - pyyaml
+          - kubernetes
+          - openshift
+        extra_args: --upgrade
       register: reg_k3s_pippkg_result
   always:
     #

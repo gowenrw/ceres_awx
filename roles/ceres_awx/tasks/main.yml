@@ -132,21 +132,10 @@
     kind: "Service"
     namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
     name: "{{ ceres_awx_value_servicename }}"
+    wait: True
     wait_sleep: 15
     wait_timeout: 600
   register: reg_oper_awx_svc
-  when: 
-    - not reg_awx_deployed.resources | default(None)
-    - ceres_awx_oper_install
-- name: Wait for awx deployment
-  kubernetes.core.k8s_info:
-    api_key: "{{ ceres_awx_ansible_token }}"
-    kind: "Deployment"
-    namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
-    name: "{{ ceres_awx_oper_helm_deploy_name }}"
-    wait_sleep: 15
-    wait_timeout: 600
-  register: reg_oper_awx_dpl
   when: 
     - not reg_awx_deployed.resources | default(None)
     - ceres_awx_oper_install

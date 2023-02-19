@@ -247,6 +247,7 @@
   ansible.builtin.set_fact:
     ceres_awx_ingress_connect: |-
       AWX URL - https://{{ ceres_awx_node_fqdn }}/#/login
+      NOTE: This link might show a 5xx error for the first few mins, be patient
       Authentication user - {{ ceres_awx_value_admin_user }}
       Authentication pass file - {{ ceres_awx_admin_pass_file }}
       Authentication pass - 

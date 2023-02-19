@@ -133,7 +133,7 @@
     name: codeready-builder-for-rhel-{{ ansible_distribution_major_version }}-{{ ansible_facts.architecture }}-rpms
   when: 
     - not reg_epel_repofile_result.stat.exists
-    - ansible_distribution == 'Red Hat Enterprise Linux'
+    - ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
 #
 # gpg for epel on rhel
 - name: Import EPEL GPG key on RHEL
@@ -146,7 +146,7 @@
   delay: 10
   when: 
     - not reg_epel_repofile_result.stat.exists
-    - ansible_distribution == 'Red Hat Enterprise Linux'
+    - ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
 #
 # epel on rhel
 - name: Install EPEL repo.
@@ -159,7 +159,7 @@
   delay: 10
   when: 
     - not reg_epel_repofile_result.stat.exists
-    - ansible_distribution == 'Red Hat Enterprise Linux'
+    - ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
 
 ## YUM UPDATE
 #

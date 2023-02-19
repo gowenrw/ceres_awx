@@ -6,8 +6,10 @@
 ## OS Check ##
 - name: OS Check
   ansible.builtin.fail:
-    msg: The role currently only supports CentOS and RHEL distributions.
-  when: ansible_distribution not in ['CentOS', 'Red Hat Enterprise Linux']
+    msg: 
+    - "The role currently only supports CentOS and RHEL distributions."
+    - "Detected distribution: {{ ansible_distribution }}"
+  when: ansible_distribution not in ['CentOS', 'RedHat', 'Red Hat Enterprise Linux']
 
 ## Resize Disk Tasks ##
 #

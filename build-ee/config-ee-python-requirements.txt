@@ -1,5 +1,0 @@
-# python requirements (beyond what galaxy collections speficy)
-ansible-core >=2.13
-pyOpenSSL >=19.1
-# community.general.dig requires dnspython module but isnt installed by collecion
-dnspython

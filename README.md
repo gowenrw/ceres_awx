@@ -57,7 +57,7 @@ If you plan to use ```ansible-playbook``` then you need to add the collections a
 
 ## Inventory File
 
-This project has an inventory file named [ceres.inventory](./ceres.inventory) which contans the details Ansible needs about the hosts we will automate against.
+This project has an inventory file named [ceres.inventory.yml](./ceres.inventory.yml) which contans the details Ansible needs about the hosts we will automate against.
 
 You will need to modify this file to incorporate the hosts that meet your needs.
 
@@ -169,9 +169,9 @@ Additionally ansible-navigator has an issue with a non-local vault key file sinc
 
 ### ansible.cfg Inventory File
 
-The following config looks for a local file named ```ceres.inventory``` that contains the Ansible inventory information.
+The following config looks for a local file named ```ceres.inventory.yml``` that contains the Ansible inventory information.
 ```
-inventory = ./ceres.inventory
+inventory = ./ceres.inventory.yml
 ```
 
 This prevents you from needing to pass the ```-i <filename>``` command line option.

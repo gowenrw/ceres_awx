@@ -54,13 +54,19 @@
       block:
         - name: Publish the ee image to a container registry
           ansible.builtin.shell:
-            cmd: "podman push localhost/{{ ee_name }} docker://{{ ee_publush_url }}/{{ ee_name }}"
+            cmd: "podman push localhost/{{ ee_name }} docker://{{ ee_publush_url }}/{{ ee_name }}:{{ ee_version }}"
           register: reg_publish_results
+        - name: Publish the ee image latest tag to a container registry
+          ansible.builtin.shell:
+            cmd: "podman push localhost/{{ ee_name }} docker://{{ ee_publush_url }}/{{ ee_name }}:latest"
+          register: reg_publish_latest_results
       rescue:
         # Debug Failure Results
         - name: "Debug failure results"
           ansible.builtin.debug:
-            var: reg_publish_results
+            msg:
+            - "{{ omit if reg_publish_results is not defined else reg_publish_results }}"
+            - "{{ omit if reg_publish_latest_results is not defined else reg_publish_latest_results }}"
             verbosity: 0
         # Print user friendly failure message
         - name: Publish Failure Message
@@ -72,7 +78,8 @@
               - "You may need to log into your registry.  For docker hub that would look like this:"
               - "podman login -u <docker-username> -p <docker-passwd-or-token> docker.io/<docker-username>"
               - ""
-              - "Once you have logged in or provided other credentials you can try to publish again using this:"
-              - "podman push localhost/{{ ee_name }} docker://{{ ee_publush_url }}/{{ ee_name }}"
+              - "After providing credentials attempt to publish again using these commands:"
+              - "podman push localhost/{{ ee_name }} docker://{{ ee_publush_url }}/{{ ee_name }}:{{ ee_version }}"
+              - "podman push localhost/{{ ee_name }} docker://{{ ee_publush_url }}/{{ ee_name }}:latest"
             verbosity: 0
       when: ee_publish

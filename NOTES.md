@@ -177,3 +177,21 @@ ansible-playbook ceres-playbook-control.yml
 ```
 
 When completed (sucessfully) we can log off of and destroy the temp vm
+
+# azure rhel notes
+
+Note: In azure the RHEL image is 64GB using LVM but is provisioned with 40GB unallocated.
+So, we need to allocate the disk space as needed for k3s and awx
+
+Show the LVM volume groups with ```lsblk``` and free space with ```vgs```
+
+Add this free space to ```/var``` and ```/``` volume groups with these commands
+```
+# Give /var half the available free space
+lvextend -l +50%FREE /dev/rootvg/varlv
+# Give / all the remaining free space
+lvextend -l +100%FREE /dev/rootvg/rootlv
+# Grow the xfs filesystems
+xfs_growfs /dev/rootvg/varlv
+xfs_growfs /dev/rootvg/rootlv
+```

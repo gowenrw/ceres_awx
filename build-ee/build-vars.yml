@@ -2,6 +2,6 @@
 # Variable for build-ee playbook
 ee_name: cloud-creator-awx-ee
 ee_dir: "~/ee/{{ ee_name }}"
-ee_version: 1
+ee_version: 2
 ee_publish: false
 ee_publush_url: "docker://docker.io/myuser" # no trailing slash as /image-name will be appended

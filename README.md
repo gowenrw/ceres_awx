@@ -206,7 +206,13 @@ IMHO EE's are much easier to deal with than setting up local python virtual envi
 
 To allow for the easy creation of local custom execution environments I created an Ansible playbook and config files in the [build-ee](./build-ee/) directory which has its own [README](./build-ee/README.md) file explaining its use.
 
-The [build-ee](./build-ee/) config files have been set to include all the [galaxy collections and thier required python modules](./build-ee/config-ee-galaxy-requirements.yml) as well as some [additional python modules](./build-ee/config-ee-python-requirements.txt) that exist in the default ```creator-ee``` image along with the additional requirements for this project.
+Note: the [build-ee](./build-ee/) directory was broken out into its own repo and is now a git submodule here.
+So if that directory is empty when you clone this repo you might need to pull it with this command:
+```
+git submodule update --init --recursive
+```
+
+The [build-ee](./build-ee/) config files have been set to include all the [galaxy collections and thier required python modules](./build-ee/config-ee-galaxy-requirements.yml) as well as some [additional python modules](./build-ee/config-ee-python-requirements.txt) that exist in the ansible provided ```creator-ee``` and ```awx-ee``` images along with the additional requirements for this project.
 
 Note that building your own execution enviornment is optional in case you wish to tweak the contents.
 
@@ -215,18 +221,3 @@ For the AWX playbooks here you can simply pull the pre-built ee from docker hub 
 podman pull docker.io/altbier/cloud-creator-awx-ee:latest
 ```
 Note that ansible-navigator will pull this image for you the first time it is run unless you changed its configuration file.
-
-Here are the ansible-galaxy collections (and their python requirements) included in this EE
-```
-collections:
-  - name: ansible.posix
-  - name: ansible.windows
-  - name: ansible.utils
-  - name: awx.awx
-  - name: containers.podman
-  - name: kubernetes.core
-  - name: theforeman.foreman
-  - name: community.general
-  - name: azure.azcollection
-  - name: amazon.aws
-```

@@ -571,6 +571,7 @@
         wait: True
         wait_sleep: 15
         wait_timeout: 300
+      register: reg_nginx_ingress_install_wait
     # Pause an extra few seconds to make sure its up
     - name: Pause for a few seconds to let nginx ingress controller finish setup
       ansible.builtin.pause:
@@ -583,6 +584,7 @@
         msg:
         - "{{ omit if reg_nginx_ingress_version is not defined else reg_nginx_ingress_version }}"
         - "{{ omit if reg_nginx_ingress_install is not defined else reg_nginx_ingress_install }}"
+        - "{{ omit if reg_nginx_ingress_install_wait is not defined else reg_nginx_ingress_install_wait }}"
         verbosity: 1
   # NGINX INGRESS Block conditionals
   when: 

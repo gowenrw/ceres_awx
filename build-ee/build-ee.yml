@@ -56,7 +56,7 @@
           ansible.builtin.shell:
             cmd: "podman push localhost/{{ ee_name }} docker://{{ ee_publush_url }}/{{ ee_name }}"
           register: reg_publish_results
-      resuce:
+      rescue:
         # Debug Failure Results
         - name: "Debug failure results"
           ansible.builtin.debug:

@@ -133,10 +133,8 @@
 # Use the ansible_default_ipv4 gathered fact unless an IP was provided
 - name: Set IP if we found one above
   ansible.builtin.set_fact:
-    ceres_k3s_node_ip_address: "{{ ansible_default_ipv4 }}"
-  when: 
-    - ceres_k3s_node_ip_address != None
-    - ceres_k3s_node_ip_address | length >0
+    ceres_k3s_node_ip_address: "{{ ansible_default_ipv4.address }}"
+  when: not ceres_k3s_node_ip_address | default(None)
 
 ## Get or set ansible node token
 #

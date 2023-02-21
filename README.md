@@ -33,6 +33,29 @@ In the future we will look at a production use case using these parameters:
   * An Azure AD Service Principal (SPN) account (with access to the RG) is needed by these AWX automation jobs
   * Automation will provision Azure resources installing everything for a fully functional HA AWX system.
 
+# Git Submodules
+
+This project makes use of git submodules.
+So, to pull all the submodules down as part of the clone use the ```--recursive``` option.
+
+Example:
+```
+git clone --recursive https://github.com/gowenrw/ceres_awx.git
+```
+
+If you cloned without the recursive option you can pull the submodules with this:
+```
+git submodule update --init --recursive
+```
+
+If you forked this project and want to pull a newer version of a submodule here is how its done.
+From within the project directory cd to the submodule dir and pull from main then cd .. and add/commit/push.
+Example:
+```
+cd build-ee; git pull origin main
+cd ..; git add build-ee; git commit -a -m 'updated build-ee'; git push
+```
+
 # How To Use This Project
 
 ## Local Environments

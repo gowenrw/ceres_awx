@@ -3,7 +3,9 @@
 # Inventory Ansible configs for this ceres_awx environment
 all:
   children:
-    # cereslocal group = all local machine vms
+    ###
+    ### cereslocal group = all local machine vms
+    ###
     cereslocal:
       # These vars will be applied to all vms in cereslocal group
       vars:
@@ -11,22 +13,41 @@ all:
         ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
         ansible_python_interpreter: /usr/bin/python3
       children:
-        # ceresdev group = local vms for testing dev awx automation against
+        ##
+        ## ceresdev group = local vms for testing dev awx automation against
+        ##
         ceresdev:
           hosts:
             ceres-a:
-              ansible_host: ceres-a.awx.altbier.us
-              ceres_k3s_kube_dashboard_fqdn: ceres-a.k3s.altbier.us
+              ansible_host: 192.168.65.21
               ansible_ssh_private_key_file: ./ssh.ceres-a.private_key
+              # K3S Node IP
+              ceres_k3s_node_ip_address: 192.168.65.21
+              # AWX Ingress FQDN
+              ceres_awx_ingress_fqdn: ceres-a.awx.altbier.us
+              # Kubernetes Dashboard Ingress FQDN
+              ceres_k3s_dashboard_ingress_fqdn: ceres-a.k3s.altbier.us
             ceres-b:
-              ansible_host: ceres-b.awx.altbier.us
-              ceres_k3s_kube_dashboard_fqdn: ceres-b.k3s.altbier.us
+              ansible_host: 192.168.65.22
               ansible_ssh_private_key_file: ./ssh.ceres-b.private_key
+              # K3S Node IP
+              ceres_k3s_node_ip_address: 192.168.65.22
+              # AWX Ingress FQDN
+              ceres_awx_ingress_fqdn: ceres-b.awx.altbier.us
+              # Kubernetes Dashboard Ingress FQDN
+              ceres_k3s_dashboard_ingress_fqdn: ceres-b.k3s.altbier.us
             ceres-c:
-              ansible_host: ceres-c.awx.altbier.us
-              ceres_k3s_kube_dashboard_fqdn: ceres-c.k3s.altbier.us
+              ansible_host: 192.168.65.23
               ansible_ssh_private_key_file: ./ssh.ceres-c.private_key
-        # cerescontrol group = local vms for use as ansible control nodes
+              # K3S Node IP
+              ceres_k3s_node_ip_address: 192.168.65.23
+              # AWX Ingress FQDN
+              ceres_awx_ingress_fqdn: ceres-c.awx.altbier.us
+              # Kubernetes Dashboard Ingress FQDN
+              ceres_k3s_dashboard_ingress_fqdn: ceres-c.k3s.altbier.us
+        ##
+        ## cerescontrol group = local vms for use as ansible control nodes
+        ##
         cerescontrol:
           hosts:
             ceres-ctrl:
@@ -35,14 +56,21 @@ all:
             ceres-rectal:
               ansible_host: 192.168.65.25
               ansible_ssh_private_key_file: ./ssh.ceres-rectal.private_key
-    # ceresazure group = all azure hosted vms
+    ###
+    ### ceresazure group = all azure hosted vms
+    ###
     ceresazure:
+      # These vars will be applied to all vms in ceresazure group
+      vars:
+        ansible_ssh_user: azureuser
+        ansible_ssh_private_key_file: ./ssh.ceres.az_key.pem
       hosts:
         ceres-az1:
           ansible_host: ceres-az1.awx.yourcloud.ninja
-          ceres_k3s_kube_dashboard_fqdn: ceres-az1.k3s.yourcloud.ninja
-          ansible_ssh_user: azureuser
-          ansible_ssh_private_key_file: ./ssh.ceres.az_key.pem
+          # AWX Ingress FQDN
+          ceres_awx_ingress_fqdn: ceres-az1.awx.yourcloud.ninja
+          # Kubernetes Dashboard Ingress FQDN
+          ceres_k3s_dashboard_ingress_fqdn: ceres-az1.k3s.yourcloud.ninja
 
 #
 # The following DNS names have been configured for ease of use with this project

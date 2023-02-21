@@ -27,19 +27,14 @@ ceres_k3s_service_cidr: "10.43.0.0/16"
 ceres_k3s_exec_role: "server" # [server|agent] only server supported at this time
 
 ## k3s node references
-#    IP and FQDN to be calculated based on inventory values
+#    Node IP will be populated from ansible_default_ipv4 unless provided
 ceres_k3s_node_ip_address:
-ceres_k3s_node_fqdn:
-#    Default domain to be used for FQDN in case not provided by inventory
-ceres_k3s_node_domain: "localdomain"
 
 ## Kube Dashboard
 ceres_k3s_kube_dashboard_install: True # Set to false to prevent install or remove install
 ceres_k3s_kube_dashboard_reinstall: False
 ceres_k3s_kube_dashboard_token_file: /etc/rancher/k3s/dashboard-token
 ceres_k3s_kube_dashboard_token:
-# This fqdn value must be set in inventory or playbook since node fqdn will be used by awx
-ceres_k3s_kube_dashboard_fqdn:
 
 ## NGINX INGRESS CONTROLLER
 ceres_k3s_nginx_ingress_install: True # Set to false to prevent install or remove install
@@ -47,3 +42,5 @@ ceres_k3s_nginx_ingress_reinstall: False
 
 # Dashboard Ingress Connection Details
 ceres_k3s_dashboard_ingress_connect:
+# This fqdn value must be set in inventory or playbook since fqdn will be used by ingress
+ceres_k3s_dashboard_ingress_fqdn:

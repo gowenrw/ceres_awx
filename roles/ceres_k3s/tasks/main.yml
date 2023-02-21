@@ -128,46 +128,15 @@
           - "{{ omit if reg_k3s_pippkg_result is not defined else reg_k3s_pippkg_result }}"
         verbosity: 1
 
-## Set Node IP and FQDN
+## Set Node IP
 #
-# Since ansible_host or inventory_hostname can be ip or name or fqdn
-# We need to parse out the ip and fqdn as seperate variables for use later
-#
-# Test if we were given an IP
-- name: Test for IP in ansible_host
-  ansible.builtin.set_fact:
-    reg_testip_ah: "{{ ansible_host | ansible.utils.ipaddr }}"
-  when: ansible_host is defined
-- name: Test for IP in inventory_hostname
-  ansible.builtin.set_fact:
-    reg_testip_ih: "{{ inventory_hostname | ansible.utils.ipaddr }}"
-# Set the IP based on given value or dig or gather facts value
+# Use the ansible_default_ipv4 gathered fact unless an IP was provided
 - name: Set IP if we found one above
   ansible.builtin.set_fact:
-    ceres_k3s_node_ip_address: "{{ reg_testip_ah if reg_testip_ah else reg_testip_ih }}"
-  when: reg_testip_ah or reg_testip_ih
-- name: Dig for IP if we only have names
-  ansible.builtin.set_fact:
-    ceres_k3s_node_ip_address: "{{ lookup('community.general.dig', ansible_host if ansible_host is defined else inventory_hostname ) | ansible.utils.ipaddr }}"
-  when: not reg_testip_ah and not reg_testip_ih
-- name: Set IP to ansible_default_ipv4 (last resort) if dig does not provide a valid IP
-  ansible.builtin.set_fact:
     ceres_k3s_node_ip_address: "{{ ansible_default_ipv4 }}"
-  when: not ceres_k3s_node_ip_address
-# Set the FQDN based on given value or gather facts value
-- name: Set FQDN from inventory fqdn or inventory short-name + domain or use ansible_fqdn (last resort)
-  ansible.builtin.set_fact:
-    ceres_k3s_node_fqdn: "{{ ( ansible_host if '.' in ansible_host else ansible_host + '.' + ceres_k3s_node_domain ) if ansible_host is defined and not reg_testip_ah else ( inventory_hostname if '.' in inventory_hostname else inventory_hostname + '.' + ceres_k3s_node_domain ) if not reg_testip_ih else ansible_fqdn }}"
-#
-# Dump the output of previous tasks if needed for troubleshooting
-- name: "Debug task output"
-  ansible.builtin.debug:
-    msg:
-    - "{{ omit if reg_testip_ah is not defined else reg_testip_ah }}"
-    - "{{ omit if reg_testip_ih is not defined else reg_testip_ih }}"
-    - "{{ omit if ceres_k3s_node_ip_address is not defined else ceres_k3s_node_ip_address}}"
-    - "{{ omit if ceres_k3s_node_fqdn is not defined else ceres_k3s_node_fqdn}}"
-    verbosity: 1
+  when: 
+    - ceres_k3s_node_ip_address != None
+    - ceres_k3s_node_ip_address | length >0
 
 ## Get or set ansible node token
 #
@@ -609,8 +578,8 @@
   when: 
     - ceres_k3s_kube_dashboard_install
     - ceres_k3s_nginx_ingress_install
-    - ceres_k3s_kube_dashboard_fqdn is defined
-    - ceres_k3s_kube_dashboard_fqdn | length >0
+    - ceres_k3s_dashboard_ingress_fqdn is defined
+    - ceres_k3s_dashboard_ingress_fqdn | length >0
 # Remove the dashboard ingress def file if exists and no ingress
 - name: Remove the dashboard ingress def file if exists and no ingress
   ansible.builtin.file:
@@ -642,18 +611,18 @@
   when: 
     - ceres_k3s_kube_dashboard_install
     - ceres_k3s_nginx_ingress_install
-    - ceres_k3s_kube_dashboard_fqdn is defined
-    - ceres_k3s_kube_dashboard_fqdn | length >0
+    - ceres_k3s_dashboard_ingress_fqdn is defined
+    - ceres_k3s_dashboard_ingress_fqdn | length >0
     - reg_dashboard_ingress_def.changed
 # Save connection info
 - name: Save Dashboard Ingress Connect Details
   ansible.builtin.set_fact:
     ceres_k3s_dashboard_ingress_connect: |-
-      Kubernetes Dashboard URL - https://{{ ceres_k3s_kube_dashboard_fqdn }}/#/login
+      Kubernetes Dashboard URL - https://{{ ceres_k3s_dashboard_ingress_fqdn }}/#/login
       Authentication token - 
       {{ ceres_k3s_kube_dashboard_token }}
   when: 
     - ceres_k3s_kube_dashboard_install
     - ceres_k3s_nginx_ingress_install
-    - ceres_k3s_kube_dashboard_fqdn is defined
-    - ceres_k3s_kube_dashboard_fqdn | length >0
+    - ceres_k3s_dashboard_ingress_fqdn is defined
+    - ceres_k3s_dashboard_ingress_fqdn | length >0

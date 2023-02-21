@@ -57,8 +57,8 @@ ceres_awx_value_requirements:
       memory: 1Gi
 
 ## awx ingress
-ceres_awx_node_fqdn:
 ceres_awx_ingress_connect:
 ceres_awx_ingress_install: True
-
+# This fqdn value must be set in inventory or playbook since fqdn will be used by ingress
+ceres_awx_ingress_fqdn:
 

@@ -9,7 +9,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: {{ ceres_awx_node_fqdn }}
+  - host: {{ ceres_awx_ingress_fqdn }}
     http:
       paths:
       - path: /
@@ -21,5 +21,5 @@ spec:
               number: 80
   tls:
   - hosts:
-    - {{ ceres_awx_node_fqdn }}
+    - {{ ceres_awx_ingress_fqdn }}
     secretName: {{ ceres_awx_value_resourcename }}-cert   # if doesnt exist will create self-signed certs

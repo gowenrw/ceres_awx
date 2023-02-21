@@ -215,8 +215,8 @@
   when: 
     - ceres_awx_oper_install
     - ceres_awx_ingress_install
-    - ceres_awx_node_fqdn is defined
-    - ceres_awx_node_fqdn | length >0
+    - ceres_awx_ingress_fqdn is defined
+    - ceres_awx_ingress_fqdn | length >0
 # Create/Update awx ingress from definition
 - name: Create / Update awx ingress from definition
   block:
@@ -241,14 +241,14 @@
   when: 
     - ceres_awx_oper_install
     - ceres_awx_ingress_install
-    - ceres_awx_node_fqdn is defined
-    - ceres_awx_node_fqdn | length >0
+    - ceres_awx_ingress_fqdn is defined
+    - ceres_awx_ingress_fqdn | length >0
     - reg_awx_ingress_def.changed
 # Save connection info
 - name: Save AWX Ingress Connect Details
   ansible.builtin.set_fact:
     ceres_awx_ingress_connect: |-
-      AWX URL - https://{{ ceres_awx_node_fqdn }}/#/login
+      AWX URL - https://{{ ceres_awx_ingress_fqdn }}/#/login
       NOTE: This link might show a 5xx error for the first few mins, be patient
       Authentication user - {{ ceres_awx_value_admin_user }}
       Authentication pass file - {{ ceres_awx_admin_pass_file }}
@@ -257,6 +257,6 @@
   when: 
     - ceres_awx_oper_install
     - ceres_awx_ingress_install
-    - ceres_awx_node_fqdn is defined
-    - ceres_awx_node_fqdn | length >0
+    - ceres_awx_ingress_fqdn is defined
+    - ceres_awx_ingress_fqdn | length >0
 

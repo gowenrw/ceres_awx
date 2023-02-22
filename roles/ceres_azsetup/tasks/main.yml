@@ -168,7 +168,6 @@
     client_id: "{{ ceres_azsetup_az_spn_client_id }}"
     secret: "{{ ceres_azsetup_az_spn_secret }}"
     name: "{{ ceres_azsetup_az_pubip_name }}"
-    domain_name: "{{ ceres_azsetup_az_pubip_dnsname }}"
     sku: "standard"
     allocation_method: "static"
   register: reg_pubip_setup_results
@@ -176,4 +175,4 @@
 - name: "Debug task output"
   ansible.builtin.debug:
     var: reg_pubip_setup_results
-    verbosity: 1
+    verbosity: 0

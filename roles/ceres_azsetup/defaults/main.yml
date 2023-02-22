@@ -18,18 +18,18 @@ ceres_azsetup_az_spn_secret: "{{ az_spn_secret }}"
 ceres_azsetup_az_location:
 #
 # Virtual Network
-ceres_azsetup_az_vnet_name: "ceres-1-vnet"
+ceres_azsetup_az_vnet_name: "ceres-01-vnet"
 ceres_azsetup_az_vnet_ip_block: "192.168.68.0/22"
 #
 # Subnet
-ceres_azsetup_az_subnet_name: "ceres-1v1-subnet"
+ceres_azsetup_az_subnet_name: "ceres-01v-01-subnet"
 ceres_azsetup_az_subnet_ip: "192.168.68.0/24"
 #
 # Application Security Group
-ceres_azsetup_az_asg_name: "ceres-awx-asg"
+ceres_azsetup_az_asg_name: "ceres-awx-01-asg"
 #
 # Network Security Group
-ceres_azsetup_az_nsg_name: "ceres-1v1s-nsg"
+ceres_azsetup_az_nsg_name: "ceres-01v01s-01-nsg"
 #  nsg_k3s_ip is an ip cidr that covers both k3s cluster and service cidrs
 ceres_azsetup_az_nsg_k3s_ip: "10.42.0.0/23"
 #  nsg_ib_asg_ip is the source ip on inbound rule to awx asg
@@ -43,5 +43,4 @@ ceres_azsetup_az_nsg_ob_asg_ip: "*"
 #
 # Public IP Address
 ceres_azsetup_az_pubip_name: "ceres-01-public"
-ceres_azsetup_az_pubip_dnsname: "ceres-az01"
 

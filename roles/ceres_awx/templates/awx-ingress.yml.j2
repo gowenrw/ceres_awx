@@ -4,22 +4,24 @@ metadata:
   namespace: {{ ceres_awx_oper_helm_deploy_namespace }}
   name: {{ ceres_awx_value_resourcename }}-ingress
   annotations:
+    kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
-  ingressClassName: nginx
+  tls:
+  - hosts:
+    - {{ ceres_awx_ingress_fqdn }}
+    secretName: {{ ceres_awx_value_resourcename }}-cert   # if doesnt exist will create self-signed certs
   rules:
   - host: {{ ceres_awx_ingress_fqdn }}
     http:
       paths:
-      - path: /
+      - path: /awx/(.*)
         pathType: Prefix
         backend:
           service:
             name: {{ ceres_awx_value_servicename }}
             port:
               number: 80
-  tls:
-  - hosts:
-    - {{ ceres_awx_ingress_fqdn }}
-    secretName: {{ ceres_awx_value_resourcename }}-cert   # if doesnt exist will create self-signed certs

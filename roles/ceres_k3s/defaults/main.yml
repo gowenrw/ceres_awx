@@ -45,4 +45,4 @@ ceres_k3s_dashboard_ingress_install: True
 # Connection Details
 ceres_k3s_dashboard_ingress_connect:
 # This fqdn value must be set in inventory or playbook since fqdn will be used by ingress
-ceres_k3s_dashboard_ingress_fqdn:
+ceres_awx_ingress_fqdn:

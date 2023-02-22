@@ -23,28 +23,22 @@ all:
               ansible_ssh_private_key_file: ./ssh.ceres-a.private_key
               # K3S Node IP
               ceres_k3s_node_ip_address: 192.168.65.21
-              # AWX Ingress FQDN
+              # Ingress FQDN
               ceres_awx_ingress_fqdn: ceres-a.awx.altbier.us
-              # Kubernetes Dashboard Ingress FQDN
-              ceres_k3s_dashboard_ingress_fqdn: ceres-a.k3s.altbier.us
             ceres-b:
               ansible_host: 192.168.65.22
               ansible_ssh_private_key_file: ./ssh.ceres-b.private_key
               # K3S Node IP
               ceres_k3s_node_ip_address: 192.168.65.22
-              # AWX Ingress FQDN
+              # Ingress FQDN
               ceres_awx_ingress_fqdn: ceres-b.awx.altbier.us
-              # Kubernetes Dashboard Ingress FQDN
-              ceres_k3s_dashboard_ingress_fqdn: ceres-b.k3s.altbier.us
             ceres-c:
               ansible_host: 192.168.65.23
               ansible_ssh_private_key_file: ./ssh.ceres-c.private_key
               # K3S Node IP
               ceres_k3s_node_ip_address: 192.168.65.23
-              # AWX Ingress FQDN
+              # Ingress FQDN
               ceres_awx_ingress_fqdn: ceres-c.awx.altbier.us
-              # Kubernetes Dashboard Ingress FQDN
-              ceres_k3s_dashboard_ingress_fqdn: ceres-c.k3s.altbier.us
         ##
         ## cerescontrol group = local vms for use as ansible control nodes
         ##
@@ -67,19 +61,14 @@ all:
       hosts:
         ceres-az1:
           ansible_host: ceres-az1.awx.yourcloud.ninja
-          # AWX Ingress FQDN
+          # Ingress FQDN
           ceres_awx_ingress_fqdn: ceres-az1.awx.yourcloud.ninja
-          # Kubernetes Dashboard Ingress FQDN
-          ceres_k3s_dashboard_ingress_fqdn: ceres-az1.k3s.yourcloud.ninja
 
 #
 # The following DNS names have been configured for ease of use with this project
 # ceres-a.awx.altbier.us  192.168.65.21
-# ceres-a.k3s.altbier.us  192.168.65.21
 # ceres-b.awx.altbier.us  192.168.65.22
-# ceres-b.k3s.altbier.us  192.168.65.22
 # ceres-c.awx.altbier.us  192.168.65.23
-# ceres-c.k3s.altbier.us  192.168.65.23
 # These names could be configured via a local hostfile instead of dns
 #
 

@@ -149,6 +149,8 @@
     secret: "{{ ceres_azsetup_az_spn_secret }}"
     name: "{{ ceres_azsetup_az_pubip_name }}"
     domain_name: "{{ ceres_azsetup_az_pubip_dnsname }}"
+    sku: "standard"
+    allocation_method: "static"
   register: reg_pubip_setup_results
 # Dump the output of previous task if needed for troubleshooting
 - name: "Debug task output"

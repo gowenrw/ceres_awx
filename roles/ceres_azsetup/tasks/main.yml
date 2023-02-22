@@ -141,7 +141,7 @@
     verbosity: 1
 
 - name: Public IP Setup
-  azure.azcollection.azure_rm_subnet:
+  azure.azcollection.azure_rm_publicipaddress:
     tenant: "{{ ceres_azsetup_az_tenant_id }}"
     subscription_id: "{{ ceres_azsetup_az_subscription_id }}"
     resource_group: "{{ ceres_azsetup_az_resource_group_name }}"

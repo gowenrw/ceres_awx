@@ -85,7 +85,7 @@
         source_application_security_groups:
           - "{{ ceres_azsetup_az_asg_name }}"
         destination_address_prefix: "{{ ceres_azsetup_az_nsg_ob_asg_ip }}"
-        destination_port_range: ['22', '443', '5985, '5986']
+        destination_port_range: ['22', '443', '5985', '5986']
         access: Allow
         priority: 110
         direction: Outbound

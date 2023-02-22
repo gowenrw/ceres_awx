@@ -1,6 +1,26 @@
 ---
 # tasks main.yml file
 
+# Get azure location from the resource group
+# This also acts as a first test of the provided azure values
+- name: Lookup Resource Group Info
+  azure.azcollection.azure_rm_resourcegroup_info:
+    tenant: "{{ ceres_azsetup_az_tenant_id }}"
+    subscription_id: "{{ ceres_azsetup_az_subscription_id }}"
+    name: "{{ ceres_azsetup_az_resource_group_name }}"
+    client_id: "{{ ceres_azsetup_az_spn_client_id }}"
+    secret: "{{ ceres_azsetup_az_spn_secret }}"
+  register: reg_rginfo_results
+- name: Set Location from Resource Group Info
+  ansible.builtin.set_fact:
+    ceres_azsetup_az_location: "{{ reg_rginfo_results.resourcegroups.0.location }}"
+  when: reg_rginfo_results.resourcegroups.0.location is defined
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: reg_rginfo_results
+    verbosity: 1
+
 - name: VNET Setup
   azure.azcollection.azure_rm_virtualnetwork:
     tenant: "{{ ceres_azsetup_az_tenant_id }}"

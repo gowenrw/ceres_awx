@@ -576,6 +576,7 @@
   when: 
     - ceres_k3s_kube_dashboard_install
     - ceres_k3s_nginx_ingress_install
+    - ceres_k3s_dashboard_ingress_install
     - ceres_k3s_dashboard_ingress_fqdn is defined
     - ceres_k3s_dashboard_ingress_fqdn | length >0
 # Remove the dashboard ingress def file if exists and no ingress
@@ -584,7 +585,7 @@
     path: "{{ ceres_k3s_kube_app_defs_path }}/dashboard-ingress.yml"
     state: absent
   when: 
-    - not ceres_k3s_kube_dashboard_install or not ceres_k3s_nginx_ingress_install
+    - not ceres_k3s_kube_dashboard_install or not ceres_k3s_nginx_ingress_install or not ceres_k3s_dashboard_ingress_install
 # Create/Update dashboard ingress from definition
 - name: Create / Update dashboard ingress from definition
   block:
@@ -609,6 +610,7 @@
   when: 
     - ceres_k3s_kube_dashboard_install
     - ceres_k3s_nginx_ingress_install
+    - ceres_k3s_dashboard_ingress_install
     - ceres_k3s_dashboard_ingress_fqdn is defined
     - ceres_k3s_dashboard_ingress_fqdn | length >0
     - reg_dashboard_ingress_def.changed
@@ -622,5 +624,6 @@
   when: 
     - ceres_k3s_kube_dashboard_install
     - ceres_k3s_nginx_ingress_install
+    - ceres_k3s_dashboard_ingress_install
     - ceres_k3s_dashboard_ingress_fqdn is defined
     - ceres_k3s_dashboard_ingress_fqdn | length >0

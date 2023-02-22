@@ -14,6 +14,9 @@ ceres_azsetup_az_spn_secret: "{{ az_spn_secret }}"
 ## Azure Landing Zone Values
 ##
 #
+# Azure Location (will pull location from resource group)
+ceres_azsetup_az_location:
+#
 # Virtual Network
 ceres_azsetup_az_vnet_name: "ceres-1-vnet"
 ceres_azsetup_az_vnet_ip_block: "192.168.68.0/22"

@@ -41,18 +41,22 @@
     secret: "{{ ceres_azsetup_az_spn_secret }}"
     name: "{{ ceres_azsetup_az_nsg_name }}"
     rules:
+      # Inbound to the ASG that will contain the awx vm
+      # Open to any source by default, should restrict source to owners source IP only
       - name: ib_to_awx_asg
         protocol: Tcp
-        source_address_prefix: '*'
+        source_address_prefix: "{{ ceres_azsetup_az_nsg_ib_asg_ip }}"
         destination_application_security_groups:
           - "{{ ceres_azsetup_az_asg_name }}"
         destination_port_range: ['22', '443']
         access: Allow
         priority: 110
         direction: Inbound
+      # Since NSG is applied to vm NIC it can interfere with internal k3s communication
+      # These next three rules allow that internal k3s communication
       - name: ib_k3s_to_vnet
         protocol: '*'
-        source_address_prefix: '10.42.0.0/23'
+        source_address_prefix: "{{ ceres_azsetup_az_nsg_k3s_ip }}"
         destination_address_prefix: VirtualNetwork
         destination_port_range: '*'
         access: Allow
@@ -61,22 +65,35 @@
       - name: ib_vnet_to_k3s
         protocol: '*'
         source_address_prefix: VirtualNetwork
-        destination_address_prefix: '10.42.0.0/23'
+        destination_address_prefix: "{{ ceres_azsetup_az_nsg_k3s_ip }}"
         destination_port_range: '*'
         access: Allow
         priority: 121
         direction: Inbound
       - name: ib_k3s_to_k3s
         protocol: '*'
-        source_address_prefix: '10.42.0.0/23'
-        destination_address_prefix: '10.42.0.0/23'
+        source_address_prefix: "{{ ceres_azsetup_az_nsg_k3s_ip }}"
+        destination_address_prefix: "{{ ceres_azsetup_az_nsg_k3s_ip }}"
         destination_port_range: '*'
         access: Allow
         priority: 122
         direction: Inbound
+      # Outbound from the ASG that will contain the awx vm
+      # Open to any destination for now, should restrict destination to automation target IPs only
+      - name: ob_from_awx_asg
+        protocol: Tcp
+        source_application_security_groups:
+          - "{{ ceres_azsetup_az_asg_name }}"
+        destination_address_prefix: "{{ ceres_azsetup_az_nsg_ob_asg_ip }}"
+        destination_port_range: ['22', '443', '5985, '5986']
+        access: Allow
+        priority: 110
+        direction: Outbound
+      # Since NSG is applied to vm NIC it can interfere with internal k3s communication
+      # These next three rules allow that internal k3s communication
       - name: ob_k3s_to_vnet
         protocol: '*'
-        source_address_prefix: '10.42.0.0/23'
+        source_address_prefix: "{{ ceres_azsetup_az_nsg_k3s_ip }}"
         destination_address_prefix: VirtualNetwork
         destination_port_range: '*'
         access: Allow
@@ -85,15 +102,15 @@
       - name: ob_vnet_to_k3s
         protocol: '*'
         source_address_prefix: VirtualNetwork
-        destination_address_prefix: '10.42.0.0/23'
+        destination_address_prefix: "{{ ceres_azsetup_az_nsg_k3s_ip }}"
         destination_port_range: '*'
         access: Allow
         priority: 121
         direction: Outbound
       - name: ob_k3s_to_k3s
         protocol: '*'
-        source_address_prefix: '10.42.0.0/23'
-        destination_address_prefix: '10.42.0.0/23'
+        source_address_prefix: "{{ ceres_azsetup_az_nsg_k3s_ip }}"
+        destination_address_prefix: "{{ ceres_azsetup_az_nsg_k3s_ip }}"
         destination_port_range: '*'
         access: Allow
         priority: 122
@@ -121,4 +138,20 @@
 - name: "Debug task output"
   ansible.builtin.debug:
     var: reg_subnet_setup_results
+    verbosity: 1
+
+- name: Public IP Setup
+  azure.azcollection.azure_rm_subnet:
+    tenant: "{{ ceres_azsetup_az_tenant_id }}"
+    subscription_id: "{{ ceres_azsetup_az_subscription_id }}"
+    resource_group: "{{ ceres_azsetup_az_resource_group_name }}"
+    client_id: "{{ ceres_azsetup_az_spn_client_id }}"
+    secret: "{{ ceres_azsetup_az_spn_secret }}"
+    name: "{{ ceres_azsetup_az_pubip_name }}"
+    domain_name: "{{ ceres_azsetup_az_pubip_dnsname }}"
+  register: reg_pubip_setup_results
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: reg_pubip_setup_results
     verbosity: 1

@@ -1,0 +1,5 @@
+---
+# defaults main.yml file
+
+## Something
+ceres_azvm_something: True

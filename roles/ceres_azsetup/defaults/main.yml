@@ -1,0 +1,17 @@
+---
+# defaults main.yml file
+
+## Azure Required Values (provided via a vault file somewhere like group_vars/all.yml)
+ceres_azsetup_az_tenant_id: "{{ az_tenant_id }}"
+ceres_azsetup_az_subscription_id: "{{ az_subscription_id }}"
+ceres_azsetup_az_resource_group_name: "{{ az_resource_group_name }}"
+ceres_azsetup_az_spn_client_id: "{{ az_spn_client_id }}"
+ceres_azsetup_az_spn_secret: "{{ az_spn_secret }}"
+
+## Azure Landing Zone Values
+ceres_azsetup_az_vnet_name: "ceres-1-vnet"
+ceres_azsetup_az_vnet_ip_block: "192.168.68.0/22"
+ceres_azsetup_az_subnet_name: "ceres-1v1-subnet"
+ceres_azsetup_az_subnet_ip: "192.168.68.0/24"
+ceres_azsetup_az_nsg_name: "ceres-1v1s-nsg"
+ceres_azsetup_az_asg_name: "ceres-awx-asg"

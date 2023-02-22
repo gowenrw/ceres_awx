@@ -1,0 +1,124 @@
+---
+# tasks main.yml file
+
+- name: VNET Setup
+  azure.azcollection.azure_rm_virtualnetwork:
+    tenant: "{{ ceres_azsetup_az_tenant_id }}"
+    subscription_id: "{{ ceres_azsetup_az_subscription_id }}"
+    resource_group: "{{ ceres_azsetup_az_resource_group_name }}"
+    client_id: "{{ ceres_azsetup_az_spn_client_id }}"
+    secret: "{{ ceres_azsetup_az_spn_secret }}"
+    name: "{{ ceres_azsetup_az_vnet_name }}"
+    address_prefixes_cidr: "{{ ceres_azsetup_az_vnet_ip_block }}"
+  register: reg_vnet_setup_results
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: reg_vnet_setup_results
+    verbosity: 1
+
+- name: ASG Setup
+  azure.azcollection.azure_rm_applicationsecuritygroup:
+    tenant: "{{ ceres_azsetup_az_tenant_id }}"
+    subscription_id: "{{ ceres_azsetup_az_subscription_id }}"
+    resource_group: "{{ ceres_azsetup_az_resource_group_name }}"
+    client_id: "{{ ceres_azsetup_az_spn_client_id }}"
+    secret: "{{ ceres_azsetup_az_spn_secret }}"
+    name: "{{ ceres_azsetup_az_asg_name }}"
+  register: reg_asg_setup_results
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: reg_asg_setup_results
+    verbosity: 1
+
+- name: NSG Setup
+  azure.azcollection.azure_rm_securitygroup:
+    tenant: "{{ ceres_azsetup_az_tenant_id }}"
+    subscription_id: "{{ ceres_azsetup_az_subscription_id }}"
+    resource_group: "{{ ceres_azsetup_az_resource_group_name }}"
+    client_id: "{{ ceres_azsetup_az_spn_client_id }}"
+    secret: "{{ ceres_azsetup_az_spn_secret }}"
+    name: "{{ ceres_azsetup_az_nsg_name }}"
+    rules:
+      - name: ib_to_awx_asg
+        protocol: Tcp
+        source_address_prefix: '*'
+        destination_application_security_groups:
+          - "{{ ceres_azsetup_az_asg_name }}"
+        destination_port_range: ['22', '443']
+        access: Allow
+        priority: 110
+        direction: Inbound
+      - name: ib_k3s_to_vnet
+        protocol: '*'
+        source_address_prefix: '10.42.0.0/23'
+        destination_address_prefix: VirtualNetwork
+        destination_port_range: '*'
+        access: Allow
+        priority: 120
+        direction: Inbound
+      - name: ib_vnet_to_k3s
+        protocol: '*'
+        source_address_prefix: VirtualNetwork
+        destination_address_prefix: '10.42.0.0/23'
+        destination_port_range: '*'
+        access: Allow
+        priority: 121
+        direction: Inbound
+      - name: ib_k3s_to_k3s
+        protocol: '*'
+        source_address_prefix: '10.42.0.0/23'
+        destination_address_prefix: '10.42.0.0/23'
+        destination_port_range: '*'
+        access: Allow
+        priority: 122
+        direction: Inbound
+      - name: ob_k3s_to_vnet
+        protocol: '*'
+        source_address_prefix: '10.42.0.0/23'
+        destination_address_prefix: VirtualNetwork
+        destination_port_range: '*'
+        access: Allow
+        priority: 120
+        direction: Outbound
+      - name: ob_vnet_to_k3s
+        protocol: '*'
+        source_address_prefix: VirtualNetwork
+        destination_address_prefix: '10.42.0.0/23'
+        destination_port_range: '*'
+        access: Allow
+        priority: 121
+        direction: Outbound
+      - name: ob_k3s_to_k3s
+        protocol: '*'
+        source_address_prefix: '10.42.0.0/23'
+        destination_address_prefix: '10.42.0.0/23'
+        destination_port_range: '*'
+        access: Allow
+        priority: 122
+        direction: Outbound
+  register: reg_nsg_setup_results
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: reg_nsg_setup_results
+    verbosity: 1
+
+- name: Subnet Setup
+  azure.azcollection.azure_rm_subnet:
+    tenant: "{{ ceres_azsetup_az_tenant_id }}"
+    subscription_id: "{{ ceres_azsetup_az_subscription_id }}"
+    resource_group: "{{ ceres_azsetup_az_resource_group_name }}"
+    client_id: "{{ ceres_azsetup_az_spn_client_id }}"
+    secret: "{{ ceres_azsetup_az_spn_secret }}"
+    virtual_network_name: "{{ ceres_azsetup_az_vnet_name }}"
+    name: "{{ ceres_azsetup_az_subnet_name }}"
+    address_prefix_cidr: "{{ ceres_azsetup_az_subnet_ip }}"
+    security_group: "{{ ceres_azsetup_az_nsg_name }}"
+  register: reg_subnet_setup_results
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: reg_subnet_setup_results
+    verbosity: 1

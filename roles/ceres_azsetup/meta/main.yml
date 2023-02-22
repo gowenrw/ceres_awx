@@ -1,6 +1,6 @@
 galaxy_info:
   author: Richard Gowen
-  description: This role will install k3s lightweight kubernetes.
+  description: This role will setup an azure landing zone (e.g., vnet/subnet/nsg/etc.) for use by the ceres_awx project.
 
   license: MIT
 
@@ -10,6 +10,4 @@ galaxy_info:
 
 dependencies: []
   # Uses the following collections
-  # ansible.posix
-  # community.general
-  # kubernetes.core
+

@@ -1,6 +1,13 @@
 ---
 # file: ceres.inventory.yml
 # Inventory Ansible configs for this ceres_awx environment
+#
+# The following DNS names have been configured for ease of use with this project
+# ceres-a.awx.altbier.us  192.168.65.21
+# ceres-b.awx.altbier.us  192.168.65.22
+# ceres-c.awx.altbier.us  192.168.65.23
+# These names could be configured via a local hostfile instead of dns
+#
 all:
   children:
     ###
@@ -54,40 +61,11 @@ all:
     ### ceresazure group = all azure hosted vms
     ###
     ceresazure:
-      # These vars will be applied to all vms in ceresazure group
-      vars:
-        ansible_ssh_user: azureuser
-        ansible_ssh_private_key_file: ./ssh.ceres.az_key.pem
       hosts:
-        ceres-az1:
-          ansible_host: ceres-az1.awx.yourcloud.ninja
-          # Ingress FQDN
-          ceres_awx_ingress_fqdn: ceres-az1.awx.yourcloud.ninja
-
-#
-# The following DNS names have been configured for ease of use with this project
-# ceres-a.awx.altbier.us  192.168.65.21
-# ceres-b.awx.altbier.us  192.168.65.22
-# ceres-c.awx.altbier.us  192.168.65.23
-# These names could be configured via a local hostfile instead of dns
-#
-
-#
-# Azure server details
-# resource group: ceres-rg
-# SKU = B2ms = 2 vCPUs, 8 GiB Memory
-# "hardwareProfile": 
-#    "vmSize": "Standard_B2ms"
-# OS IMAGE = RHEL 9 latest with LVM
-#  "imageReference": { 
-#      "publisher": "RedHat",
-#      "offer": "RHEL",
-#      "sku": "9-lvm-gen2",
-#      "version": "latest",
-#      "exactVersion": "9.1.2022112101"
-#  },
-#
-# Set up an SSH key pair and used a basic public IP tied to a DNS name
-# Opened inbound NSG rules for my home IP to access it using port 22
-# Update the details below with your server DNS name and key file location
-#
+        ## ANSIBLE MANAGED BLOCK START ##
+        ceres-az01:
+          ansible_ssh_user: azureuser
+          ansible_ssh_private_key_file: ./ssh.ceres-az.key
+          ansible_host: ceres-az01-jl6ur61a1z.southcentralus.cloudapp.azure.com
+          ceres_awx_ingress_fqdn: ceres-az01-jl6ur61a1z.southcentralus.cloudapp.azure.com
+        ## ANSIBLE MANAGED BLOCK END ##

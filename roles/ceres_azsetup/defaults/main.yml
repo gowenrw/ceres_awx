@@ -46,14 +46,19 @@ ceres_azsetup_az_nsg_ob_asg_ip: "*"
 ## Azure VM Values
 ##
 #
-# Public IP Address
-ceres_azsetup_az_pubip_name: "ceres-01-public"
-#
 # Hostname
 ceres_azsetup_az_vm_hostname: "ceres-az01"
 #  dnslabel is a unique name that will be generated
 ceres_azsetup_az_vm_dnslabel:
-#  dnslabel saved to file for item potency
-ceres_azsetup_az_vm_dnslabel_file: "ssh.ceres-az01.dnslabel.key"
+#  user is the user name to be created on the vm
+ceres_azsetup_az_vm_user: azureuser
+#  private_key is the name of the private key file (public key will have .pub appended)
+ceres_azsetup_az_vm_private_key: ssh.ceres-az.key
+ceres_azsetup_az_vm_pub_key_contents:
+#
+# Public IP Address
+ceres_azsetup_az_pubip_name: "ceres-01-public"
+#  fqdn will be pulled from public ip on creation
+ceres_azsetup_az_pubip_fqdn:
 
 

@@ -197,7 +197,7 @@
 - name: "Debug task output"
   ansible.builtin.debug:
     var: ceres_azsetup_az_vm_dnslabel
-    verbosity: 0
+    verbosity: 1
 
 ##
 ## Public IP
@@ -218,4 +218,42 @@
 - name: "Debug task output"
   ansible.builtin.debug:
     var: reg_pubip_setup_results
-    verbosity: 0
+    verbosity: 1
+#
+- name: Set fact for FQDN from public ip
+  ansible.builtin.set_fact:
+    ceres_azsetup_az_pubip_fqdn: "{{ reg_pubip_setup_results.state.dns_settings.fqdn }}"
+  when: reg_pubip_setup_results.state.dns_settings.fqdn is defined
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: ceres_azsetup_az_pubip_fqdn
+    verbosity: 1
+
+##
+## Azure SSH Key pair
+##
+- name: Stat Azure SSH Key
+  ansible.builtin.stat: path="{{ ceres_azsetup_az_vm_private_key }}.pub"
+  register: reg_stat_az_sshkey
+# Read from file if its there
+- name: Get public key contents from file if it exists
+  ansible.builtin.set_fact:
+    ceres_azsetup_az_vm_pub_key_contents: "{{ lookup('ansible.builtin.file', (ceres_azsetup_az_vm_private_key + '.pub') ) }}"
+  when: reg_stat_az_sshkey.stat.exists
+# Create SSH Key Pair if its not there
+- name: Create new SSH Key Pair for Azure
+  community.crypto.openssh_keypair:
+    path: "{{ ceres_azsetup_az_vm_private_key }}"
+  when: not reg_stat_az_sshkey.stat.exists
+# Read the new file
+- name: Get public key contents from newly generated file
+  ansible.builtin.set_fact:
+    ceres_azsetup_az_vm_pub_key_contents: "{{ lookup('ansible.builtin.file', (ceres_azsetup_az_vm_private_key + '.pub') ) }}"
+  when: not reg_stat_az_sshkey.stat.exists
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: ceres_azsetup_az_vm_pub_key_contents
+    verbosity: 1
+

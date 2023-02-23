@@ -21,6 +21,10 @@
     var: reg_rginfo_results
     verbosity: 1
 
+
+##
+## Virtual Network
+##
 - name: VNET Setup
   azure.azcollection.azure_rm_virtualnetwork:
     tenant: "{{ ceres_azsetup_az_tenant_id }}"
@@ -37,6 +41,9 @@
     var: reg_vnet_setup_results
     verbosity: 1
 
+##
+## Application Security Group
+##
 - name: ASG Setup
   azure.azcollection.azure_rm_applicationsecuritygroup:
     tenant: "{{ ceres_azsetup_az_tenant_id }}"
@@ -52,6 +59,9 @@
     var: reg_asg_setup_results
     verbosity: 1
 
+##
+## Network Security Group
+##
 - name: NSG Setup
   azure.azcollection.azure_rm_securitygroup:
     tenant: "{{ ceres_azsetup_az_tenant_id }}"
@@ -142,6 +152,9 @@
     var: reg_nsg_setup_results
     verbosity: 1
 
+##
+## Subnet
+##
 - name: Subnet Setup
   azure.azcollection.azure_rm_subnet:
     tenant: "{{ ceres_azsetup_az_tenant_id }}"
@@ -160,6 +173,34 @@
     var: reg_subnet_setup_results
     verbosity: 1
 
+##
+## Unique DNS Label Name
+##
+- name: Stat dnslabel
+  ansible.builtin.stat: path="{{ ssh.ceres-az01.dnslabel.key }}"
+  register: reg_stat_dnslabel
+# Read from file if its there
+- name: Set fact for dnslabel from file if exists
+  ansible.builtin.set_fact:
+    ceres_azsetup_az_vm_dnslabel: "{{ lookup('ansible.builtin.file', ceres_azsetup_az_vm_dnslabel_file) }}"
+  when: reg_stat_dnslabel.stat.exists
+# Gererate and write to file if its not there
+- name: Create VM dnslabel if none exists
+  block:
+  - name: Generate a dnslabel from vm_hostname and a random string
+    ansible.builtin.set_fact:
+      ceres_azsetup_az_vm_dnslabel: "{{ ceres_azsetup_az_vm_hostname + '-' + lookup('community.general.random_string', upper=false, special=false, length=10) }}"
+  - name: Write VM dnslabel to file
+    ansible.builtin.copy:
+      dest: "{{ ceres_azsetup_az_vm_dnslabel_file }}"
+      content: "{{ ceres_azsetup_az_vm_dnslabel }}"
+  when: not reg_stat_dnslabel.stat.exists
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: ceres_azsetup_az_vm_dnslabel
+    verbosity: 1
+
 - name: Public IP Setup
   azure.azcollection.azure_rm_publicipaddress:
     tenant: "{{ ceres_azsetup_az_tenant_id }}"
@@ -168,6 +209,7 @@
     client_id: "{{ ceres_azsetup_az_spn_client_id }}"
     secret: "{{ ceres_azsetup_az_spn_secret }}"
     name: "{{ ceres_azsetup_az_pubip_name }}"
+    domain_name: "{{ ceres_azsetup_az_vm_dnslabel }}"
     sku: "standard"
     allocation_method: "static"
   register: reg_pubip_setup_results
@@ -175,4 +217,4 @@
 - name: "Debug task output"
   ansible.builtin.debug:
     var: reg_pubip_setup_results
-    verbosity: 0
+    verbosity: 1

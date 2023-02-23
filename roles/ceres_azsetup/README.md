@@ -1,12 +1,12 @@
 ceres_azsetup
 ============
 
-This role will setup an azure landing zone (e.g., vnet/subnet/nsg/etc.) for use by the ceres_awx project.
+This role will setup an azure landing zone (e.g., vnet/subnet/nsg/etc.) and provision an azure VM for use by the ceres_awx project.
 
 Requirements
 ------------
 
-This role requires that an Azure resource group has been created for the landing zone artifacts to be created in
+This role requires that an Azure resource group has been created for the artifacts to be created in
 and an Azure AD Service Principal account with contrubutor access to the resource group.
 
 Role Variables

@@ -40,7 +40,20 @@ ceres_azsetup_az_nsg_ib_asg_ip: "*"
 #  For a single ip/cidr use quoted values e.g., "10.0.0.0", "10.0.0.0/24"
 #  For multiple ips/cidrs use list values e.g., ["10.0.0.0/24", "10.10.10.0/24"]
 ceres_azsetup_az_nsg_ob_asg_ip: "*"
+
+
+##
+## Azure VM Values
+##
 #
 # Public IP Address
 ceres_azsetup_az_pubip_name: "ceres-01-public"
+#
+# Hostname
+ceres_azsetup_az_vm_hostname: "ceres-az01"
+#  dnslabel is a unique name that will be generated
+ceres_azsetup_az_vm_dnslabel:
+#  dnslabel saved to file for item potency
+ceres_azsetup_az_vm_dnslabel_file: "ssh.ceres-az01.dnslabel.key"
+
 

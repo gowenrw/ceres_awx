@@ -1,6 +1,6 @@
 galaxy_info:
   author: Richard Gowen
-  description: This role will setup an azure landing zone (e.g., vnet/subnet/nsg/etc.) for use by the ceres_awx project.
+  description: This role will setup an azure landing zone (e.g., vnet/subnet/nsg/etc.) and provision an azure VM for use by the ceres_awx project.
 
   license: MIT
 

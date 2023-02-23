@@ -189,7 +189,7 @@
   ansible.builtin.set_fact:
     ceres_azsetup_az_vm_dnslabel: "{{ reg_pubip_info.publicipaddresses.0.dns_settings.domain_name_label }}"
   when: reg_pubip_info.publicipaddresses.0.dns_settings.domain_name_label is defined
-- name: Generate a dnslabel from vm_hostname and a random string if needed
+- name: Generate a dnslabel from vm_hostname and a random string if no dnslabel exists
   ansible.builtin.set_fact:
     ceres_azsetup_az_vm_dnslabel: "{{ ceres_azsetup_az_vm_hostname + '-' + lookup('community.general.random_string', upper=false, special=false, length=10) }}"
   when: reg_pubip_info.publicipaddresses.0.dns_settings.domain_name_label is not defined
@@ -270,3 +270,61 @@
                 ansible_host: {{ ceres_azsetup_az_pubip_fqdn }}
                 ceres_awx_ingress_fqdn: {{ ceres_azsetup_az_pubip_fqdn }}
 
+##
+## Network Interface Card
+##
+- name: Create NIC using VNET/Subnet/ASG/Public-IP from above
+  azure.azcollection.azure_rm_networkinterface:
+    tenant: "{{ ceres_azsetup_az_tenant_id }}"
+    subscription_id: "{{ ceres_azsetup_az_subscription_id }}"
+    resource_group: "{{ ceres_azsetup_az_resource_group_name }}"
+    client_id: "{{ ceres_azsetup_az_spn_client_id }}"
+    secret: "{{ ceres_azsetup_az_spn_secret }}"
+    name: "{{ ceres_azsetup_az_vm_hostname }}-01-nic"
+    virtual_network: "{{ ceres_azsetup_az_vnet_name }}"
+    subnet_name: "{{ ceres_azsetup_az_subnet_name }}"
+    create_with_security_group: False
+    ip_configurations:
+      - name: "ipconfig1"
+        public_ip_address_name: "{{ ceres_azsetup_az_pubip_name }}"
+        application_security_groups:
+          - name: "{{ ceres_azsetup_az_asg_name }}"
+            resource_group: "{{ ceres_azsetup_az_resource_group_name }}"
+        primary: True
+  register: reg_nic_results
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: reg_nic_results
+    verbosity: 1
+
+##
+## Virtual Machine
+##
+- name: Virtual Machine
+  azure.azcollection.azure_rm_virtualmachine:
+    tenant: "{{ ceres_azsetup_az_tenant_id }}"
+    subscription_id: "{{ ceres_azsetup_az_subscription_id }}"
+    resource_group: "{{ ceres_azsetup_az_resource_group_name }}"
+    client_id: "{{ ceres_azsetup_az_spn_client_id }}"
+    secret: "{{ ceres_azsetup_az_spn_secret }}"
+    name: "{{ ceres_azsetup_az_vm_hostname }}"
+    admin_username: "{{ ceres_azsetup_az_vm_user }}"
+    ssh_password_enabled: false
+    ssh_public_keys:
+      - path: "/home/{{ ceres_azsetup_az_vm_user }}/.ssh/authorized_keys"
+        key_data: "{{ ceres_azsetup_az_vm_pub_key_contents }}"
+    managed_disk_type: "StandardSSD_LRS"
+    vm_size: "Standard_B2ms"
+    network_interfaces: "{{ ceres_azsetup_az_vm_hostname }}-01-nic"
+    image:
+      offer: "RHEL"
+      publisher: "RedHat"
+      sku: "9-lvm-gen2"
+      version: "latest"
+  register: reg_vm_results
+# Dump the output of previous task if needed for troubleshooting
+- name: "Debug task output"
+  ansible.builtin.debug:
+    var: reg_vm_results
+    verbosity: 1

@@ -9,6 +9,8 @@
   - name: Import role ceres_localenv
     ansible.builtin.import_role:
       name: ceres_localenv
+    vars:
+      ceres_localenv_resize_az_rhel_lvm_disk: True
 
   #
   # Call role ceres_k3s to install k3s varient of Kubernetes on vm for DEV AWX

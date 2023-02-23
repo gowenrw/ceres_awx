@@ -75,6 +75,55 @@
         - "{{ omit if reg_resize_extfs is not defined else reg_resize_extfs}}"
         verbosity: 1
 
+## Resize RHEL AZ LVM Disk Tasks ##
+#
+# Get Free Space
+- name: "Read vgs information to determine free space in rootvg"
+  ansible.builtin.shell:
+    cmd: "vgs --units g --no-suffix --noheadings | awk '{ printf $7 }'"
+  register: reg_rootvg_free_results
+#
+# Block for AZ LVM disk resize with conditionals for only RHEL
+# Note: This is to make use of free space on Azure OS disk rather than adding data disks
+- name: Resize RHEL AZ LVM Disk Block
+  block:
+    #
+    # Extend the logical volumes 
+    - name: Extend logical volume for /var with lvextend
+      ansible.builtin.shell: "lvextend -l +50%FREE /dev/rootvg/varlv"
+      register: reg_resize_varlv_results
+    - name: Extend logical volume for / with lvextend
+      ansible.builtin.shell: "lvextend -l +100%FREE /dev/rootvg/rootlv"
+      register: reg_resize_rootlv_results
+    #
+    # Grow the filesystems on the extended lvs
+    - name: Grow xfs filesystem on /var with xfs_growfs
+      ansible.builtin.shell: "xfs_growfs /dev/rootvg/varlv"
+      register: reg_xfsgrow_varlv_results
+    - name: Grow xfs filesystem on / with xfs_growfs
+      ansible.builtin.shell: "xfs_growfs /dev/rootvg/rootlv"
+      register: reg_xfsgrow_rootlv_results
+  #
+  # Resize disk block conditionals
+  when: 
+    - ceres_localenv_resize_az_rhel_lvm_disk
+    - reg_rootvg_free_results is defined
+    - reg_rootvg_free_results.stdout | int > 1
+    - ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
+  # Resize disk block Debugging
+  always:
+    #
+    # Dump the output of block tasks if needed for troubleshooting
+    - name: "Debug block tasks output"
+      ansible.builtin.debug:
+        msg:
+        - "{{ omit if reg_rootvg_free_results is not defined else reg_rootvg_free_results }}"
+        - "{{ omit if reg_resize_varlv_results is not defined else reg_resize_varlv_results}}"
+        - "{{ omit if reg_resize_rootlv_results is not defined else reg_resize_rootlv_results}}"
+        - "{{ omit if reg_xfsgrow_varlv_results is not defined else reg_xfsgrow_varlv_results}}"
+        - "{{ omit if reg_xfsgrow_rootlv_results is not defined else reg_xfsgrow_rootlv_results}}"
+        verbosity: 1
+
 ## DISABLE SELINUX & FIREWALLD
 #
 # selinux

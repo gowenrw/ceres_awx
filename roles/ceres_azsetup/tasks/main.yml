@@ -263,7 +263,7 @@
 - name: Insert/Update azure vm details in ceres.inventory.yml
   ansible.builtin.blockinfile:
     path: ceres.inventory.yml
-    block: |
+    block: |2
               {{ ceres_azsetup_az_vm_hostname }}:
                 ansible_ssh_user: {{ ceres_azsetup_az_vm_user }}
                 ansible_ssh_private_key_file: ./{{ ceres_azsetup_az_vm_private_key }}

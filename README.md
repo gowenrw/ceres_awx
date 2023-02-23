@@ -126,19 +126,26 @@ Here is a simplified variable order of precedence list as applies to this projec
 There are several Ansible playbooks included in this project that are examples of how to perform various automation jobs.
 These playbooks are all named ceres-playbook-<jobname>.yml where <jobname> refers to the automation job that playbook will execute.
 
-The dev/test example playbook is named [ceres-playbook-devtest.yml](./ceres-playbook-devtest.yml).
-This playbook is used for testing the dev awx automation jobs and may have items not included in the normal dev playbook.
+There are several testing playbooks that contain extra variables:
+* [ceres.test.playbook.dev.yml](ceres.test.playbook.dev.yml) - Testing Playbook for DEV (local VM)
+* [ceres.test.playbook.azsetup.yml](ceres.test.playbook.azsetup.yml) - Testing Playbook for Azure Setup (create Azure VM)
+* [ceres.test.playbook.qa.yml](ceres.test.playbook.qa.yml) - Testing Playbook for QA (Azure VM)
 
-Each of these example playbooks will have embedded comment text explaining what it is doing.
+Here are the main playbooks used in this project:
+* [ceres.playbook.dev.yml](ceres.playbook.dev.yml) - Playbook for DEV (local VM)
+* [ceres.playbook.azsetup.yml](ceres.playbook.azsetup.yml) - Playbook for Azure Setup (create Azure VM)
+* [ceres.playbook.qa.yml](ceres.playbook.qa.yml) - Playbook for QA (Azure VM)
 
-These playbook files will need to be modified or copied then changed to meet your needs.
+Each of these playbooks will have embedded comment text explaining what it is doing.
+
+These playbook files can be modified or copied / changed to meet your needs.
 At a minimum you will need to verify the proper inventory host names are being called.
 
 ## Running the Automation Jobs
 
 Assuming [your local environments](#local-environments) have been properly configured this is how you would run a playbook:
 ```
-ansible-navigator run ceres-playbook-devtest.yml
+ansible-navigator run ceres.test.playbook.dev.yml
 ```
 
 Other playbooks would be run the same way, just replace the playbook filename.

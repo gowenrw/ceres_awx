@@ -27,6 +27,8 @@ If you wish to spin up local vms using the [Vagrantfile](./Vagrantfile) included
 * VirtualBox version 7+ (tested with 7.0.6, 6.x versions might work but not tested)
 * Vagrant version 2.3+ (tested with 2.3.4, 2.2.x might also work but 2.1.x will fail)
 
+The [ansible.cfg](./ansible.cfg) file is set up to look for an ansible vault file named ```.ansible-vault.private_key``` so regardless of weather or not you plan on using ansible-vault you will either need to create that file with some random text in it or remove that configuration line to prevent ansible from throwing errors.
+
 # Target VM
 
 We need a target VM to install AWX on.

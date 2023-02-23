@@ -45,6 +45,23 @@
       ceres_awx_ingress_install: True
     when: launch_role_awx
 
+  # Save connection details to local files
+  - name: Save Dashboard Ingress Connection Info
+    ansible.builtin.copy:
+      content: "{{ ceres_k3s_dashboard_ingress_connect }}\n"
+      dest: "CONNECT_{{ inventory_hostname }}_dashboard.key"
+    delegate_to: localhost
+    when:
+      - ceres_k3s_dashboard_ingress_connect is defined
+      - ceres_k3s_dashboard_ingress_connect != None
+  - name: Save AWX Ingress Connection Info
+    ansible.builtin.copy:
+      content: "{{ ceres_awx_ingress_connect }}\n"
+      dest: "CONNECT_{{ inventory_hostname }}_awx.key"
+    delegate_to: localhost
+    when:
+      - ceres_awx_ingress_connect is defined
+      - ceres_awx_ingress_connect != None
 
   # Print final status messages
   - name: Dashboard Ingress Connection Info

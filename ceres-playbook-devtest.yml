@@ -49,18 +49,18 @@
   # Save connection details to local files
   - name: Save Dashboard Ingress Connection Info
     ansible.builtin.copy:
-      content: "{{ ceres_k3s_dashboard_ingress_connect.split('\n') }}"
-      dest: "connect_to_{{ inventory_hostname }}_dashboard.key"
+      content: "{{ ceres_k3s_dashboard_ingress_connect }}\n"
+      dest: "CONNECT_{{ inventory_hostname }}_dashboard.key"
     delegate_to: localhost
-    when: 
+    when:
       - ceres_k3s_dashboard_ingress_connect is defined
       - ceres_k3s_dashboard_ingress_connect != None
   - name: Save AWX Ingress Connection Info
     ansible.builtin.copy:
-      content: "{{ ceres_awx_ingress_connect.split('\n') }}"
-      dest: "connect_to_{{ inventory_hostname }}_awx.key"
+      content: "{{ ceres_awx_ingress_connect }}\n"
+      dest: "CONNECT_{{ inventory_hostname }}_awx.key"
     delegate_to: localhost
-    when: 
+    when:
       - ceres_awx_ingress_connect is defined
       - ceres_awx_ingress_connect != None
 

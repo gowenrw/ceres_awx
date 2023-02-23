@@ -177,7 +177,7 @@
 ## Unique DNS Label Name
 ##
 - name: Stat dnslabel
-  ansible.builtin.stat: path="{{ ssh.ceres-az01.dnslabel.key }}"
+  ansible.builtin.stat: path="{{ ceres_azsetup_az_vm_dnslabel_file }}"
   register: reg_stat_dnslabel
 # Read from file if its there
 - name: Set fact for dnslabel from file if exists

@@ -257,3 +257,16 @@
     var: ceres_azsetup_az_vm_pub_key_contents
     verbosity: 1
 
+##
+## Update Inventory File
+##
+- name: Insert/Update azure vm details in ceres.inventory
+  ansible.builtin.blockinfile:
+    path: ceres.inventory
+    block: |8
+      {{ ceres_azsetup_az_vm_hostname }}:
+        ansible_ssh_user: {{ ceres_azsetup_az_vm_user }}
+        ansible_ssh_private_key_file: ./{{ ceres_azsetup_az_vm_private_key }}
+        ansible_host: {{ ceres_azsetup_az_pubip_fqdn }}
+        ceres_awx_ingress_fqdn: {{ ceres_azsetup_az_pubip_fqdn }}
+

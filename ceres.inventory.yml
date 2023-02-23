@@ -62,10 +62,10 @@ all:
     ###
     ceresazure:
       hosts:
-        ## ANSIBLE MANAGED BLOCK START ##
+# BEGIN ANSIBLE MANAGED BLOCK
         ceres-az01:
           ansible_ssh_user: azureuser
           ansible_ssh_private_key_file: ./ssh.ceres-az.key
           ansible_host: ceres-az01-jl6ur61a1z.southcentralus.cloudapp.azure.com
           ceres_awx_ingress_fqdn: ceres-az01-jl6ur61a1z.southcentralus.cloudapp.azure.com
-        ## ANSIBLE MANAGED BLOCK END ##
+# END ANSIBLE MANAGED BLOCK

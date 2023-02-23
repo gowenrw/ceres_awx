@@ -1,0 +1,61 @@
+---
+- name: Dev Playbook - Install Ansible AWX onto a local VM
+  hosts: ceresdev
+  become: true
+
+  tasks:
+  # 
+  # Call role ceres_localenv to resize root partition on vm for DEV AWX
+  - name: Import role ceres_localenv
+    ansible.builtin.import_role:
+      name: ceres_localenv
+    vars:
+      ceres_localenv_resize_disk: True
+
+  #
+  # Call role ceres_k3s to install k3s varient of Kubernetes on vm for DEV AWX
+  - name: Import role ceres_k3s
+    ansible.builtin.import_role:
+      name: ceres_k3s
+
+  #
+  # Call role ceres_awx to install awx on vm for DEV AWX
+  - name: Import role ceres_awx
+    ansible.builtin.import_role:
+      name: ceres_awx
+    vars:
+      ceres_awx_ansible_token: "{{ omit if ceres_k3s_ansible_token is not defined else ceres_k3s_ansible_token }}"
+
+  # Save connection details to local files
+  - name: Save Dashboard Ingress Connection Info
+    ansible.builtin.copy:
+      content: "{{ ceres_k3s_dashboard_ingress_connect }}\n"
+      dest: "CONNECT_{{ inventory_hostname }}_dashboard.key"
+    delegate_to: localhost
+    when:
+      - ceres_k3s_dashboard_ingress_connect is defined
+      - ceres_k3s_dashboard_ingress_connect != None
+  - name: Save AWX Ingress Connection Info
+    ansible.builtin.copy:
+      content: "{{ ceres_awx_ingress_connect }}\n"
+      dest: "CONNECT_{{ inventory_hostname }}_awx.key"
+    delegate_to: localhost
+    when:
+      - ceres_awx_ingress_connect is defined
+      - ceres_awx_ingress_connect != None
+
+  # Print final status messages
+  - name: Print Dashboard Ingress Connection Info
+    ansible.builtin.debug:
+      msg: "{{ ceres_k3s_dashboard_ingress_connect.split('\n') }}"
+      verbosity: 0
+    when: 
+      - ceres_k3s_dashboard_ingress_connect is defined
+      - ceres_k3s_dashboard_ingress_connect != None
+  - name: Print AWX Ingress Connection Info
+    ansible.builtin.debug:
+      msg: "{{ ceres_awx_ingress_connect.split('\n') }}"
+      verbosity: 0
+    when: 
+      - ceres_awx_ingress_connect is defined
+      - ceres_awx_ingress_connect != None

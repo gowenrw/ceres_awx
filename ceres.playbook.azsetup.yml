@@ -1,0 +1,11 @@
+---
+- name: AZ Setup Playbook - Prepare Azure environment and a VM in Azure
+  hosts: localhost
+  become: true
+
+  tasks:
+  # 
+  # Call role ceres_localenv to resize root partition on vm for DEV AWX
+  - name: Import role ceres_azsetup
+    ansible.builtin.import_role:
+      name: ceres_azsetup

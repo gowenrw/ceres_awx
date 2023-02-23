@@ -2,7 +2,7 @@
 
 AWX server provisioning for local and cloud
 
-The main goal of this project is to automate provisioning of several distinct Ansible AWX configurations (which cover dev, and use cases - maybe a prod use case in the future).
+The main goal of this project is to automate provisioning of several distinct Ansible AWX configurations (which cover dev, and qa use cases - maybe a prod use case in the future).
 
 A secondary goal is to automate the creation of custom Ansible execution environments for use with ansible-navigator and Ansible AWX and to encourage the use of ansible-navigator versus ansible-playbook for running jobs.
 
@@ -15,7 +15,7 @@ A final goal is to meet the first two goals in a way that is accessible to those
 These are the Ansible AWX configurations this project should automate provisioning for:
 * DEV - AWX in a single VM on a local machine
   * The local VM needs to be provisioned manually prior to these AWX automation jobs
-  * Will be tested with Virtualbox as the local hypervisor using Vagrant for local VM provisioning
+  * Has been tested with Virtualbox as the local hypervisor using Vagrant for local VM provisioning
   * Automation will install everything for a fully functional AWX system on that local VM.
 * QA - AWX in a single IaaS VM on Microsoft Azure.
   * This should automate the provisioning of the AWX VM and its network landing zone in azure

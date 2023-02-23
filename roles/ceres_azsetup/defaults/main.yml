@@ -31,7 +31,7 @@ ceres_azsetup_az_asg_name: "ceres-awx-01-asg"
 # Network Security Group
 ceres_azsetup_az_nsg_name: "ceres-01v01s-01-nsg"
 #  nsg_k3s_ip is an ip cidr that covers both k3s cluster and service cidrs
-ceres_azsetup_az_nsg_k3s_ip: "10.42.0.0/23"
+ceres_azsetup_az_nsg_k3s_ip: "10.42.0.0/15"
 #  nsg_ib_asg_ip is the source ip on inbound rule to awx asg
 #  set to any ip for now, should be set to owners public ip
 ceres_azsetup_az_nsg_ib_asg_ip: "*"

@@ -58,6 +58,12 @@ cd ..; git add build-ee; git commit -a -m 'updated build-ee'; git push
 
 # How To Use This Project
 
+## Quick Start
+
+Want to get started quickly?
+
+Check out the [QUICKSTART.md](./QUICKSTART.md) document.
+
 ## Local Environments
 
 You will need to setup your local environment for running Ansible (i.e., Ansible control node) and your local environment for spinning up local vms if needed for AWX DEV provisioning and/or an Ansible control node.

@@ -174,33 +174,34 @@
     verbosity: 1
 
 ##
-## Unique DNS Label Name
+## Unique DNS Label Name (For Public IP)
 ##
-- name: Stat dnslabel
-  ansible.builtin.stat: path="{{ ceres_azsetup_az_vm_dnslabel_file }}"
-  register: reg_stat_dnslabel
-# Read from file if its there
-- name: Set fact for dnslabel from file if exists
+- name: Lookup Public IP Name (to see if it already exists)
+  azure_rm_publicipaddress_info:
+    tenant: "{{ ceres_azsetup_az_tenant_id }}"
+    subscription_id: "{{ ceres_azsetup_az_subscription_id }}"
+    resource_group: "{{ ceres_azsetup_az_resource_group_name }}"
+    client_id: "{{ ceres_azsetup_az_spn_client_id }}"
+    secret: "{{ ceres_azsetup_az_spn_secret }}"
+    name: "{{ ceres_azsetup_az_pubip_name }}"
+  register: reg_pubip_info
+- name: Set fact for dnslabel from public ip info if exists
   ansible.builtin.set_fact:
-    ceres_azsetup_az_vm_dnslabel: "{{ lookup('ansible.builtin.file', ceres_azsetup_az_vm_dnslabel_file) }}"
-  when: reg_stat_dnslabel.stat.exists
-# Gererate and write to file if its not there
-- name: Create VM dnslabel if none exists
-  block:
-  - name: Generate a dnslabel from vm_hostname and a random string
-    ansible.builtin.set_fact:
-      ceres_azsetup_az_vm_dnslabel: "{{ ceres_azsetup_az_vm_hostname + '-' + lookup('community.general.random_string', upper=false, special=false, length=10) }}"
-  - name: Write VM dnslabel to file
-    ansible.builtin.copy:
-      dest: "{{ ceres_azsetup_az_vm_dnslabel_file }}"
-      content: "{{ ceres_azsetup_az_vm_dnslabel }}"
-  when: not reg_stat_dnslabel.stat.exists
+    ceres_azsetup_az_vm_dnslabel: reg_pubip_info.publicipaddresses.0.dns_settings.domain_name_label
+  when: reg_pubip_info.publicipaddresses.0.dns_settings.domain_name_label is defined
+- name: Generate a dnslabel from vm_hostname and a random string if needed
+  ansible.builtin.set_fact:
+    ceres_azsetup_az_vm_dnslabel: "{{ ceres_azsetup_az_vm_hostname + '-' + lookup('community.general.random_string', upper=false, special=false, length=10) }}"
+  when: reg_pubip_info.publicipaddresses.0.dns_settings.domain_name_label is not defined
 # Dump the output of previous task if needed for troubleshooting
 - name: "Debug task output"
   ansible.builtin.debug:
     var: ceres_azsetup_az_vm_dnslabel
-    verbosity: 1
+    verbosity: 0
 
+##
+## Public IP
+##
 - name: Public IP Setup
   azure.azcollection.azure_rm_publicipaddress:
     tenant: "{{ ceres_azsetup_az_tenant_id }}"
@@ -217,4 +218,4 @@
 - name: "Debug task output"
   ansible.builtin.debug:
     var: reg_pubip_setup_results
-    verbosity: 1
+    verbosity: 0

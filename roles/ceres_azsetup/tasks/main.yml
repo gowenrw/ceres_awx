@@ -187,7 +187,7 @@
   register: reg_pubip_info
 - name: Set fact for dnslabel from public ip info if exists
   ansible.builtin.set_fact:
-    ceres_azsetup_az_vm_dnslabel: reg_pubip_info.publicipaddresses.0.dns_settings.domain_name_label
+    ceres_azsetup_az_vm_dnslabel: "{{ reg_pubip_info.publicipaddresses.0.dns_settings.domain_name_label }}"
   when: reg_pubip_info.publicipaddresses.0.dns_settings.domain_name_label is defined
 - name: Generate a dnslabel from vm_hostname and a random string if needed
   ansible.builtin.set_fact:

@@ -4,6 +4,19 @@
   become: true
 
   tasks:
+  #
+  # Set facts based on OS
+  - name: Set facts for CentOS
+    ansible.builtin.set_fact:
+      ceres_localenv_resize_dev: "/dev/sda"
+      ceres_localenv_resize_part: 1     # centos / is on sda1
+    when: ansible_distribution == 'CentOS'
+  - name: Set facts for Rocky
+    ansible.builtin.set_fact:
+      ceres_localenv_resize_dev: "/dev/sda"
+      ceres_localenv_resize_part: 5     # rocky / is on sda5
+    when: ansible_distribution == 'Rocky'
+
   # 
   # Call role ceres_localenv to resize root partition on vm for DEV AWX
   - name: Import role ceres_localenv

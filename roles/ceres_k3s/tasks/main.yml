@@ -11,9 +11,9 @@
 - name: OS Check
   ansible.builtin.fail:
     msg: 
-    - "The role currently only supports CentOS and RHEL distributions."
+    - "The role currently only supports CentOS and Rocky and RHEL distributions."
     - "Detected distribution: {{ ansible_distribution }}"
-  when: ansible_distribution not in ['CentOS', 'RedHat', 'Red Hat Enterprise Linux']
+  when: ansible_distribution not in ['CentOS', 'RedHat', 'Red Hat Enterprise Linux', 'Rocky']
 
 ## DISABLE SELINUX & FIREWALLD
 #

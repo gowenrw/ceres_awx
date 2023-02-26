@@ -7,9 +7,9 @@
 - name: OS Check
   ansible.builtin.fail:
     msg: 
-    - "The role currently only supports CentOS and RHEL distributions."
+    - "The role currently only supports CentOS and Rocky and RHEL distributions."
     - "Detected distribution: {{ ansible_distribution }}"
-  when: ansible_distribution not in ['CentOS', 'RedHat', 'Red Hat Enterprise Linux']
+  when: ansible_distribution not in ['CentOS', 'RedHat', 'Red Hat Enterprise Linux', 'Rocky']
 
 ## Resize Disk Tasks ##
 #
@@ -20,9 +20,9 @@
   changed_when: False
   when: 
   - ceres_localenv_resize_disk
-  - ansible_distribution == 'CentOS'
+  - ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
 #
-# Block for disk resize with conditionals for only CentOS, free space, etc.
+# Block for disk resize with conditionals for distro, free space, etc.
 - name: Resize Disk Block
   block:
     #
@@ -61,7 +61,7 @@
     - ceres_localenv_resize_disk
     - reg_resize_disk_free_gb is defined
     - reg_resize_disk_free_gb.stdout | int > 1
-    - ansible_distribution == 'CentOS'
+    - ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
   # Resize disk block Debugging
   always:
     #
@@ -82,6 +82,9 @@
   ansible.builtin.shell:
     cmd: "vgs --units g --no-suffix --noheadings | awk '{ printf $7 }'"
   register: reg_rootvg_free_results
+  when: 
+    - ceres_localenv_resize_az_rhel_lvm_disk
+    - ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
 #
 # Block for AZ LVM disk resize with conditionals for only RHEL
 # Note: This is to make use of free space on Azure OS disk rather than adding data disks
@@ -158,12 +161,12 @@
     path: "{{ ceres_localenv_epel_repofile_path }}"
   register: reg_epel_repofile_result
 #
-# crb on centos
-- name: Enable codeready-builder repository on CentOS 
+# crb on centos and rocky
+- name: Enable codeready-builder repository on CentOS or Rocky
   ansible.builtin.command: "dnf config-manager --set-enabled crb"
   when: 
     - not reg_epel_repofile_result.stat.exists
-    - ansible_distribution == 'CentOS'
+    - ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
 #
 # epel on centos
 - name: Install epel-release and epel-next-release on CentOS
@@ -176,7 +179,17 @@
     - not reg_epel_repofile_result.stat.exists
     - ansible_distribution == 'CentOS'
 #
-# crb on rhel - broken on azure rhel which uses RHUI license
+# epel on rocky
+- name: Install epel-release and epel-next-release on Rocky
+  ansible.builtin.dnf:
+    name:
+      - epel-release
+    state: present
+  when: 
+    - not reg_epel_repofile_result.stat.exists
+    - ansible_distribution == 'Rocky'
+#
+# crb on rhel - ### broken on azure rhel which uses RHUI license
 #- name: Enable codeready-builder repository on RHEL
 #  community.general.rhsm_repository:
 #    name: codeready-builder-for-rhel-{{ ansible_distribution_major_version }}-{{ ansible_facts.architecture }}-rpms
@@ -281,7 +294,7 @@
   register: reg_pkgs_puttybin_result
   when:
     - ceres_localenv_pkgs_putty_install
-    - ansible_distribution == 'CentOS'
+    - ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
 #
 # Putty Install Block
 - name: PuTTy Install Block
@@ -316,7 +329,7 @@
   # Putty Install Block Conditional
   when:
     - ceres_localenv_pkgs_putty_install
-    - ansible_distribution == 'CentOS'
+    - ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
     - not reg_pkgs_puttybin_result.stat.exists
   # Putty Install Block Debugging
   always:

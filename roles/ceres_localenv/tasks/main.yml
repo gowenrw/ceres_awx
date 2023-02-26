@@ -15,7 +15,7 @@
 #
 # Get disk free space info for resize block conditional check
 - name: Determine free space on disk
-  ansible.builtin.shell: "parted {{ ceres_localenv_resize_dev }} unit GB print free | grep 'Free Space' | tail -n1 | awk '{print $3}' | sed 's/GB//'"
+  ansible.builtin.shell: "parted --script {{ ceres_localenv_resize_dev }} unit GB print free | grep 'Free Space' | tail -n1 | awk '{print $3}' | sed 's/GB//'"
   register: reg_resize_disk_free_gb
   changed_when: False
   when: 

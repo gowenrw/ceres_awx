@@ -80,8 +80,8 @@ servers=[
     :ram => 8192,
     :vram => 16,
     :cpu => 2,
-    :disksize => "0", # Set to string zero to prevent disk resizing
-    :vbguestupdate => true, # Set to false to prevent vbguest auto update
+    :disksize => "20GB", # Set to string zero to prevent disk resizing
+    :vbguestupdate => false, # Set to false to prevent vbguest auto update
     :fwdguest => 0, # Set to int zero to prevent native vagrant port forwarding
     :fwdhost => 0
   },

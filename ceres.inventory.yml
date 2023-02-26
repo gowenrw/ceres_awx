@@ -46,6 +46,13 @@ all:
               ceres_k3s_node_ip_address: 192.168.65.23
               # Ingress FQDN
               ceres_awx_ingress_fqdn: ceres-c.awx.altbier.us
+            ceres-r:
+              ansible_host: 192.168.65.28
+              ansible_ssh_private_key_file: ./ssh.ceres-r.private_key
+              # K3S Node IP
+              ceres_k3s_node_ip_address: 192.168.65.28
+              # Ingress FQDN
+              ceres_awx_ingress_fqdn: ceres-r.awx.altbier.us
         ##
         ## cerescontrol group = local vms for use as ansible control nodes
         ##

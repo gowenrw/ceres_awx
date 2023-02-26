@@ -6,9 +6,9 @@ The main goal of this project is to automate provisioning of several distinct An
 
 A secondary goal is to automate the creation of custom Ansible execution environments for use with ansible-navigator and Ansible AWX and to encourage the use of ansible-navigator versus ansible-playbook for running jobs.
 
-A tertiary goal is to use current Redhat OS's for these servers, both local and cloud.
+A tertiary goal is to use current Redhat flavor OS's for these servers, both local and cloud.
 There are several projects out there that automate AWX on older (now unsupported) CentOS 8 or lower.
-This project will use CentOS Stream 9 locally and Redhat Enterprise Linux 9 in the cloud.
+This project will use CentOS Stream 9 or Rocky linux 9 locally and Redhat Enterprise Linux 9 in the cloud.
 
 A final goal is to meet the first two goals in a way that is accessible to those with limited Ansible knowledge (i.e., lots of documentation and examples).
 

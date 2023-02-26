@@ -21,6 +21,10 @@ centos_stream_8 = {
   "name" => "CentOS-Stream-Vagrant-8-20220913.0.x86_64",
   "url" => "https://cloud.centos.org/centos/8-stream/x86_64/images/CentOS-Stream-Vagrant-8-20220913.0.x86_64.vagrant-virtualbox.box"
 }
+rocky_9 = {
+  "name" => "Rocky-9-Vagrant-Vbox-9.1-20230215.0.x86_64",
+  "url" => "https://dl.rockylinux.org/pub/rocky/9.1/images/x86_64/Rocky-9-Vagrant-Vbox-9.1-20230215.0.x86_64.box"
+}
 
 #
 # Define Server Variables Here
@@ -66,6 +70,20 @@ servers=[
     :vbguestupdate => true, # Set to false to prevent vbguest auto update
     :fwdguest => 6443, # Set to int zero to prevent native vagrant port forwarding
     :fwdhost => 36443
+  },
+  {
+    :hostname => "ceres-r",
+    :log => "ceres-r-console.log",
+    :ip => "192.168.65.28",
+    :box => "#{rocky_9["name"]}",
+    :boxurl => "#{rocky_9["url"]}",
+    :ram => 8192,
+    :vram => 16,
+    :cpu => 2,
+    :disksize => "0", # Set to string zero to prevent disk resizing
+    :vbguestupdate => true, # Set to false to prevent vbguest auto update
+    :fwdguest => 0, # Set to int zero to prevent native vagrant port forwarding
+    :fwdhost => 0
   },
   {
     :hostname => "ceres-ctrl",

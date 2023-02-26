@@ -18,6 +18,7 @@ vMList=(
   "ceres-a"
   "ceres-b"
   "ceres-c"
+  "ceres-r"
   "ceres-ctrl"
   "ceres-rectal"
   "ceres-tst"

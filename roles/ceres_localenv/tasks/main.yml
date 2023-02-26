@@ -55,6 +55,13 @@
     - name: Extend ext4 filesystem to fill all available space
       ansible.builtin.command: "resize2fs {{ ceres_localenv_resize_dev }}{{ ceres_localenv_resize_part }}"
       register: reg_resize_extfs
+      when: ceres_localenv_resize_fstype == "ext4"
+    #
+    # Extend the xfs filesystem
+    - name: Extend xfs filesystem to fill all available space
+      ansible.builtin.command: "xfs_growfs {{ ceres_localenv_resize_dev }}{{ ceres_localenv_resize_part }}"
+      register: reg_resize_xfs
+      when: ceres_localenv_resize_fstype == "xfs"
   #
   # Resize disk block conditionals
   when: 

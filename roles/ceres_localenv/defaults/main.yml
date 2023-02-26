@@ -4,7 +4,8 @@
 ## Resize
 ceres_localenv_resize_disk: False  # If True resize partition & filesystem
 ceres_localenv_resize_dev: "/dev/sda"
-ceres_localenv_resize_part: 1
+ceres_localenv_resize_part: 1          # centos / is sda1 - rocky / is sda5
+ceres_localenv_resize_fstype: "ext4"   # centos / is ext4 - rocky / is xfs
 ceres_localenv_resize_az_rhel_lvm_disk: False  # If True resize LVM & filesystem on RHEL in Azure
 
 ## Custom Color Prompt

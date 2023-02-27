@@ -40,12 +40,12 @@ If you are going to spin up your VM via some process not included here then skip
 
 To spin up a local VM on VirtualBox using Vagrant just use the following command:
 ```
-vagrant up ceres-a
+vagrant up ceres-c9
 ```
 
 Nothing else needs to be provided to create this VM since all the configs are in the [Vagrantfile](./Vagrantfile)
 
-When vagrant is done you will have a local VM named ceres-a running CentOS Stream 9 which is your target for AWX.
+When vagrant is done you will have a local VM named ceres-c9 running CentOS Stream 9 which is your target for AWX.
 
 ## Azure VM (and other required artifacts)
 

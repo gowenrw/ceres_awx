@@ -17,8 +17,8 @@ fi
 vMList=(
   "ceres-a"
   "ceres-b"
-  "ceres-c"
-  "ceres-r"
+  "ceres-c9"
+  "ceres-r9"
   "ceres-ctrl"
   "ceres-rectal"
   "ceres-tst"

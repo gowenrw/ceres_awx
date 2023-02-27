@@ -72,18 +72,56 @@ You will need to setup your local environment for running Ansible (i.e., Ansible
 If you are using a linux host these two local environments may be the same.
 But if you are using a Windows host then these two local environments will be different as Ansible cannot be run nativley on Windows.
 
+### Local Environment for Ansible
+
 I use a Windows host with a linux vm for my Ansible control node.  You can see [my local environment details below](#my-local-environment).
 This includes details about the [ansible.cfg](./ansible.cfg) file and [ansible-navigator.yml](./ansible-navigator.yml) file provided here and what they do.
 
+For the Ansible cotrol node local environment (which needs to be Linux) you will need the following installed:
+  * python v3
+  * python pip v3
+  * podman or docker
+  * ansible-core
+  * ansible-navigator
+
 This project has been optimized for use with ```ansible-navigator``` to execute the Ansible playbooks for provisioning AWX.
 
-If you plan to use ```ansible-navigator``` then you need to either [build your local execution environment using the scripts provided](#ansible-execution-environments) or pull down the pre-built execution environment using the following command.
+If you plan to use ```ansible-navigator``` then you need to either [build your local execution environment using the scripts provided](#ansible-execution-environments) or you can [use my pre-built execution environment](https://hub.docker.com/r/altbier/cloud-creator-awx-ee).
+
+To pull down a pre-built execution environment using podman this is what the command would look like:
 ```
 podman pull docker.io/altbier/cloud-creator-awx-ee:latest
 ```
-Note that ansible-navigator will pull this image for you the first time it is run unless you changed its configuration file.
+
+Note that running ```ansible-navigator``` in the project directory will automatically pull this EE image for you the first time it is run unless you changed its configuration file.
 
 If you plan to use ```ansible-playbook``` then you need to add the collections and python modules to your local environment, and you will need to adjust the example code provided as needed.
+
+The [ansible.cfg](./ansible.cfg) file is set up to look for an ansible vault file named ```.ansible-vault.private_key``` so regardless of weather or not you plan on using ansible-vault you will either need to create that file with some random text in it or remove that configuration line to prevent ansible from throwing errors.
+
+### Local Environment for Local VM Provisioning
+
+In order to automate the deployment of AWX to a local VM you must first be able to provision a local VM.
+
+This can be done in several ways using different hypervisor software (e.g., VMWare, HyperV, VirtualBox, etc.).
+
+For your convenience a [Vagrantfile](./Vagrantfile) has been provided with preconfigured local VM settings that can be used.
+
+This file is designed to be used with the [VirtualBox](https://www.virtualbox.org/) hypervisor and the [Vagrant](https://www.vagrantup.com/) orchestration tool which are both cross-platform (i.e., work on Windows and Linux) and free to use.
+
+If you wish to spin up local vms using the [Vagrantfile](./Vagrantfile) you will need the following installed:
+* VirtualBox version 7+ (tested with 7.0.6, 6.x versions might work but not tested)
+* Vagrant version 2.3+ (tested with 2.3.4, 2.2.x might also work but 2.1.x will fail)
+
+To spin up a local VM using [CentOS Stream 9](https://cloud.centos.org/centos/9-stream/x86_64/images/) (2 CPU, 8GB RAM, 20GB Disk) use the following command:
+```
+vagrant up ceres-c9
+```
+
+To spin up a local VM using [Rocky Linux 9](https://dl.rockylinux.org/pub/rocky/9.1/images/x86_64/) (2 CPU, 8GB RAM, 20GB Disk) use the following command:
+```
+vagrant up ceres-r9
+```
 
 ## Inventory File
 

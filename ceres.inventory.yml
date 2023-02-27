@@ -5,7 +5,8 @@
 # The following DNS names have been configured for ease of use with this project
 # ceres-a.awx.altbier.us  192.168.65.21
 # ceres-b.awx.altbier.us  192.168.65.22
-# ceres-c.awx.altbier.us  192.168.65.23
+# ceres-c9.awx.altbier.us  192.168.65.23
+# ceres-r9.awx.altbier.us  192.168.65.28
 # These names could be configured via a local hostfile instead of dns
 #
 all:
@@ -39,20 +40,20 @@ all:
               ceres_k3s_node_ip_address: 192.168.65.22
               # Ingress FQDN
               ceres_awx_ingress_fqdn: ceres-b.awx.altbier.us
-            ceres-c:
+            ceres-c9:
               ansible_host: 192.168.65.23
-              ansible_ssh_private_key_file: ./ssh.ceres-c.private_key
+              ansible_ssh_private_key_file: ./ssh.ceres-c9.private_key
               # K3S Node IP
               ceres_k3s_node_ip_address: 192.168.65.23
               # Ingress FQDN
-              ceres_awx_ingress_fqdn: ceres-c.awx.altbier.us
-            ceres-r:
+              ceres_awx_ingress_fqdn: ceres-c9.awx.altbier.us
+            ceres-r9:
               ansible_host: 192.168.65.28
-              ansible_ssh_private_key_file: ./ssh.ceres-r.private_key
+              ansible_ssh_private_key_file: ./ssh.ceres-r9.private_key
               # K3S Node IP
               ceres_k3s_node_ip_address: 192.168.65.28
               # Ingress FQDN
-              ceres_awx_ingress_fqdn: ceres-r.awx.altbier.us
+              ceres_awx_ingress_fqdn: ceres-r9.awx.altbier.us
         ##
         ## cerescontrol group = local vms for use as ansible control nodes
         ##

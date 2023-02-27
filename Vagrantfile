@@ -58,22 +58,22 @@ servers=[
     :fwdhost => 26443
   },
   {
-    :hostname => "ceres-c",
-    :log => "ceres-c-console.log",
+    :hostname => "ceres-c9",
+    :log => "ceres-c9-console.log",
     :ip => "192.168.65.23",
     :box => "#{centos_stream_9["name"]}",
     :boxurl => "#{centos_stream_9["url"]}",
-    :ram => 4096,
+    :ram => 8192,
     :vram => 16,
     :cpu => 2,
-    :disksize => "15GB", # Set to string zero to prevent disk resizing
+    :disksize => "20GB", # Set to string zero to prevent disk resizing
     :vbguestupdate => true, # Set to false to prevent vbguest auto update
     :fwdguest => 6443, # Set to int zero to prevent native vagrant port forwarding
     :fwdhost => 36443
   },
   {
-    :hostname => "ceres-r",
-    :log => "ceres-r-console.log",
+    :hostname => "ceres-r9",
+    :log => "ceres-r9-console.log",
     :ip => "192.168.65.28",
     :box => "#{rocky_9["name"]}",
     :boxurl => "#{rocky_9["url"]}",
@@ -82,8 +82,8 @@ servers=[
     :cpu => 2,
     :disksize => "20GB", # Set to string zero to prevent disk resizing
     :vbguestupdate => false, # Set to false to prevent vbguest auto update
-    :fwdguest => 0, # Set to int zero to prevent native vagrant port forwarding
-    :fwdhost => 0
+    :fwdguest => 6443, # Set to int zero to prevent native vagrant port forwarding
+    :fwdhost => 46443
   },
   {
     :hostname => "ceres-ctrl",

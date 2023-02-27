@@ -216,7 +216,7 @@ Note: these scripts lookup the Windows Hostname for conditionals and will need t
 
 Since I want to use PuTTy to connect to the vagrant managed virtualbox VMs I wrote a script to copy and convert the vagrant ssh keys to the PuTTy ppk format.
 This script ```vkeyconvert.sh``` will only work from a linux vm (not Git Bash or WSL) since the windows version of puttygen does not support CLI options the way the linux version does.
-So, when I first connect to my Ansible control vm I do so via the vagrant ssh method and then I install putty on it (see [Notes.md](./NOTES.md) for details on my Ansible control vm config).
+So, when I first connect to my Ansible control vm I do so via the vagrant ssh method and then I install putty on it (see [Notes.md](./docs/NOTES.md) for details on my Ansible control vm config).
 Then from the Ansible control vm I can clone this git repository and execute the script which generates the ppk keys for all the vagrant vms.
 
 On my local Ansible control node vm I perform a seperate git clone of this project for running these jobs.

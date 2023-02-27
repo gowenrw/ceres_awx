@@ -279,15 +279,15 @@ An Execution Environment (EE) is a container that has all the galaxy collections
 
 IMHO EE's are much easier to deal with than setting up local python virtual environments and controlling where collections get installed for each project and dealing with version conflicts.
 
-To allow for the easy creation of local custom execution environments I created an Ansible playbook and config files in the [build-ee](./build-ee/) directory which has its own [README](./build-ee/README.md) file explaining its use.
+To allow for the easy creation of local custom execution environments I created an Ansible playbook and config files in the ```build-ee``` directory which has its own [README](https://github.com/gowenrw/build-ee/blob/main/README.md) file explaining its use.
 
-Note: the [build-ee](./build-ee/) directory was broken out into its own repo and is now a git submodule here.
+Note: the [build-ee](https://github.com/gowenrw/build-ee) directory was broken out into its own repo and is now a git submodule here.
 So if that directory is empty when you clone this repo you might need to pull it with this command:
 ```
 git submodule update --init --recursive
 ```
 
-The [build-ee](./build-ee/) config files have been set to include all the [galaxy collections and thier required python modules](./build-ee/config-ee-galaxy-requirements.yml) as well as some [additional python modules](./build-ee/config-ee-python-requirements.txt) that exist in the ansible provided ```creator-ee``` and ```awx-ee``` images along with the additional requirements for this project.
+The ```build-ee``` config files have been set to include all the [galaxy collections and thier required python modules](https://github.com/gowenrw/build-ee/blob/main/config-ee-galaxy-requirements.yml) as well as some [additional python modules](https://github.com/gowenrw/build-ee/blob/main/config-ee-python-requirements.txt) that exist in the ansible provided ```creator-ee``` and ```awx-ee``` images along with the additional requirements for this project.
 
 Note that building your own execution enviornment is optional in case you wish to tweak the contents.
 

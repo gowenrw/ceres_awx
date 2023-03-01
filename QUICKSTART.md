@@ -47,6 +47,11 @@ Nothing else needs to be provided to create this VM since all the configs are in
 
 When vagrant is done you will have a local VM named ceres-c9 running CentOS Stream 9 which is your target for AWX.
 
+Copy the SSH Key from the vagrant folder to the root project folder where the ansible inventory file will look for it using the provided script using the following command:
+```
+.\bin\wkeycp.sh
+```
+
 ## Azure VM (and other required artifacts)
 
 To spin up an Azure VM and its other required Azure resources (VNET/Subnet/etc.) will require some things.

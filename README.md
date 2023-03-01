@@ -129,6 +129,13 @@ This project has an inventory file named [ceres.inventory.yml](./ceres.inventory
 
 You will need to modify this file to incorporate the hosts that meet your needs.
 
+If you are using the provided Vagrant/Virtualbox configs to spin up local VMs be sure to copy the SSH Key from the vagrant folder to the root project folder where the ansible inventory file will look for it.
+
+This can be done using the provided script with the following command:
+```
+./bin/wkeycp.sh
+```
+
 ## Group Variable File
 
 This project makes use of a group variable file [group_vars/all.yml](./group_vars/all.yml) which contains variables that will be included regardless which inventory host is being called.

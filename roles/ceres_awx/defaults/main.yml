@@ -19,6 +19,7 @@ ceres_awx_admin_pass:
 
 ## awx values
 ceres_awx_value_resourcename: awx
+ceres_awx_value_deployment_name: awx-web
 ceres_awx_value_admin_user: admin
 ceres_awx_value_servicename: awx-service
 # Requirements settings based on a system with 2 cpu cores 8GB ram 16GB disk (B2ms) - adjust as needed

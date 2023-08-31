@@ -136,7 +136,7 @@
         api_key: "{{ ceres_awx_ansible_token }}"
         kind: Deployment
         namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
-        name: "{{ ceres_awx_value_resourcename }}"
+        name: "{{ ceres_awx_value_deployment_name }}"
         wait: True
         wait_sleep: 15
         wait_timeout: 420

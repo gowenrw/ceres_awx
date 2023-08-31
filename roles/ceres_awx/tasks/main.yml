@@ -121,6 +121,7 @@
         api_key: "{{ ceres_awx_ansible_token }}"
         name: "{{ ceres_awx_oper_helm_deploy_name }}"
         chart_ref: "{{ ceres_awx_oper_helm_deploy_chart_ref }}"
+        chart_version: "{{ ceres_awx_oper_helm_deploy_chart_version }}"
         values_files:
           - "{{ ceres_awx_kube_app_defs_path }}/awx-values.yaml"
         release_state: present
@@ -130,7 +131,7 @@
         wait: True
       register: reg_oper_helm
     # Wait for deploy to finish before continuing
-    - name: Wait for awx deployment to finish
+    - name: Wait for awx deployment to finish - This may take up to 10 minutes
       kubernetes.core.k8s_info:
         api_key: "{{ ceres_awx_ansible_token }}"
         kind: Deployment

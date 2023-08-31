@@ -71,10 +71,14 @@
       name: ceres_awx
     vars:
       ceres_awx_ansible_token: "{{ omit if ceres_k3s_ansible_token is not defined else ceres_k3s_ansible_token }}"
+      #
       # awx install and ingress are required, setting to false will uninstall
       # which can be helpful if troubleshooting a bad install
       ceres_awx_oper_install: True
       ceres_awx_ingress_install: True
+      #
+      # This is the version of awx to install via helm
+      ceres_awx_oper_helm_deploy_chart_version: latest
     when: launch_role_awx
 
   #

@@ -197,7 +197,7 @@
     # Uninstall k3s using defined environment
     - name: Execute k3s uninstaller
       ansible.builtin.command:
-        cmd: "{{ ceres_k3s_installer_directory }}/k3s-uninstall.sh"
+        cmd: "{{ ceres_k3s_bin_directory }}/k3s-uninstall.sh"
       environment: "{{ ceres_k3s_install_env }}"
     # Wait for cleanup to finish before proceeding
     - name: Pause for a bit to let k3s uninstall cleanup catch up before doing anything else

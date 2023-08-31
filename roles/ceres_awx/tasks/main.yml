@@ -57,17 +57,17 @@
 ## AWX Values File
 #
 # Remove if ceres_awx_oper_install is False
-- name: Remove AWX Values definition file
+- name: Remove AWX Values definition file - when ceres_awx_oper_install is False (REMOVE AWX)
   ansible.builtin.file:
     path: "{{ ceres_awx_kube_app_defs_path }}/awx-values.yaml"
     state: absent
   when: 
-    - reg_awx_deployed.resources != None
-    - reg_awx_deployed.resources | length >0
+    #- reg_awx_deployed.resources != None
+    #- reg_awx_deployed.resources | length >0
     - not ceres_awx_oper_install
 #
 # Add if ceres_awx_oper_install is True
-- name: Add AWX Values definition file
+- name: Add AWX Values definition file if AWX is not already deployed
   ansible.builtin.template:
     src: "awx-values.yaml.j2"
     dest: "{{ ceres_awx_kube_app_defs_path }}/awx-values.yaml"
@@ -90,7 +90,7 @@
 ## AWX OPERATOR
 #
 # Remove AWX if ceres_awx_oper_install is False and we see it installed
-- name: Use helm to delete awx operator
+- name: Use helm to delete awx operator - when ceres_awx_oper_install is False (REMOVE AWX)
   kubernetes.core.helm:
     api_key: "{{ ceres_awx_ansible_token }}"
     name: "{{ ceres_awx_oper_helm_deploy_name }}"
@@ -98,18 +98,18 @@
     release_namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
     wait: True
   when: 
-    - reg_awx_deployed.resources != None
-    - reg_awx_deployed.resources | length >0
+    #- reg_awx_deployed.resources != None
+    #- reg_awx_deployed.resources | length >0
     - not ceres_awx_oper_install
-- name: Remove awx namespace
+- name: Remove awx namespace - when ceres_awx_oper_install is False (REMOVE AWX)
   kubernetes.core.k8s:
     api_key: "{{ ceres_awx_ansible_token }}"
     kind: Namespace
     state: absent
     name: "{{ ceres_awx_oper_helm_deploy_namespace }}"
   when: 
-    - reg_awx_deployed.resources != None
-    - reg_awx_deployed.resources | length >0
+    #- reg_awx_deployed.resources != None
+    #- reg_awx_deployed.resources | length >0
     - not ceres_awx_oper_install
 #
 # Install AWX if ceres_awx_oper_install is True and we dont see it installed
@@ -159,13 +159,13 @@
 ## AWX ADMIN
 #
 # Remove if ceres_awx_oper_install is False
-- name: Remove AWX Admin file
+- name: Remove AWX Admin file - when ceres_awx_oper_install is False (REMOVE AWX)
   ansible.builtin.file:
     path: "{{ ceres_awx_admin_pass_file }}"
     state: absent
   when: 
-    - reg_awx_deployed.resources != None
-    - reg_awx_deployed.resources | length >0
+    #- reg_awx_deployed.resources != None
+    #- reg_awx_deployed.resources | length >0
     - not ceres_awx_oper_install
 #
 # Get the admin password
@@ -197,7 +197,7 @@
 #
 #
 # Remove the ingress def file if exists and no ingress
-- name: Remove the AWX ingress def file if exists and no ingress
+- name: Remove the AWX ingress def file if exists - when install or ingress are set to False
   ansible.builtin.file:
     path: "{{ ceres_awx_kube_app_defs_path }}/awx-ingress.yml"
     state: absent

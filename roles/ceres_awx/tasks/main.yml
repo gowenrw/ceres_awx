@@ -120,6 +120,8 @@
       kubernetes.core.helm:
         api_key: "{{ ceres_awx_ansible_token }}"
         name: "{{ ceres_awx_oper_helm_deploy_name }}"
+        chart_ref: "{{ ceres_awx_oper_helm_deploy_chart_ref }}"
+        chart_version: "{{ ceres_awx_oper_helm_deploy_chart_version }}"
         values_files:
           - "{{ ceres_awx_kube_app_defs_path }}/awx-values.yaml"
         release_state: present

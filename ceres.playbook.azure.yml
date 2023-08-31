@@ -61,6 +61,13 @@
       # which can be helpful if troubleshooting a bad install
       ceres_awx_oper_install: True
       ceres_awx_ingress_install: True
+      #
+      # This is the version of awx-operator to install via helm
+      # NOTE This is not the awx version but operator which determines it
+      # Example awx-operator version 2.5.2 will depoly awx version 23.0.0
+      # See this link for release information https://github.com/ansible/awx-operator/tags
+      # By default it pulls latest version to change it uncomment below
+      #ceres_awx_oper_helm_deploy_chart_version: "2.5.1"
     when: launch_role_awx
 
   # Save connection details to local files

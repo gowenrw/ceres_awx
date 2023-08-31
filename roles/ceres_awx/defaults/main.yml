@@ -7,6 +7,7 @@ ceres_awx_oper_helm_repo_name: awx-operator
 ceres_awx_oper_helm_deploy_name: awx-operator
 ceres_awx_oper_helm_deploy_chart_ref: awx-operator/awx-operator
 ceres_awx_oper_helm_deploy_namespace: awx
+ceres_awx_oper_helm_deploy_chart_version:
 ceres_awx_oper_install: True  # If set to False will uninstall awx
 
 ## k3s env

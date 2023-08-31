@@ -376,15 +376,18 @@
 # Dashboard Install and Deployment Block
 - name: Kube Dashboard Block
   block:
+    # Get Latest Version - Commented out because of issues with v3 alpha which is latest
+    #- name: Get Kube Dashboard Version
+    #  ansible.builtin.shell:
+    #    cmd: "curl -w '%{url_effective}' -I -L -s -S https://github.com/kubernetes/dashboard/releases/latest -o /dev/null | sed -e 's|.*/||'"
+    #  register: reg_kube_dashboard_version
+    #
     # Define Kube Dashboard installer environment
-    - name: Get Kube Dashboard Version
-      ansible.builtin.shell:
-        cmd: "curl -w '%{url_effective}' -I -L -s -S https://github.com/kubernetes/dashboard/releases/latest -o /dev/null | sed -e 's|.*/||'"
-      register: reg_kube_dashboard_version
     - name: Set facts for Kube Dashboard installer environment
       ansible.builtin.set_fact:
         ceres_k3s_kube_dashboard_install_env:
-          VERSION_KUBE_DASHBOARD: "{{ reg_kube_dashboard_version.stdout }}"
+          #VERSION_KUBE_DASHBOARD: "{{ reg_kube_dashboard_version.stdout }}"
+          VERSION_KUBE_DASHBOARD: "{{ ceres_k3s_kube_dashboard_version }}"
     # Install Kube Dashboard using defined environment
     - name: Install Kube Dashboard
       ansible.builtin.command:

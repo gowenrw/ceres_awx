@@ -4,34 +4,27 @@ AWX server provisioning for local and cloud
 
 The main goal of this project is to automate provisioning of several distinct Ansible AWX configurations (which cover dev, and qa use cases - maybe a prod use case in the future).
 
-A secondary goal is to automate the creation of custom Ansible execution environments for use with ansible-navigator and Ansible AWX and to encourage the use of ansible-navigator versus ansible-playbook for running jobs.
+A secondary goal is to automate the creation of custom Ansible execution environments for use with ansible-navigator and Ansible AWX and to encourage the use of ansible-navigator versus ansible-playbook for running jobs. 
+NOTE THIS GOAL MOVED TO MY [build-ee REPOSITORY](https://github.com/gowenrw/build-ee)
 
-A tertiary goal is to use current Redhat flavor OS's for these servers, both local and cloud.
-There are several projects out there that automate AWX on older (now unsupported) CentOS 8 or lower.
-This project will use CentOS Stream 9 or Rocky linux 9 locally and Redhat Enterprise Linux 9 in the cloud.
-
-A final goal is to meet the first two goals in a way that is accessible to those with limited Ansible knowledge (i.e., lots of documentation and examples).
+A final goal is to make this code accessible to those with limited Ansible knowledge (i.e., lots of documentation and examples).
 
 These are the Ansible AWX configurations this project should automate provisioning for:
-* DEV - AWX in a single VM on a local machine
+* LOCAL - AWX in a single VM on a local machine
   * The local VM needs to be provisioned manually prior to these AWX automation jobs
   * Has been tested with Virtualbox as the local hypervisor using Vagrant for local VM provisioning
   * Automation will install everything for a fully functional AWX system on that local VM.
-* QA - AWX in a single IaaS VM on Microsoft Azure.
+* REMOTE - AWX in a single VM or physical machine remote from this box
+  * The remote VM/PM needs to be provisioned manually prior to these AWX automation jobs
+  * Has been tested with various physical and virtual machines in a home lab
+  * Automation will install everything for a fully functional AWX system on that remote VM/PM.
+* AZURE - AWX in a single IaaS VM on Microsoft Azure.
   * This should automate the provisioning of the AWX VM and its network landing zone in azure
   * Azure details will need to be provided for these automation jobs
   * An Azure AD Service Principal (SPN) account (with contributor access to a RG) will be needed
   * Automation will install everything for a fully functional AWX system as per the phases above.
 
-In the future we will look at a production use case using these parameters:
-* PROD - AWX distributed IaaS/PaaS environment on Microsoft Azure.
-  * This job should provision a PaaS Kubernetes service, a PaaS external database, and IaaS VMs as needed.
-  * The Azure resource group needs to be provisioned prior to these AWX automation jobs
-    * Note that unlike QA, this automation will create its landing zone (VNET/Subnet(s)/etc.) in the RG
-  * An Azure AD Service Principal (SPN) account (with access to the RG) is needed by these AWX automation jobs
-  * Automation will provision Azure resources installing everything for a fully functional HA AWX system.
-
-Currently we have bare bones working DEV and QA automation.
+Currently these three roles are working with bare bones functionality.
 Need to tweak many things and add some post provisioning configurations.
 
 # Git Submodules
@@ -67,7 +60,7 @@ Check out the [QUICKSTART.md](./QUICKSTART.md) document.
 
 ## Local Environments
 
-You will need to setup your local environment for running Ansible (i.e., Ansible control node) and your local environment for spinning up local vms if needed for AWX DEV provisioning and/or an Ansible control node.
+You will need to setup your local environment for running Ansible (i.e., Ansible control node) and your local environment for spinning up local vms if needed for AWX provisioning and/or an Ansible control node.
 
 If you are using a linux host these two local environments may be the same.
 But if you are using a Windows host then these two local environments will be different as Ansible cannot be run nativley on Windows.
@@ -172,15 +165,14 @@ Here is a simplified variable order of precedence list as applies to this projec
 There are several Ansible playbooks included in this project that are examples of how to perform various automation jobs.
 These playbooks are all named ceres-playbook-<jobname>.yml where <jobname> refers to the automation job that playbook will execute.
 
-There are several testing playbooks that contain extra variables:
-* [ceres.test.playbook.dev.yml](ceres.test.playbook.dev.yml) - Testing Playbook for DEV (local VM)
-* [ceres.test.playbook.azsetup.yml](ceres.test.playbook.azsetup.yml) - Testing Playbook for Azure Setup (create Azure VM)
-* [ceres.test.playbook.qa.yml](ceres.test.playbook.qa.yml) - Testing Playbook for QA (Azure VM)
-
 Here are the main playbooks used in this project:
-* [ceres.playbook.dev.yml](ceres.playbook.dev.yml) - Playbook for DEV (local VM)
+* [ceres.playbook.local.yml](ceres.playbook.dev.yml) - Playbook for local VM
+* [ceres.playbook.remote.yml](ceres.playbook.dev.yml) - Playbook for remote VM/PM
 * [ceres.playbook.azsetup.yml](ceres.playbook.azsetup.yml) - Playbook for Azure Setup (create Azure VM)
-* [ceres.playbook.qa.yml](ceres.playbook.qa.yml) - Playbook for QA (Azure VM)
+* [ceres.playbook.azure.yml](ceres.playbook.qa.yml) - Playbook for Azure VM
+
+This is a playbook I use to set up an ansible control vm:
+* [ceres.playbook.control.yml](ceres.playbook.control.yml) - Playbook for Ansible Control VM
 
 Each of these playbooks will have embedded comment text explaining what it is doing.
 
@@ -191,7 +183,7 @@ At a minimum you will need to verify the proper inventory host names are being c
 
 Assuming [your local environments](#local-environments) have been properly configured this is how you would run a playbook:
 ```
-ansible-navigator run ceres.test.playbook.dev.yml
+ansible-navigator run ceres.playbook.local.yml
 ```
 
 Other playbooks would be run the same way, just replace the playbook filename.

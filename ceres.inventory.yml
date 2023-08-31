@@ -12,7 +12,7 @@
 all:
   children:
     ###
-    ### cereslocal group = all local machine vms
+    ### cereslocal group = all local machine vms for use as awx installation target
     ###
     cereslocal:
       # These vars will be applied to all vms in cereslocal group
@@ -20,56 +20,58 @@ all:
         ansible_ssh_user: vagrant
         ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
         ansible_python_interpreter: /usr/bin/python3
-      children:
-        ##
-        ## ceresdev group = local vms for testing dev awx automation against
-        ##
-        ceresdev:
-          hosts:
-            ceres-a:
-              ansible_host: 192.168.65.21
-              ansible_ssh_private_key_file: ./ssh.ceres-a.private_key
-              # K3S Node IP
-              ceres_k3s_node_ip_address: 192.168.65.21
-              # Ingress FQDN
-              ceres_awx_ingress_fqdn: ceres-a.awx.altbier.us
-            ceres-b:
-              ansible_host: 192.168.65.22
-              ansible_ssh_private_key_file: ./ssh.ceres-b.private_key
-              # K3S Node IP
-              ceres_k3s_node_ip_address: 192.168.65.22
-              # Ingress FQDN
-              ceres_awx_ingress_fqdn: ceres-b.awx.altbier.us
-            ceres-c9:
-              ansible_host: 192.168.65.23
-              ansible_ssh_private_key_file: ./ssh.ceres-c9.private_key
-              # K3S Node IP
-              ceres_k3s_node_ip_address: 192.168.65.23
-              # Ingress FQDN
-              ceres_awx_ingress_fqdn: ceres-c9.awx.altbier.us
-            ceres-r9:
-              ansible_host: 192.168.65.28
-              ansible_ssh_private_key_file: ./ssh.ceres-r9.private_key
-              # K3S Node IP
-              ceres_k3s_node_ip_address: 192.168.65.28
-              # Ingress FQDN
-              ceres_awx_ingress_fqdn: ceres-r9.awx.altbier.us
-        ##
-        ## cerescontrol group = local vms for use as ansible control nodes
-        ##
-        cerescontrol:
-          hosts:
-            ceres-ctrl:
-              ansible_host: 192.168.65.24
-              ansible_ssh_private_key_file: ./ssh.ceres-ctrl.private_key
-            ceres-rectal:
-              ansible_host: 192.168.65.25
-              ansible_ssh_private_key_file: ./ssh.ceres-rectal.private_key
+      hosts:
+        ceres-a:
+          ansible_host: 192.168.65.21
+          ansible_ssh_private_key_file: ./ssh.ceres-a.private_key
+          # K3S Node IP
+          ceres_k3s_node_ip_address: 192.168.65.21
+          # Ingress FQDN
+          ceres_awx_ingress_fqdn: ceres-a.awx.altbier.us
+        ceres-b:
+          ansible_host: 192.168.65.22
+          ansible_ssh_private_key_file: ./ssh.ceres-b.private_key
+          # K3S Node IP
+          ceres_k3s_node_ip_address: 192.168.65.22
+          # Ingress FQDN
+          ceres_awx_ingress_fqdn: ceres-b.awx.altbier.us
+        ceres-c9:
+          ansible_host: 192.168.65.23
+          ansible_ssh_private_key_file: ./ssh.ceres-c9.private_key
+          # K3S Node IP
+          ceres_k3s_node_ip_address: 192.168.65.23
+          # Ingress FQDN
+          ceres_awx_ingress_fqdn: ceres-c9.awx.altbier.us
+        ceres-r9:
+          ansible_host: 192.168.65.28
+          ansible_ssh_private_key_file: ./ssh.ceres-r9.private_key
+          # K3S Node IP
+          ceres_k3s_node_ip_address: 192.168.65.28
+          # Ingress FQDN
+          ceres_awx_ingress_fqdn: ceres-r9.awx.altbier.us
+    ##
+    ## cerescontrol group = local vms for use as ansible control nodes
+    ##
+    cerescontrol:
+      # These vars will be applied to all vms in control group
+      vars:
+        ansible_ssh_user: vagrant
+        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+        ansible_python_interpreter: /usr/bin/python3
+      hosts:
+        ceres-ctrl:
+          ansible_host: 192.168.65.24
+          ansible_ssh_private_key_file: ./ssh.ceres-ctrl.private_key
+        ceres-rectal:
+          ansible_host: 192.168.65.25
+          ansible_ssh_private_key_file: ./ssh.ceres-rectal.private_key
     ###
     ### ceresazure group = all azure hosted vms
     ###
     ceresazure:
       hosts:
+# Note that the below block will be modified by the azsetup automation jobs
+# Anything changed within this block will be overwritten
 # BEGIN ANSIBLE MANAGED BLOCK
         ceres-az01:
           ansible_ssh_user: azureuser
@@ -77,3 +79,20 @@ all:
           ansible_host: ceres-az01-jl6ur61a1z.southcentralus.cloudapp.azure.com
           ceres_awx_ingress_fqdn: ceres-az01-jl6ur61a1z.southcentralus.cloudapp.azure.com
 # END ANSIBLE MANAGED BLOCK
+    ##
+    ## ceresremote group = remote machines for use as awx installation target
+    ##
+    ceresremote:
+      hosts:
+        # This is an example of how you add a host
+        # REPLACE this host with the remote host you wish to use
+        phoenix:
+          ansible_host: 192.168.9.9
+          ansible_ssh_user: bagodicks
+          ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_ssh_private_key_file: ./ssh.labrador_rsa.private_key
+          # K3S Node IP
+          ceres_k3s_node_ip_address: 192.168.9.9
+          # Ingress FQDN
+          ceres_awx_ingress_fqdn: phoenix.iproute.ninja

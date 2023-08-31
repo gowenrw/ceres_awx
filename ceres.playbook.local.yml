@@ -1,8 +1,10 @@
 ---
-- name: Dev Test Playbook
-  hosts: ceresdev
+- name: Local Playbook - Install Ansible AWX onto a local VM
+  hosts: cereslocal
   become: true
-
+ 
+  # By default three main roles are run
+  # These can be disabled for testing by setting these launch values to False
   vars:
     launch_role_localenv: True
     launch_role_k3s: True
@@ -25,7 +27,7 @@
     when: ansible_distribution == 'Rocky'
 
   # 
-  # Call role ceres_localenv to resize root partition on vm for DEV AWX
+  # Call role ceres_localenv to resize root partition on target machine for AWX
   - name: Import role ceres_localenv
     ansible.builtin.import_role:
       name: ceres_localenv
@@ -37,30 +39,38 @@
     when: launch_role_localenv
 
   #
-  # Call role ceres_k3s to install k3s varient of Kubernetes on vm for DEV AWX
+  # Call role ceres_k3s to install k3s varient of Kubernetes on target machine for AWX
   - name: Import role ceres_k3s
     ansible.builtin.import_role:
       name: ceres_k3s
     vars:
-      ceres_k3s_installer_version: "v1.25.6+k3s1"
-      ceres_k3s_installer_channel: "stable"
-      ceres_k3s_exec_role: "server"
-      ceres_k3s_kube_dashboard_install: True
+      # k3s defaults - uncomment to change as needed
+      #ceres_k3s_installer_version: "v1.25.6+k3s1"
+      #ceres_k3s_installer_channel: "stable"
+      #ceres_k3s_exec_role: "server"
+      #
+      # This ingress is required for awx
       ceres_k3s_nginx_ingress_install: True
-      ceres_k3s_dashboard_ingress_install: True
+      #
+      # Dashboard is not required but can be nice, change below to True to install
+      ceres_k3s_kube_dashboard_install: False
+      ceres_k3s_dashboard_ingress_install: False
     when: launch_role_k3s
 
   #
-  # Call role ceres_awx to install awx on vm for DEV AWX
+  # Call role ceres_awx to install awx on target machine
   - name: Import role ceres_awx
     ansible.builtin.import_role:
       name: ceres_awx
     vars:
       ceres_awx_ansible_token: "{{ omit if ceres_k3s_ansible_token is not defined else ceres_k3s_ansible_token }}"
+      # awx install and ingress are required, setting to false will uninstall
+      # which can be helpful if troubleshooting a bad install
       ceres_awx_oper_install: True
       ceres_awx_ingress_install: True
     when: launch_role_awx
 
+  #
   # Save connection details to local files
   - name: Save Dashboard Ingress Connection Info
     ansible.builtin.copy:
@@ -79,6 +89,7 @@
       - ceres_awx_ingress_connect is defined
       - ceres_awx_ingress_connect != None
 
+  #
   # Print final status messages
   - name: Print Dashboard Ingress Connection Info
     ansible.builtin.debug:

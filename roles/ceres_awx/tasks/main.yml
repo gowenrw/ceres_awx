@@ -52,7 +52,7 @@
 - name: "Debug task output"
   ansible.builtin.debug:
     var: reg_awx_deployed
-    verbosity: 0
+    verbosity: 1
 
 ## AWX Values File
 #

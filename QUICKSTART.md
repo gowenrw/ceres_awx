@@ -4,9 +4,9 @@ This document was written for the impatient who want to just jump in now and RTF
 
 # Overview
 
-The basics of what this project will do for you is spin up a functional Ansible AWX system on either a local vm (which we are calling DEV) or on an Azure hosted vm (which we are calling QA).
+The basics of what this project will do for you is spin up a functional Ansible AWX system on either a local vm or on a remote vm/pm or on an Azure hosted vm.
 
-You can spin up your own target vm (locally or in Azure) to run the automation playbooks against.
+You can spin up your own target vm (locally or remote or in Azure) to run the automation playbooks against.
 Or you can use the tools here to spin up a local vm using vagrant/virtualbox or an Azure vm using a seperate azsetup automation playbook.
 
 # Local Environment
@@ -32,9 +32,12 @@ The [ansible.cfg](./ansible.cfg) file is set up to look for an ansible vault fil
 # Target VM
 
 We need a target VM to install AWX on.
-This can be a local VM (for the DEV automation jobs) or an Azure VM (for the QA automation jobs).
 
-If you are going to spin up your VM via some process not included here then skip ahead to [Lets Run This Shit](#lets-run-this-shit)
+This can be a local VM (for the 'local' automation jobs) or a remote VM/Physical-Machine (for the 'remote' automation jobs) or an Azure VM (for the 'azure'' automation jobs).
+
+Automation for standing up a local VM or an Azure VM are provided and detailed below.
+
+If you are going use a machine created via some process not included here then skip ahead to [Lets Run This Shit](#lets-run-this-shit)
 
 ## Local VM
 
@@ -105,20 +108,27 @@ When ansible is done you should have an Azure VM named ceres-az01 running RHEL 9
 
 Now that we have a target VM to install AWX on we just need to run the automation to do that.
 
-If you created your own VM via some process not included here then make sure you have updated the Ansible inventory file [ceres.inventory.yml](./ceres.inventory.yml) with the details of the target VM you created.
+If you created your own machine via some process not included here then make sure you have updated the Ansible inventory file [ceres.inventory.yml](./ceres.inventory.yml) with the details of the target machine you created.
 
-## DEV local VM AWX build
+## Install AWX on a local VM
 
-If you are building AWX on a local VM then run the DEV automation job with this command:
+If you are installing AWX on a local VM then run the local automation jobs with this command:
 ```
-ansible-navigator run ceres.playbook.dev.yml
+ansible-navigator run ceres.playbook.local.yml
 ```
 
-## QA Azure VM AWX build
+## Install AWX on a remote VM/PM
 
-If you are building AWX on an Azure VM then run the QA automation job with this command:
+If you are installing AWX on a remote machine then run the remote automation jobs with this command:
 ```
-ansible-navigator run ceres.playbook.qa.yml
+ansible-navigator run ceres.playbook.remote.yml
+```
+
+## Install AWX on an Azure VM
+
+If you are installing AWX on an Azure VM then run the azure automation jobs with this command:
+```
+ansible-navigator run ceres.playbook.azure.yml
 ```
 
 ## Rerunning

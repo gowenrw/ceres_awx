@@ -5,7 +5,7 @@
 
   tasks:
   # 
-  # Call role ceres_localenv to resize root partition on vm for DEV AWX
+  # Call role ceres_azsetup to create an AWX target machine in Azure
   - name: Import role ceres_azsetup
     ansible.builtin.import_role:
       name: ceres_azsetup

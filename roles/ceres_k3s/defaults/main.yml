@@ -6,6 +6,7 @@ ceres_k3s_installer_url: "https://get.k3s.io"
 ceres_k3s_installer_directory: /opt/k3s
 ceres_k3s_installer_version: "v1.25.6+k3s1"
 ceres_k3s_installer_channel: "stable"
+ceres_k3s_installer_install: True
 ceres_k3s_installer_reinstall: False
 
 ## helm installer (set to empty to disable installation)
@@ -31,10 +32,11 @@ ceres_k3s_exec_role: "server" # [server|agent] only server supported at this tim
 ceres_k3s_node_ip_address:
 
 ## Kube Dashboard
-ceres_k3s_kube_dashboard_install: True # Set to false to prevent install or remove install
+ceres_k3s_kube_dashboard_install: False # Set to true to install and false to prevent install or remove install
 ceres_k3s_kube_dashboard_reinstall: False
 ceres_k3s_kube_dashboard_token_file: /etc/rancher/k3s/dashboard-token
 ceres_k3s_kube_dashboard_token:
+ceres_k3s_kube_dashboard_version: "v2.7.0" # Had issues with v3 alpha which is latest so hardcoding this version
 
 ## NGINX INGRESS CONTROLLER
 ceres_k3s_nginx_ingress_install: True # Set to false to prevent install or remove install

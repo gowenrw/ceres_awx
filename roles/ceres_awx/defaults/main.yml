@@ -7,6 +7,7 @@ ceres_awx_oper_helm_repo_name: awx-operator
 ceres_awx_oper_helm_deploy_name: awx-operator
 ceres_awx_oper_helm_deploy_chart_ref: awx-operator/awx-operator
 ceres_awx_oper_helm_deploy_namespace: awx
+ceres_awx_oper_helm_deploy_chart_version:
 ceres_awx_oper_install: True  # If set to False will uninstall awx
 
 ## k3s env
@@ -18,6 +19,7 @@ ceres_awx_admin_pass:
 
 ## awx values
 ceres_awx_value_resourcename: awx
+ceres_awx_value_deployment_name: awx-web
 ceres_awx_value_admin_user: admin
 ceres_awx_value_servicename: awx-service
 # Requirements settings based on a system with 2 cpu cores 8GB ram 16GB disk (B2ms) - adjust as needed

@@ -39,20 +39,20 @@
     verbosity: 1
 
 #
-# Check if awx is already deployed
-- name: Query k3s to see if awx deployment exists
+# Check if awx is already deployed by checking for service
+- name: Query k3s to see if awx service exists
   kubernetes.core.k8s_info:
     api_key: "{{ ceres_awx_ansible_token }}"
-    kind: "Deployment"
+    kind: "Service"
     namespace: "{{ ceres_awx_oper_helm_deploy_namespace }}"
-    name: "{{ ceres_awx_value_resourcename }}"
+    name: "{{ ceres_awx_value_servicename }}"
   register: reg_awx_deployed
 #
 # Dump the output of previous task if needed for troubleshooting
 - name: "Debug task output"
   ansible.builtin.debug:
     var: reg_awx_deployed
-    verbosity: 1
+    verbosity: 0
 
 ## AWX Values File
 #
@@ -131,7 +131,7 @@
         wait: True
       register: reg_oper_helm
     # Wait for deploy to finish before continuing
-    - name: Wait for awx deployment to finish - This may take up to 10 minutes
+    - name: Wait for awx deployment to finish - This may take up to 7 minutes
       kubernetes.core.k8s_info:
         api_key: "{{ ceres_awx_ansible_token }}"
         kind: Deployment
@@ -139,12 +139,12 @@
         name: "{{ ceres_awx_value_resourcename }}"
         wait: True
         wait_sleep: 15
-        wait_timeout: 600
+        wait_timeout: 420
       register: reg_oper_awx_depl
     # AWX needs time to set up things before it is ready
     - name: Pause for a bit to let k3s and awx catch up before doing anything else
       ansible.builtin.pause:
-        seconds: 90
+        seconds: 60
   always:
     # Dump the output of block tasks if needed for troubleshooting
     - name: "Debug block tasks output"

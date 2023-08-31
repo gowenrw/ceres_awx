@@ -410,8 +410,9 @@
   # Dashboard Deployment Block conditionals
   when:
     - ceres_k3s_installer_install
-    - ceres_k3s_kube_dashboard_query.resources exists and ceres_k3s_kube_dashboard_query.resources != None
-    - ceres_k3s_kube_dashboard_query.resources exists and ceres_k3s_kube_dashboard_query.resources | length >0
+    - ceres_k3s_kube_dashboard_query.resources exists
+    - ceres_k3s_kube_dashboard_query.resources != None
+    - ceres_k3s_kube_dashboard_query.resources | length >0
     - not ceres_k3s_kube_dashboard_install or ceres_k3s_kube_dashboard_reinstall
 #
 # Dashboard Install and Deployment Block

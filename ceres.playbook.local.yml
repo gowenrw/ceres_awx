@@ -76,10 +76,6 @@
       # which can be helpful if troubleshooting a bad install
       ceres_awx_oper_install: True
       ceres_awx_ingress_install: True
-      #
-      # This is the version of awx to install via helm
-      # By default it pulls latest to change uncomment below
-      #ceres_awx_oper_helm_deploy_chart_version: "23.0.0"
     when: launch_role_awx
 
   #

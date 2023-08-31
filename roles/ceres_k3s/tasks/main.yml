@@ -131,7 +131,7 @@
     # Wait for cleanup to finish before proceeding
     - name: Pause for a bit to let k3s uninstall cleanup catch up before doing anything else
       ansible.builtin.pause:
-        seconds: 180
+        seconds: 60
   # Uninstall block conditionals
   when: reg_k3binary.stat.exists and (ceres_k3s_installer_reinstall or not ceres_k3s_installer_install)
 

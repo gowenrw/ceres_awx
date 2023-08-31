@@ -68,34 +68,6 @@
     path: /etc/sudoers
     validate: visudo -cf %s
 
-## Setup Dirs
-#
-# Make sure the directories we need exist
-- name: create required directories
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    state: directory
-    mode: "{{ item.mode }}"
-    owner: "{{ item.owner | default(omit) }}"
-    group: "{{ item.group | default(omit) }}"
-  loop:
-    - path: "{{ ceres_k3s_installer_directory }}"
-      mode: "0700"
-      owner: root
-      group: root
-    - path: "{{ ceres_k3s_bin_directory }}"
-      mode: "0755"
-    - path: "{{ ceres_k3s_default_storage_path }}"
-      mode: "0755"
-    - path: "{{ ceres_k3s_kube_app_defs_path }}"
-      mode: "0750"
-    - path: "{{ ceres_k3s_config_file | dirname }}"
-      mode: "0750"
-    - path: "{{ ceres_k3s_kubeconfig_file_root | dirname }}"
-      mode: "0700"
-      owner: root
-      group: root
-
 ## Install required packages
 #
 - name: Package Install Block
@@ -127,6 +99,75 @@
           - "{{ omit if reg_k3s_yumpkg_result is not defined else reg_k3s_yumpkg_result }}"
           - "{{ omit if reg_k3s_pippkg_result is not defined else reg_k3s_pippkg_result }}"
         verbosity: 1
+
+#########################
+#
+# UNINSTALL IF REQUIRED
+#
+#########################
+
+## Check if k3s already installed
+- name: Stat k3s binary
+  ansible.builtin.stat: path="{{ ceres_k3s_bin_directory }}/k3s"
+  register: reg_k3binary
+
+## K3S UNINSTALL BLOCK
+- name: K3S Uninstall Block
+  block:
+    # Define installer environment
+    - name: Set facts for installer environment
+      ansible.builtin.set_fact:
+        ceres_k3s_install_env:
+          INSTALL_K3S_VERSION: "{{ ceres_k3s_installer_version }}"
+          INSTALL_K3S_CHANNEL: "{{ ceres_k3s_installer_channel }}"
+          INSTALL_K3S_BIN_DIR: "{{ ceres_k3s_bin_directory }}"
+          INSTALL_K3S_EXEC: "{{ ceres_k3s_exec_role }}"
+          INSTALL_K3S_SKIP_START: "true"
+    # Uninstall k3s using defined environment
+    - name: Execute k3s uninstaller
+      ansible.builtin.command:
+        cmd: "{{ ceres_k3s_bin_directory }}/k3s-uninstall.sh"
+      environment: "{{ ceres_k3s_install_env }}"
+    # Wait for cleanup to finish before proceeding
+    - name: Pause for a bit to let k3s uninstall cleanup catch up before doing anything else
+      ansible.builtin.pause:
+        seconds: 90
+  # Uninstall block conditionals
+  when: reg_k3binary.stat.exists and (ceres_k3s_installer_reinstall or not ceres_k3s_installer_install)
+
+#########################
+#
+# INSTALL PREP
+#
+#########################
+
+## Setup Dirs
+#
+# Make sure the directories we need exist
+- name: create required directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+  loop:
+    - path: "{{ ceres_k3s_installer_directory }}"
+      mode: "0700"
+      owner: root
+      group: root
+    - path: "{{ ceres_k3s_bin_directory }}"
+      mode: "0755"
+    - path: "{{ ceres_k3s_default_storage_path }}"
+      mode: "0755"
+    - path: "{{ ceres_k3s_kube_app_defs_path }}"
+      mode: "0750"
+    - path: "{{ ceres_k3s_config_file | dirname }}"
+      mode: "0750"
+    - path: "{{ ceres_k3s_kubeconfig_file_root | dirname }}"
+      mode: "0700"
+      owner: root
+      group: root
 
 ## Set Node IP
 #
@@ -170,41 +211,11 @@
     var: ceres_k3s_ansible_token
     verbosity: 1
 
-
 #########################
 #
 # DOWNLOAD AND INSTALL
 #
 #########################
-
-## Check if k3s already installed
-- name: Stat k3s binary
-  ansible.builtin.stat: path="{{ ceres_k3s_bin_directory }}/k3s"
-  register: reg_k3binary
-
-## K3S UNINSTALL BLOCK
-- name: K3S Uninstall Block
-  block:
-    # Define installer environment
-    - name: Set facts for installer environment
-      ansible.builtin.set_fact:
-        ceres_k3s_install_env:
-          INSTALL_K3S_VERSION: "{{ ceres_k3s_installer_version }}"
-          INSTALL_K3S_CHANNEL: "{{ ceres_k3s_installer_channel }}"
-          INSTALL_K3S_BIN_DIR: "{{ ceres_k3s_bin_directory }}"
-          INSTALL_K3S_EXEC: "{{ ceres_k3s_exec_role }}"
-          INSTALL_K3S_SKIP_START: "true"
-    # Uninstall k3s using defined environment
-    - name: Execute k3s uninstaller
-      ansible.builtin.command:
-        cmd: "{{ ceres_k3s_bin_directory }}/k3s-uninstall.sh"
-      environment: "{{ ceres_k3s_install_env }}"
-    # Wait for cleanup to finish before proceeding
-    - name: Pause for a bit to let k3s uninstall cleanup catch up before doing anything else
-      ansible.builtin.pause:
-        seconds: 90
-  # Uninstall block conditionals
-  when: reg_k3binary.stat.exists and (ceres_k3s_installer_reinstall or not ceres_k3s_installer_install)
 
 ## K3S INSTALL BLOCK
 - name: K3S Install Block
@@ -285,6 +296,7 @@
         PATH: "{{ ceres_k3s_bin_directory }}:{{ ansible_env.PATH }}"
   when:
     - not reg_helmbinary.stat.exists
+    - ceres_k3s_installer_install
     - ceres_k3s_helm_installer_url | default("", true) != ""
 
 #########################
@@ -300,11 +312,13 @@
     name: "{{ ceres_k3s_service_name }}"
     state: started
     enabled: true
+  when: ceres_k3s_installer_install
 # Make sure it is fully up before continuing
 - name: Wait for kubeconfig file
   ansible.builtin.wait_for:
     path: "{{ ceres_k3s_kubeconfig_file }}"
     state: present
+  when: ceres_k3s_installer_install
 
 ## Root kubeconfig
 #
@@ -316,6 +330,7 @@
     owner: root
     group: root
     mode: "0600"
+  when: ceres_k3s_installer_install
 
 #########################
 #
@@ -332,12 +347,14 @@
     name: "kubernetes-dashboard"
     api_key: "{{ ceres_k3s_ansible_token }}"
   register: ceres_k3s_kube_dashboard_query
+  when: ceres_k3s_installer_install
 #
 # Dump the output of query task if needed for troubleshooting
 - name: "Debug query tasks output"
   ansible.builtin.debug:
     var: ceres_k3s_kube_dashboard_query
     verbosity: 1
+  when: ceres_k3s_installer_install
 #
 # Dashboard Uninstall
 - name: Kube Dashboard Remove Block
@@ -479,7 +496,8 @@
         - "{{ omit if reg_k3s_kube_dashboard_token is not defined else reg_k3s_kube_dashboard_token}}"
         verbosity: 1
   # Dashboard Deployment Block conditionals
-  when: 
+  when:
+    - ceres_k3s_installer_install
     - not ceres_k3s_kube_dashboard_query.resources | default(None) or ceres_k3s_kube_dashboard_reinstall
     - ceres_k3s_kube_dashboard_install
 #
@@ -488,13 +506,15 @@
   ansible.builtin.slurp:
     src: "{{ ceres_k3s_kube_dashboard_token_file }}"
   register: reg_slurp_k3s_kube_dashboard_token
-  when: 
+  when:
+    - ceres_k3s_installer_install
     - ceres_k3s_kube_dashboard_install
 # Decode token contents for ansible use
 - name: set fact for kube dashboard token
   ansible.builtin.set_fact:
     ceres_k3s_kube_dashboard_token: "{{ reg_slurp_k3s_kube_dashboard_token['content'] | b64decode }}"
-  when: 
+  when:
+    - ceres_k3s_installer_install
     - ceres_k3s_kube_dashboard_install
 
 #########################
@@ -512,6 +532,7 @@
     name: "ingress-nginx-controller"
     api_key: "{{ ceres_k3s_ansible_token }}"
   register: ceres_k3s_nginx_ingress_query
+  when: ceres_k3s_installer_install
 #
 # Dump the output of query task if needed for troubleshooting
 - name: "Debug query tasks output"

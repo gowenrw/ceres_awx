@@ -49,6 +49,13 @@
       #ceres_k3s_installer_channel: "stable"
       #ceres_k3s_exec_role: "server"
       #
+      # k3s installation is required for AWX set to false to uninstall
+      ceres_k3s_installer_install: True
+      #
+      # Reinstall k3s by setting this to True
+      # Good for changing versions as it does uninstall then install
+      ceres_k3s_installer_reinstall: False
+      #
       # This ingress is required for awx
       ceres_k3s_nginx_ingress_install: True
       #

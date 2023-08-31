@@ -182,6 +182,30 @@
   ansible.builtin.stat: path="{{ ceres_k3s_bin_directory }}/k3s"
   register: reg_k3binary
 
+## K3S UNINSTALL BLOCK
+- name: K3S Uninstall Block
+  block:
+    # Define installer environment
+    - name: Set facts for installer environment
+      ansible.builtin.set_fact:
+        ceres_k3s_install_env:
+          INSTALL_K3S_VERSION: "{{ ceres_k3s_installer_version }}"
+          INSTALL_K3S_CHANNEL: "{{ ceres_k3s_installer_channel }}"
+          INSTALL_K3S_BIN_DIR: "{{ ceres_k3s_bin_directory }}"
+          INSTALL_K3S_EXEC: "{{ ceres_k3s_exec_role }}"
+          INSTALL_K3S_SKIP_START: "true"
+    # Uninstall k3s using defined environment
+    - name: Execute k3s uninstaller
+      ansible.builtin.command:
+        cmd: "{{ ceres_k3s_installer_directory }}/k3s-uninstall.sh"
+      environment: "{{ ceres_k3s_install_env }}"
+    # Wait for cleanup to finish before proceeding
+    - name: Pause for a bit to let k3s uninstall cleanup catch up before doing anything else
+      ansible.builtin.pause:
+        seconds: 90
+  # Uninstall block conditionals
+  when: reg_k3binary.stat.exists and (ceres_k3s_installer_reinstall or not ceres_k3s_installer_install)
+
 ## K3S INSTALL BLOCK
 - name: K3S Install Block
   block:
@@ -237,8 +261,7 @@
         - type: stderr
       when: reg_k3s_install.changed | bool
   # Install block conditionals
-  when: not reg_k3binary.stat.exists or ceres_k3s_installer_reinstall
-
+  when: (not reg_k3binary.stat.exists and ceres_k3s_installer_install) or ceres_k3s_installer_reinstall
 
 ## Check if helm already installed
 - name: Stat helm binary

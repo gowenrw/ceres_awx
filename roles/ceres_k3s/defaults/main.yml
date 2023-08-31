@@ -6,6 +6,7 @@ ceres_k3s_installer_url: "https://get.k3s.io"
 ceres_k3s_installer_directory: /opt/k3s
 ceres_k3s_installer_version: "v1.25.6+k3s1"
 ceres_k3s_installer_channel: "stable"
+ceres_k3s_installer_install: True
 ceres_k3s_installer_reinstall: False
 
 ## helm installer (set to empty to disable installation)

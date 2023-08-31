@@ -408,9 +408,10 @@
         path: "{{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user-token.yml"
         state: absent
   # Dashboard Deployment Block conditionals
-  when: 
-    - ceres_k3s_kube_dashboard_query.resources != None
-    - ceres_k3s_kube_dashboard_query.resources | length >0
+  when:
+    - ceres_k3s_installer_install
+    - ceres_k3s_kube_dashboard_query.resources exists and ceres_k3s_kube_dashboard_query.resources != None
+    - ceres_k3s_kube_dashboard_query.resources exists and ceres_k3s_kube_dashboard_query.resources | length >0
     - not ceres_k3s_kube_dashboard_install or ceres_k3s_kube_dashboard_reinstall
 #
 # Dashboard Install and Deployment Block
@@ -551,7 +552,8 @@
         state: absent
         name: "ingress-nginx"
   # Dashboard Deployment Block conditionals
-  when: 
+  when:
+    - ceres_k3s_installer_install
     - ceres_k3s_nginx_ingress_query.resources != None
     - ceres_k3s_nginx_ingress_query.resources | length >0
     - not ceres_k3s_nginx_ingress_install or ceres_k3s_nginx_ingress_reinstall
@@ -600,7 +602,8 @@
         - "{{ omit if reg_nginx_ingress_install_wait is not defined else reg_nginx_ingress_install_wait }}"
         verbosity: 1
   # NGINX INGRESS Block conditionals
-  when: 
+  when:
+    - ceres_k3s_installer_install
     - not ceres_k3s_nginx_ingress_query.resources | default(None) or ceres_k3s_nginx_ingress_reinstall
     - ceres_k3s_nginx_ingress_install
 

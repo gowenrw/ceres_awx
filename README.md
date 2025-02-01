@@ -2,30 +2,37 @@
 
 AWX server provisioning for local and cloud
 
-The main goal of this project is to automate provisioning of several distinct Ansible AWX configurations (which cover dev, and qa use cases - maybe a prod use case in the future).
+The main goal of this project is to automate provisioning of Ansible AWX on a VM located on-premise or in the cloud.
 
-A secondary goal is to automate the creation of custom Ansible execution environments for use with ansible-navigator and Ansible AWX and to encourage the use of ansible-navigator versus ansible-playbook for running jobs. 
-NOTE THIS GOAL MOVED TO MY [build-ee REPOSITORY](https://github.com/gowenrw/build-ee)
+A secondary goal is to automate the provisioning of Ansible AWX in a cloud managed container service (e.g., Azure AKS, AWS ECS).
+
+A tertiary goal is to automate the creation of custom Ansible execution environments for use with ansible-navigator and Ansible AWX and to encourage the use of ansible-navigator versus ansible-playbook for running CLI jobs. 
+
+NOTE THIS GOAL MOVED TO MY [build-ee REPOSITORY](https://github.com/gowenrw/build-ee) Project which is called as a submodule here.
 
 A final goal is to make this code accessible to those with limited Ansible knowledge (i.e., lots of documentation and examples).
 
 These are the Ansible AWX configurations this project should automate provisioning for:
-* LOCAL - AWX in a single VM on a local machine
-  * The local VM needs to be provisioned manually prior to these AWX automation jobs
-  * Has been tested with Virtualbox as the local hypervisor using Vagrant for local VM provisioning
-  * Automation will install everything for a fully functional AWX system on that local VM.
-* REMOTE - AWX in a single VM or physical machine remote from this box
-  * The remote VM/PM needs to be provisioned manually prior to these AWX automation jobs
-  * Has been tested with various physical and virtual machines in a home lab
-  * Automation will install everything for a fully functional AWX system on that remote VM/PM.
-* AZURE - AWX in a single IaaS VM on Microsoft Azure.
+
+* MYVM - AWX in a single VM (or pyisical machine) located anywhere (e.g., local, on-premise, cloud)
+  * The VM needs to be provisioned prior to these ceres_awx automation jobs running (no provisioning scripts provided)
+  * Connectivity via SSH should be allowed and confirmed from the control platform where you are running the cerex_awx automation jobs to the target VM where you wish AWX installed.
+  * The file ```ceres.inventory.yml``` will need to be updated with the SSH key and other VM details
+  * The supported VM OS Types should be RHEL 9, CentOS Stream 9, and Ubuntu 24.04
+  * Testing will be done with the supported OS types, any other OS may require tweaks to the code
+  * Automation will install everything for a fully functional AWX system on that VM.
+* AZVM - AWX in a single IaaS VM on Microsoft Azure provisioned via our automation scripts.
   * This should automate the provisioning of the AWX VM and its network landing zone in azure
   * Azure details will need to be provided for these automation jobs
   * An Azure AD Service Principal (SPN) account (with contributor access to a RG) will be needed
-  * Automation will install everything for a fully functional AWX system as per the phases above.
+  * Automation will install everything for a fully functional AWX system.
+* AZAKS - AWX in an Azure Kubernetes Service cluster provisioned via our automation scripts.
+  * This should automate the provisioning of the AWX services in its AKS cluster landing zone in azure
+  * Azure details will need to be provided for these automation jobs
+  * An Azure AD Service Principal (SPN) account (with contributor access to a RG) will be needed
+  * Automation will install everything for a fully functional AWX system.
 
-Currently these three roles are working with bare bones functionality.
-Need to tweak many things and add some post provisioning configurations.
+As this is a revamp of an old project none of the above are fully functional at this time.
 
 # Git Submodules
 
@@ -52,22 +59,15 @@ cd ..; git add build-ee; git commit -a -m 'updated build-ee'; git push
 
 # How To Use This Project
 
-## Quick Start
-
-Want to get started quickly?
-
-Check out the [QUICKSTART.md](./QUICKSTART.md) document.
-
 ## Local Environments
 
-You will need to setup your local environment for running Ansible (i.e., Ansible control node) and your local environment for spinning up local vms if needed for AWX provisioning and/or an Ansible control node.
+You will need to setup your local environment for running Ansible (i.e., Ansible control node).
 
-If you are using a linux host these two local environments may be the same.
-But if you are using a Windows host then these two local environments will be different as Ansible cannot be run nativley on Windows.
+Given that Ansible does not run nativley on Windows this will need to be a Linux environment such as on a VM or WSL.
 
 ### Local Environment for Ansible
 
-I use a Windows host with a linux vm for my Ansible control node.  You can see [my local environment details below](#my-local-environment).
+I use a Linux vm for my Ansible control node.  You can see [my local environment details below](#my-local-environment).
 This includes details about the [ansible.cfg](./ansible.cfg) file and [ansible-navigator.yml](./ansible-navigator.yml) file provided here and what they do.
 
 For the Ansible cotrol node local environment (which needs to be Linux) you will need the following installed:
@@ -92,42 +92,11 @@ If you plan to use ```ansible-playbook``` then you need to add the collections a
 
 The [ansible.cfg](./ansible.cfg) file is set up to look for an ansible vault file named ```.ansible-vault.private_key``` so regardless of weather or not you plan on using ansible-vault you will either need to create that file with some random text in it or remove that configuration line to prevent ansible from throwing errors.
 
-### Local Environment for Local VM Provisioning
-
-In order to automate the deployment of AWX to a local VM you must first be able to provision a local VM.
-
-This can be done in several ways using different hypervisor software (e.g., VMWare, HyperV, VirtualBox, etc.).
-
-For your convenience a [Vagrantfile](./Vagrantfile) has been provided with preconfigured local VM settings that can be used.
-
-This file is designed to be used with the [VirtualBox](https://www.virtualbox.org/) hypervisor and the [Vagrant](https://www.vagrantup.com/) orchestration tool which are both cross-platform (i.e., work on Windows and Linux) and free to use.
-
-If you wish to spin up local vms using the [Vagrantfile](./Vagrantfile) you will need the following installed:
-* VirtualBox version 7+ (tested with 7.0.6, 6.x versions might work but not tested)
-* Vagrant version 2.3+ (tested with 2.3.4, 2.2.x might also work but 2.1.x will fail)
-
-To spin up a local VM using [CentOS Stream 9](https://cloud.centos.org/centos/9-stream/x86_64/images/) (2 CPU, 8GB RAM, 20GB Disk) use the following command:
-```
-vagrant up ceres-c9
-```
-
-To spin up a local VM using [Rocky Linux 9](https://dl.rockylinux.org/pub/rocky/9.1/images/x86_64/) (2 CPU, 8GB RAM, 20GB Disk) use the following command:
-```
-vagrant up ceres-r9
-```
-
 ## Inventory File
 
 This project has an inventory file named [ceres.inventory.yml](./ceres.inventory.yml) which contans the details Ansible needs about the hosts we will automate against.
 
 You will need to modify this file to incorporate the hosts that meet your needs.
-
-If you are using the provided Vagrant/Virtualbox configs to spin up local VMs be sure to copy the SSH Key from the vagrant folder to the root project folder where the ansible inventory file will look for it.
-
-This can be done using the provided script with the following command:
-```
-./bin/wkeycp.sh
-```
 
 ## Group Variable File
 
@@ -156,7 +125,7 @@ You can inspect these files to determine which variable names are used to set wh
 
 The Ansible variable order of precedence dictates that a variable defined in a playbook will take precedence over (i.e., overwrite the value of) that same variable name defined in a role.
 Here is a simplified variable order of precedence list as applies to this project:
-* Vars in ./playbook.yml take precedence over ./roles/role-name/vars/main.yml
+* Vars in ./*playbook.yml take precedence over ./roles/role-name/vars/main.yml
 * Vars in ./roles/role-name/vars/main.yml take precedence over ./roles/role-name/defaults/main.yml
 * Vars in ./roles/role-name/defaults/main.yml take precedence over ./group_vars/all.yml
 
@@ -166,13 +135,9 @@ There are several Ansible playbooks included in this project that are examples o
 These playbooks are all named ceres-playbook-<jobname>.yml where <jobname> refers to the automation job that playbook will execute.
 
 Here are the main playbooks used in this project:
-* [ceres.playbook.local.yml](ceres.playbook.dev.yml) - Playbook for local VM
-* [ceres.playbook.remote.yml](ceres.playbook.dev.yml) - Playbook for remote VM/PM
-* [ceres.playbook.azsetup.yml](ceres.playbook.azsetup.yml) - Playbook for Azure Setup (create Azure VM)
-* [ceres.playbook.azure.yml](ceres.playbook.qa.yml) - Playbook for Azure VM
-
-This is a playbook I use to set up an ansible control vm:
-* [ceres.playbook.control.yml](ceres.playbook.control.yml) - Playbook for Ansible Control VM
+* [ceres.playbook.azsetup.yml](ceres.playbook.azsetup.yml) - Playbook for Azure Setup (provision an Azure VM)
+* [ceres.playbook.azvm.yml](ceres.playbook.azvm.yml) - Playbook to deploy AWX on the Azure VM from azsetup
+* [ceres.playbook.myvm.yml](ceres.playbook.myvm.yml) - Playbook to deploy AWX on any VM provisioned by you
 
 Each of these playbooks will have embedded comment text explaining what it is doing.
 
@@ -183,44 +148,19 @@ At a minimum you will need to verify the proper inventory host names are being c
 
 Assuming [your local environments](#local-environments) have been properly configured this is how you would run a playbook:
 ```
-ansible-navigator run ceres.playbook.local.yml
+ansible-navigator run ceres.playbook.myvm.yml
 ```
 
 Other playbooks would be run the same way, just replace the playbook filename.
 
 # My Local Environment
 
-Since AWX DEV will be on a local machine it is important to note the local environment this was tested with so you can make adjustments for your own local environment.
+I use an Ubuntu VM as my Ansible control node and have its local environment set up with ansible-core and ansible-navigator and podman using a set up automation script not contained in this repo.
+The details of this are not too important only that I keep both ansible-core and ansible-navigator up to date with the most recent version available.
 
-Here is the local environment this was tested with:
+All the ansible collections and python libraries needed are contained in the execution environment container that is used by ansible-navigator, so there is no need to install those locally.
 
-* Host OS: Windows 10
-* VirtualBox version 7.0.6
-* Vagrant version 2.3.4
-* Git for Windows 2.37.3
-* VSCode 1.75.0
-* PuTTy 0.78
-
-I do testing on two different machines (not at the same time) with the setup above using MS OneDrive to sync this folder between them.
-
-Note that I do not run windows subsystem for linux as it has had conflicts with virtualbox in the past (not sure if those were ever resolved).
-
-Since Ansible cannot be run nativley on Windows I have local VMs configured in Vagrant to use as Ansible control nodes (i.e., this is where I run the Ansible code for the AWX automation).
-
-Vagrant does not like my OneDrive sharing the .vagrant directory where it keeps its local system configuration data.
-Rather than configure OneDrive to ignore that one folder (which seemed overly complex to do) I created some helper bash scripts I can run in a Git Bash shell that backup and restore the .vagrant folder on each machine.
-These scripts are named ```xstart.sh``` and ```xquit.sh``` since I execute them at the start and end of testing on each machine.
-These scripts also take care of the vagrant up and halt of my Ansible control vms since I am lazy.
-Note: these scripts lookup the Windows Hostname for conditionals and will need to be modified for use elsewhere.
-
-Since I want to use PuTTy to connect to the vagrant managed virtualbox VMs I wrote a script to copy and convert the vagrant ssh keys to the PuTTy ppk format.
-This script ```vkeyconvert.sh``` will only work from a linux vm (not Git Bash or WSL) since the windows version of puttygen does not support CLI options the way the linux version does.
-So, when I first connect to my Ansible control vm I do so via the vagrant ssh method and then I install putty on it (see [Notes.md](./docs/NOTES.md) for details on my Ansible control vm config).
-Then from the Ansible control vm I can clone this git repository and execute the script which generates the ppk keys for all the vagrant vms.
-
-On my local Ansible control node vm I perform a seperate git clone of this project for running these jobs.
-While it is possible to use the shared folder, given the file and permission differences between the windows host and the linux guest this usually causes issues.
-So, it is better to work with a linux native copy on the linux vm.
+On my local Ansible control node vm I perform a git clone of this project for running these jobs using ansible-navigator and its EE which is defined in its configuration file in this repo.
 
 ## ansible.cfg configuration file
 

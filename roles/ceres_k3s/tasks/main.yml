@@ -461,7 +461,7 @@
         wait: True
       register: reg_k3s_kube_dashboard_helm
     # Wait for deploy to finish before continuing
-    - name: Wait for kubernetes-dashboard deployment to finish - This may take up to 7 minutes
+    - name: Wait for kubernetes-dashboard deployment to finish - This may take a few minutes
       kubernetes.core.k8s_info:
         api_key: "{{ ceres_awx_ansible_token }}"
         kind: Deployment
@@ -469,7 +469,7 @@
         name: "{{ ceres_k3s_kube_dashboard_helm_deploy_name }}"
         wait: True
         wait_sleep: 15
-        wait_timeout: 420
+        wait_timeout: 60
       register: reg_k3s_kube_dashboard_depl
     # Dashboard Admin User Definitions
     - name: Dashboard admin user definition file
@@ -532,7 +532,7 @@
         verbosity: 1
   when: 
     - ceres_k3s_installer_install
-    - not ceres_k3s_kube_dashboard_query.resources | default(None) or ceres_k3s_kube_dashboard_reinstall
+    - not ceres_k3s_kube_dashboard_query.resources | default(None)
     - ceres_k3s_kube_dashboard_install
 
 #
@@ -647,6 +647,13 @@
 #
 #########################
 
+# Remove the dashboard ingress def file if exists and no ingress
+- name: Remove the dashboard ingress def file if exists and no ingress
+  ansible.builtin.file:
+    path: "{{ ceres_k3s_kube_app_defs_path }}/dashboard-ingress.yml"
+    state: absent
+  when: 
+    - not ceres_k3s_kube_dashboard_install or not ceres_k3s_nginx_ingress_install or not ceres_k3s_dashboard_ingress_install
 #
 # Create the dashboard ingress def file
 - name: Dashboard Ingress definition file
@@ -663,13 +670,6 @@
     - ceres_k3s_dashboard_ingress_install
     - ceres_awx_ingress_fqdn is defined
     - ceres_awx_ingress_fqdn | length >0
-# Remove the dashboard ingress def file if exists and no ingress
-- name: Remove the dashboard ingress def file if exists and no ingress
-  ansible.builtin.file:
-    path: "{{ ceres_k3s_kube_app_defs_path }}/dashboard-ingress.yml"
-    state: absent
-  when: 
-    - not ceres_k3s_kube_dashboard_install or not ceres_k3s_nginx_ingress_install or not ceres_k3s_dashboard_ingress_install
 # Create/Update dashboard ingress from definition
 - name: Create / Update dashboard ingress from definition
   block:

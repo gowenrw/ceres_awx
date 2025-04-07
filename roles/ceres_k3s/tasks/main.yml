@@ -113,6 +113,12 @@
           - "{{ omit if reg_k3s_pippkg_result is not defined else reg_k3s_pippkg_result }}"
         verbosity: 1
 
+#
+## Reboot VM to fully affect some changes above
+- name: Reboot machine to ensure all updates are applied
+  ansible.builtin.reboot:
+    reboot_timeout: 3600
+
 #########################
 #
 # UNINSTALL IF REQUIRED

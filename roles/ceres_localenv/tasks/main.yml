@@ -17,6 +17,7 @@
 - name: Disable SELinux
   ansible.posix.selinux:
     state: disabled
+  register: reg_localenv_selinux_result
 #
 # firewalld
 - name: Stop and Disable FirewallD
@@ -24,6 +25,7 @@
     name: firewalld
     state: stopped
     enabled: False
+  register: reg_localenv_firewalld_result
   when:
     - ansible_facts.services['firewalld'] is defined
     - ansible_facts.services['firewalld'].state == 'running'
@@ -226,3 +228,4 @@
 - name: Reboot machine to ensure all updates are applied
   ansible.builtin.reboot:
     reboot_timeout: 3600
+  when: reg_localenv_selinux_result.changed or reg_localenv_firewalld_result.changed or reg_yum_update_result.changed

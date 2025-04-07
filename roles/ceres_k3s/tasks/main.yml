@@ -21,6 +21,7 @@
 - name: Disable SELinux
   ansible.posix.selinux:
     state: disabled
+  register: reg_k3s_selinux_result
 #
 # firewalld
 - name: Stop and Disable FirewallD
@@ -28,9 +29,10 @@
     name: firewalld
     state: stopped
     enabled: False
+  register: reg_k3s_firewalld_result
   when:
-    - ansible_facts.services['firewalld'] is defined
-    - ansible_facts.services['firewalld'].state == 'running'
+    - ansible_facts['services']['firewalld']['status'] | default('not-found') != 'not-found'
+    - ansible_facts['services']['firewalld']['state'] == 'running'
 
 ## STOP AND DISABLE nm-cloud-setup.service
 - name: Stop and Disable nm-cloud-setup
@@ -38,8 +40,9 @@
     name: nm-cloud-setup
     state: stopped
     enabled: False
+  register: reg_k3s_nmcloudsetup_result
   when:
-    - ansible_facts.services['nm-cloud-setup'] is defined
+    - ansible_facts['services']['nm-cloud-setup']['status'] | default('not-found') != 'not-found'
 
 ## IP FORWARDING
 # 
@@ -117,6 +120,7 @@
 - name: Reboot machine to ensure all updates are applied
   ansible.builtin.reboot:
     reboot_timeout: 3600
+  when: reg_k3s_selinux_result.changed or reg_k3s_firewalld_result.changed or reg_k3s_nmcloudsetup_result.changed
 
 #########################
 #

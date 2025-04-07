@@ -29,8 +29,8 @@
     state: stopped
     enabled: False
   when:
-    - ansible_facts.services.firewalld is defined
-    - ansible_facts.services.firewalld.state == 'running'
+    - ansible_facts.services['firewalld'] is defined
+    - ansible_facts.services['firewalld'].state == 'running'
 
 ## STOP AND DISABLE nm-cloud-setup.service
 - name: Stop and Disable nm-cloud-setup
@@ -39,8 +39,7 @@
     state: stopped
     enabled: False
   when:
-    - ansible_facts.services.nm-cloud-setup is defined
-    - ansible_facts.services.nm-cloud-setup.state == 'running'
+    - ansible_facts.services['nm-cloud-setup'] is defined
 
 ## IP FORWARDING
 # 

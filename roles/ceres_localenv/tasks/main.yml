@@ -25,8 +25,8 @@
     state: stopped
     enabled: False
   when:
-    - ansible_facts.services.firewalld is defined
-    - ansible_facts.services.firewalld.state == 'running'
+    - ansible_facts.services['firewalld'] is defined
+    - ansible_facts.services['firewalld'].state == 'running'
 
 ## SUDO SECURE_PATH
 #

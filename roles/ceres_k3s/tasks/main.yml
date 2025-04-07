@@ -11,9 +11,9 @@
 - name: OS Check
   ansible.builtin.fail:
     msg: 
-    - "The role currently only supports CentOS and Rocky and RHEL distributions."
+    - "The role currently only supports CentOS and RHEL distributions."
     - "Detected distribution: {{ ansible_distribution }}"
-  when: ansible_distribution not in ['CentOS', 'RedHat', 'Red Hat Enterprise Linux', 'Rocky']
+  when: ansible_distribution not in ['CentOS', 'RedHat', 'Red Hat Enterprise Linux']
 
 ## DISABLE SELINUX & FIREWALLD
 #
@@ -28,6 +28,9 @@
     name: firewalld
     state: stopped
     enabled: False
+  when:
+    - ansible_facts.services.firewalld is defined
+    - ansible_facts.services.firewalld.state == 'running'
 
 ## IP FORWARDING
 # 

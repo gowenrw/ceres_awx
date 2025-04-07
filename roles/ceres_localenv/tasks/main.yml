@@ -7,132 +7,9 @@
 - name: OS Check
   ansible.builtin.fail:
     msg: 
-    - "The role currently only supports CentOS and Rocky and RHEL distributions."
+    - "The role currently only supports CentOS Stream and RHEL distributions."
     - "Detected distribution: {{ ansible_distribution }}"
-  when: ansible_distribution not in ['CentOS', 'RedHat', 'Red Hat Enterprise Linux', 'Rocky']
-
-## Resize Disk Tasks ##
-#
-# Get disk free space info for resize block conditional check
-# - name: Determine free space on disk
-#   ansible.builtin.shell: "parted --script --fix {{ ceres_localenv_resize_dev }} unit GB print free | grep 'Free Space' | tail -n1 | awk '{print $3}' | sed 's/GB//'"
-#   register: reg_resize_disk_free_gb
-#   changed_when: False
-#   when: 
-#   - ceres_localenv_resize_disk
-#   - ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
-#
-# Block for disk resize with conditionals for distro, free space, etc.
-# - name: Resize Disk Block
-#   block:
-#     #
-#     # Get partition info for debugging
-#     - name: "Read disk {{ ceres_localenv_resize_dev }} information"
-#       community.general.parted: device={{ ceres_localenv_resize_dev }} unit=MiB
-#       register: reg_resize_disk_info
-#     #
-#     # Nested block for extending partition to rescue failure with brute force task
-#     - name: Extend Partition Block
-#       block:
-#         #
-#         # This is the correct way to resize a partition but seems to fail for my vagrant vms
-#         - name: Extend existing partition to fill all available space (nice way)
-#           community.general.parted:
-#             device: "{{ ceres_localenv_resize_dev }}"
-#             number: "{{ ceres_localenv_resize_part }}"
-#             part_end: "100%"
-#             resize: true
-#             state: present
-#           register: reg_resize_part_nice
-#       rescue:
-#         #
-#         # This is an ugly brute force way to resize a partition
-#         - name: Extend partition to fill all available space
-#           ansible.builtin.shell: "echo -e 'resizepart\n{{ ceres_localenv_resize_part }}\nYes\n100%\nprint free\nquit' | parted {{ ceres_localenv_resize_dev }} ---pretend-input-tty"
-#           register: reg_resize_part_force
-#     #
-#     # Extend the ext4 filesystem
-#     - name: Extend ext4 filesystem to fill all available space
-#       ansible.builtin.command: "resize2fs {{ ceres_localenv_resize_dev }}{{ ceres_localenv_resize_part }}"
-#       register: reg_resize_extfs
-#       when: ceres_localenv_resize_fstype == "ext4"
-#     #
-#     # Extend the xfs filesystem
-#     - name: Extend xfs filesystem to fill all available space
-#       ansible.builtin.command: "xfs_growfs {{ ceres_localenv_resize_dev }}{{ ceres_localenv_resize_part }}"
-#       register: reg_resize_xfs
-#       when: ceres_localenv_resize_fstype == "xfs"
-#   #
-#   # Resize disk block conditionals
-#   when: 
-#     - ceres_localenv_resize_disk
-#     - reg_resize_disk_free_gb is defined
-#     - reg_resize_disk_free_gb.stdout | int > 1
-#     - ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
-#   # Resize disk block Debugging
-#   always:
-#     #
-#     # Dump the output of block tasks if needed for troubleshooting
-#     - name: "Debug block tasks output"
-#       ansible.builtin.debug:
-#         msg:
-#         - "{{ omit if reg_resize_disk_info is not defined else reg_resize_disk_info }}"
-#         - "{{ omit if reg_resize_part_nice is not defined else reg_resize_part_nice}}"
-#         - "{{ omit if reg_resize_part_force is not defined else reg_resize_part_force}}"
-#         - "{{ omit if reg_resize_extfs is not defined else reg_resize_extfs}}"
-#         verbosity: 1
-
-## Resize RHEL AZ LVM Disk Tasks ##
-#
-# Get Free Space
-# - name: "Read vgs information to determine free space in rootvg"
-#   ansible.builtin.shell:
-#     cmd: "vgs --units g --no-suffix --noheadings | awk '{ printf $7 }'"
-#   register: reg_rootvg_free_results
-#   when: 
-#     - ceres_localenv_resize_az_rhel_lvm_disk
-#     - ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
-# #
-# # Block for AZ LVM disk resize with conditionals for only RHEL
-# # Note: This is to make use of free space on Azure OS disk rather than adding data disks
-# - name: Resize RHEL AZ LVM Disk Block
-#   block:
-#     #
-#     # Extend the logical volumes 
-#     - name: Extend logical volume for /var with lvextend
-#       ansible.builtin.shell: "lvextend -l +50%FREE /dev/rootvg/varlv"
-#       register: reg_resize_varlv_results
-#     - name: Extend logical volume for / with lvextend
-#       ansible.builtin.shell: "lvextend -l +100%FREE /dev/rootvg/rootlv"
-#       register: reg_resize_rootlv_results
-#     #
-#     # Grow the filesystems on the extended lvs
-#     - name: Grow xfs filesystem on /var with xfs_growfs
-#       ansible.builtin.shell: "xfs_growfs /dev/rootvg/varlv"
-#       register: reg_xfsgrow_varlv_results
-#     - name: Grow xfs filesystem on / with xfs_growfs
-#       ansible.builtin.shell: "xfs_growfs /dev/rootvg/rootlv"
-#       register: reg_xfsgrow_rootlv_results
-#   #
-#   # Resize disk block conditionals
-#   when: 
-#     - ceres_localenv_resize_az_rhel_lvm_disk
-#     - reg_rootvg_free_results is defined
-#     - reg_rootvg_free_results.stdout | int > 1
-#     - ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
-#   # Resize disk block Debugging
-#   always:
-#     #
-#     # Dump the output of block tasks if needed for troubleshooting
-#     - name: "Debug block tasks output"
-#       ansible.builtin.debug:
-#         msg:
-#         - "{{ omit if reg_rootvg_free_results is not defined else reg_rootvg_free_results }}"
-#         - "{{ omit if reg_resize_varlv_results is not defined else reg_resize_varlv_results}}"
-#         - "{{ omit if reg_resize_rootlv_results is not defined else reg_resize_rootlv_results}}"
-#         - "{{ omit if reg_xfsgrow_varlv_results is not defined else reg_xfsgrow_varlv_results}}"
-#         - "{{ omit if reg_xfsgrow_rootlv_results is not defined else reg_xfsgrow_rootlv_results}}"
-#         verbosity: 1
+  when: ansible_distribution not in ['CentOS', 'RedHat', 'Red Hat Enterprise Linux']
 
 ## DISABLE SELINUX & FIREWALLD
 #
@@ -171,12 +48,12 @@
     path: "{{ ceres_localenv_epel_repofile_path }}"
   register: reg_epel_repofile_result
 #
-# crb on centos and rocky
-- name: Enable codeready-builder repository on CentOS or Rocky
+# crb on centos
+- name: Enable codeready-builder repository on CentOS
   ansible.builtin.command: "dnf config-manager --set-enabled crb"
   when: 
     - not reg_epel_repofile_result.stat.exists
-    - ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
+    - ansible_distribution == 'CentOS'
 #
 # epel on centos
 - name: Install epel-release and epel-next-release on CentOS
@@ -188,16 +65,7 @@
   when: 
     - not reg_epel_repofile_result.stat.exists
     - ansible_distribution == 'CentOS'
-#
-# epel on rocky
-- name: Install epel-release and epel-next-release on Rocky
-  ansible.builtin.dnf:
-    name:
-      - epel-release
-    state: present
-  when: 
-    - not reg_epel_repofile_result.stat.exists
-    - ansible_distribution == 'Rocky'
+
 #
 # crb on rhel - ### broken on azure rhel which uses RHUI license
 #- name: Enable codeready-builder repository on RHEL
@@ -282,78 +150,6 @@
     var: reg_pkgs_qol_result
     verbosity: 1
 
-## Custom color prompt
-#
-# Install custom color prompt
-- name: Install custom color prompt to /etc/profile.d
-  ansible.builtin.template:
-    src: "setPS1.sh.j2"
-    dest: "/etc/profile.d/setPS1.sh"
-    owner: root
-    group: root
-    mode: "0444"
-  when: 
-    - ceres_localenv_custom_color_prompt
-
-## INSTALL PUTTY PKG FROM SOURCE
-#
-# Check if PuTTy is already installed
-# - name: Check if PuTTy is already installed.
-#   ansible.builtin.stat:
-#     path: "{{ ceres_localenv_pkgs_putty_bin }}"
-#   register: reg_pkgs_puttybin_result
-#   when:
-#     - ceres_localenv_pkgs_putty_install
-#     - ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
-# #
-# # Putty Install Block
-# - name: PuTTy Install Block
-#   block:
-#     #
-#     # Download putty source tarball
-#     - name: Download PuTTy source tarball
-#       ansible.builtin.get_url:
-#         url: "{{ ceres_localenv_pkgs_putty_url }}"
-#         dest: "{{ ceres_localenv_pkgs_putty_file }}"
-#       register: reg_pkgs_puttyurl_result
-#     #
-#     # Extract putty source tarball
-#     - name: Extract PuTTy source tarball
-#       ansible.builtin.unarchive:
-#         src: "{{ ceres_localenv_pkgs_putty_file }}"
-#         dest: "/tmp/"
-#         remote_src: yes
-#       register: reg_pkgs_puttytar_result
-#     #
-#     # Build putty from source and install
-#     - name: Run cmake in PuTTy source directory
-#       ansible.builtin.shell:
-#         cmd: cmake .; cmake --build .
-#         chdir: "{{ ceres_localenv_pkgs_putty_dir }}"
-#       register: reg_pkgs_puttycmake_result
-#     - name: Run cmake install in PuTTy source directory
-#       ansible.builtin.shell:
-#         cmd: cmake --build . --target install
-#         chdir: "{{ ceres_localenv_pkgs_putty_dir }}"
-#       register: reg_pkgs_puttycminstall_result
-#   # Putty Install Block Conditional
-#   when:
-#     - ceres_localenv_pkgs_putty_install
-#     - ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
-#     - not reg_pkgs_puttybin_result.stat.exists
-#   # Putty Install Block Debugging
-#   always:
-#     #
-#     # Dump the output of block tasks if needed for troubleshooting
-#     - name: "Debug block tasks output"
-#       ansible.builtin.debug:
-#         msg:
-#         - "{{ omit if reg_pkgs_puttyurl_result is not defined else reg_pkgs_puttyurl_result }}"
-#         - "{{ omit if reg_pkgs_puttytar_result is not defined else reg_pkgs_puttytar_result}}"
-#         - "{{ omit if reg_pkgs_puttycmake_result is not defined else reg_pkgs_puttycmake_result}}"
-#         - "{{ omit if reg_pkgs_puttycminstall_result is not defined else reg_pkgs_puttycminstall_result}}"
-#         verbosity: 1
-
 ## INSTALL ANSIBLE PKGS
 #
 # Install ansible and podman
@@ -386,3 +182,35 @@
   ansible.builtin.debug:
     var: reg_pkgs_ansn_result
     verbosity: 1
+
+## Custom color prompt
+#
+# Install custom color prompt without git support
+- name: Install custom color prompt to /etc/profile.d
+  ansible.builtin.template:
+    src: "setPS1.sh.j2"
+    dest: "/etc/profile.d/setPS1.sh"
+    owner: root
+    group: root
+    mode: "0444"
+  when: 
+    - ceres_localenv_custom_color_prompt
+    - not ceres_localenv_custom_color_prompt_git_support
+#
+# Install custom color prompt with git support
+- name: Install custom color prompt with git support to /etc/profile.d
+  ansible.builtin.template:
+    src: "setPS1git.sh.j2"
+    dest: "/etc/profile.d/setPS1.sh"
+    owner: root
+    group: root
+    mode: "0444"
+  when: 
+    - ceres_localenv_custom_color_prompt
+    - ceres_localenv_custom_color_prompt_git_support
+
+#
+## Reboot VM to fully affect some changes above
+- name: Reboot machine to ensure all updates are applied
+  ansible.builtin.reboot:
+    reboot_timeout: 3600

@@ -10,26 +10,20 @@ ceres_localenv_resize_az_rhel_lvm_disk: False  # If True resize LVM & filesystem
 
 ## Custom Color Prompt
 ceres_localenv_custom_color_prompt: True
+ceres_localenv_custom_color_prompt_git_support: False
 
 ## EPEL
 ceres_localenv_epel_repofile_path: "/etc/yum.repos.d/epel.repo"
 ceres_localenv_epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
 ceres_localenv_epel_repo_gpg_key_url: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
 
-## Install Build Packages if set to True
-ceres_localenv_pkgs_build_install: False
-ceres_localenv_pkgs_build_list: [] # see vars/main.yml for package list
-
 ## Install Quality of Life Packages if set to True
 ceres_localenv_pkgs_qol_install: True
 ceres_localenv_pkgs_qol_list: [] # see vars/main.yml for package list
 
-## Install PuTTy Package from source if set to True
-ceres_localenv_pkgs_putty_install: False
-ceres_localenv_pkgs_putty_url: "https://the.earth.li/~sgtatham/putty/0.78/putty-0.78.tar.gz"
-ceres_localenv_pkgs_putty_file: "/tmp/putty-0.78.tar.gz"
-ceres_localenv_pkgs_putty_dir: "/tmp/putty-0.78/"
-ceres_localenv_pkgs_putty_bin: "/usr/local/bin/puttygen"
+## Install Build Packages if set to True
+ceres_localenv_pkgs_build_install: False
+ceres_localenv_pkgs_build_list: [] # see vars/main.yml for package list
 
 ## Install Ansible Packages if set to True
 ceres_localenv_pkgs_ansible_install: False

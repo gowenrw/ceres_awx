@@ -1,7 +1,8 @@
 ---
-- name: Azure Playbook - Install Ansible AWX onto a VM in Azure that our azsetup job created
+- name: Ceres AnyVM Playbook - Install Ansible AWX onto a VM located anywhere (local/on-premise/cloud)
   hosts: ceresanyvm
-  become: true
+  gather_facts: True
+  become: True
 
   # By default three main roles are run
   # These can be disabled for testing by setting these launch values to False

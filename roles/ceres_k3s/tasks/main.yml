@@ -41,8 +41,12 @@
     state: stopped
     enabled: False
   register: reg_k3s_nmcloudsetup_result
-  when:
-    - ansible_facts['services']['nm-cloud-setup']['status'] | default('not-found') != 'not-found'
+- name: Stop and Disable nm-cloud-setup.timer
+  ansible.builtin.service:
+    name: nm-cloud-setup.timer
+    state: stopped
+    enabled: False
+  register: reg_k3s_nmcloudsetuptimer_result
 
 ## IP FORWARDING
 # 
@@ -120,7 +124,7 @@
 - name: Reboot machine to ensure all updates are applied
   ansible.builtin.reboot:
     reboot_timeout: 3600
-  when: reg_k3s_selinux_result.changed or reg_k3s_firewalld_result.changed or reg_k3s_nmcloudsetup_result.changed
+  when: reg_k3s_selinux_result.changed or reg_k3s_firewalld_result.changed or reg_k3s_nmcloudsetup_result.changed or reg_k3s_nmcloudsetuptimer_result.changed
 
 #########################
 #

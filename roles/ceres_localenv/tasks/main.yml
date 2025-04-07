@@ -27,8 +27,8 @@
     enabled: False
   register: reg_localenv_firewalld_result
   when:
-    - ansible_facts.services['firewalld'] is defined
-    - ansible_facts.services['firewalld'].state == 'running'
+    - ansible_facts['services']['firewalld']['status'] | default('not-found') != 'not-found'
+    - ansible_facts['services']['firewalld']['state'] == 'running'
 
 ## SUDO SECURE_PATH
 #

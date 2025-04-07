@@ -1,6 +1,6 @@
 ---
 - name: Azure Playbook - Install Ansible AWX onto a VM in Azure that our azsetup job created
-  hosts: ceresazure
+  hosts: ceresanyvm
   become: true
 
   # By default three main roles are run
@@ -17,7 +17,6 @@
     ansible.builtin.import_role:
       name: ceres_localenv
     vars:
-      ceres_localenv_resize_az_rhel_lvm_disk: True
       ceres_localenv_pkgs_qol_install: True
       ceres_localenv_pkgs_build_install: False
       ceres_localenv_pkgs_ansible_install: False

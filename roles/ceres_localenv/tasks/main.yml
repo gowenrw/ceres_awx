@@ -198,13 +198,25 @@
     - not ceres_localenv_custom_color_prompt_git_support
 #
 # Install custom color prompt with git support
-- name: Install custom color prompt with git support to /etc/profile.d
-  ansible.builtin.template:
-    src: "setPS1git.sh.j2"
-    dest: "/etc/profile.d/setPS1.sh"
-    owner: root
-    group: root
-    mode: "0444"
+- name: Install custom color prompt with git support block
+  block:
+    - name: Check if git-prompt.sh exists
+      ansible.builtin.stat:
+        path: /etc/profile.d/git-prompt.sh
+      register: reg_gitprompt_file
+    - name: Download git-prompt.sh Git Completion File
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/git/git/refs/heads/master/contrib/completion/git-prompt.sh
+        dest: /etc/profile.d/git-prompt.sh
+        mode: '0444'
+      when: not reg_gitprompt_file.stat.exists
+    - name: Install custom color prompt with git support to /etc/profile.d
+      ansible.builtin.template:
+        src: "setPS1git.sh.j2"
+        dest: "/etc/profile.d/setPS1.sh"
+        owner: root
+        group: root
+        mode: "0444"
   when: 
     - ceres_localenv_custom_color_prompt
     - ceres_localenv_custom_color_prompt_git_support

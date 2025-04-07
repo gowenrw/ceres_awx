@@ -246,6 +246,7 @@
           INSTALL_K3S_CHANNEL: "{{ ceres_k3s_installer_channel }}"
           INSTALL_K3S_BIN_DIR: "{{ ceres_k3s_bin_directory }}"
           INSTALL_K3S_EXEC: "{{ ceres_k3s_exec_role }}"
+          NSTALL_K3S_SKIP_SELINUX_RPM: "true"
           INSTALL_K3S_SKIP_START: "true"
     # Install k3s using defined environment
     - name: Execute k3s installer

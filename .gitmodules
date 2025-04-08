@@ -1,3 +1,0 @@
-[submodule "build-ee"]
-	path = build-ee
-	url = https://github.com/gowenrw/build-ee.git

@@ -11,9 +11,9 @@
 - name: OS Check
   ansible.builtin.fail:
     msg: 
-    - "The role currently only supports CentOS and Rocky and RHEL distributions."
+    - "The role currently only supports CentOS and RHEL distributions."
     - "Detected distribution: {{ ansible_distribution }}"
-  when: ansible_distribution not in ['CentOS', 'RedHat', 'Red Hat Enterprise Linux', 'Rocky']
+  when: ansible_distribution not in ['CentOS', 'RedHat', 'Red Hat Enterprise Linux']
 
 ## DISABLE SELINUX & FIREWALLD
 #
@@ -21,6 +21,7 @@
 - name: Disable SELinux
   ansible.posix.selinux:
     state: disabled
+  register: reg_k3s_selinux_result
 #
 # firewalld
 - name: Stop and Disable FirewallD
@@ -28,6 +29,24 @@
     name: firewalld
     state: stopped
     enabled: False
+  register: reg_k3s_firewalld_result
+  when:
+    - ansible_facts['services']['firewalld']['status'] | default('not-found') != 'not-found'
+    - ansible_facts['services']['firewalld']['state'] == 'running'
+
+## STOP AND DISABLE nm-cloud-setup.service
+- name: Stop and Disable nm-cloud-setup
+  ansible.builtin.service:
+    name: nm-cloud-setup
+    state: stopped
+    enabled: False
+  register: reg_k3s_nmcloudsetup_result
+- name: Stop and Disable nm-cloud-setup.timer
+  ansible.builtin.service:
+    name: nm-cloud-setup.timer
+    state: stopped
+    enabled: False
+  register: reg_k3s_nmcloudsetuptimer_result
 
 ## IP FORWARDING
 # 
@@ -99,6 +118,13 @@
           - "{{ omit if reg_k3s_yumpkg_result is not defined else reg_k3s_yumpkg_result }}"
           - "{{ omit if reg_k3s_pippkg_result is not defined else reg_k3s_pippkg_result }}"
         verbosity: 1
+
+#
+## Reboot VM to fully affect some changes above
+- name: Reboot machine to ensure all updates are applied
+  ansible.builtin.reboot:
+    reboot_timeout: 3600
+  when: reg_k3s_selinux_result.changed or reg_k3s_firewalld_result.changed or reg_k3s_nmcloudsetup_result.changed or reg_k3s_nmcloudsetuptimer_result.changed
 
 #########################
 #
@@ -243,6 +269,7 @@
           INSTALL_K3S_CHANNEL: "{{ ceres_k3s_installer_channel }}"
           INSTALL_K3S_BIN_DIR: "{{ ceres_k3s_bin_directory }}"
           INSTALL_K3S_EXEC: "{{ ceres_k3s_exec_role }}"
+          NSTALL_K3S_SKIP_SELINUX_RPM: "true"
           INSTALL_K3S_SKIP_START: "true"
     # Install k3s using defined environment
     - name: Execute k3s installer
@@ -342,9 +369,9 @@
 # Check if dashboard is already deployed
 - name: Query k3s to see if kubernetes-dashboard deployment exists
   kubernetes.core.k8s_info:
-    kind: "Deployment"
-    namespace: "kubernetes-dashboard"
-    name: "kubernetes-dashboard"
+    kind: "Service"
+    namespace: "{{ ceres_k3s_kube_dashboard_helm_deploy_namespace }}"
+    name: "{{ ceres_k3s_kube_dashboard_servicename }}"
     api_key: "{{ ceres_k3s_ansible_token }}"
   register: ceres_k3s_kube_dashboard_query
   when: ceres_k3s_installer_install
@@ -355,9 +382,21 @@
     var: ceres_k3s_kube_dashboard_query
     verbosity: 1
   when: ceres_k3s_installer_install
+
+## Add helm repo for kubernetes-dashboard
+- name: Add kubernetes-dashboard helm repository
+  kubernetes.core.helm_repository:
+    name: "{{ ceres_k3s_kube_dashboard_helm_repo_name }}"
+    repo_url: "{{ ceres_k3s_kube_dashboard_helm_repo_url }}"
+  when:
+    - ceres_k3s_installer_install
+    - not ceres_k3s_kube_dashboard_query.resources | default(None)
+    - ceres_k3s_kube_dashboard_install
+
+## Dashboard UNINSTALL
 #
-# Dashboard Uninstall
-- name: Kube Dashboard Remove Block
+# Dashboard Uninstall Block
+- name: Kube Dashboard Uninstall Block
   block:
     - name: Remove Dashboard ClusterRoleBinding admin-user
       kubernetes.core.k8s:
@@ -383,61 +422,55 @@
         kind: ServiceAccount
         state: absent
         name: "admin-user"
+    #
+    # Remove kubernetes-dashboard
+    - name: Use helm to delete kubernetes-dashboard
+      kubernetes.core.helm:
+        api_key: "{{ ceres_awx_ansible_token }}"
+        name: "{{ ceres_k3s_kube_dashboard_helm_deploy_name }}"
+        release_state: absent
+        release_namespace: "{{ ceres_k3s_kube_dashboard_helm_deploy_namespace }}"
+        wait: True
+    #
     # Remove kubernetes-dashboard namespace
-    - name: Remove kubernetes-dashboard namespace
+    - name: Use helm to remove kubernetes-dashboard namespace
       kubernetes.core.k8s:
-        api_key: "{{ ceres_k3s_ansible_token }}"
+        api_key: "{{ ceres_awx_ansible_token }}"
         kind: Namespace
         state: absent
-        name: "kubernetes-dashboard"
-    # Remove installation files
-    - name: Remove token file
-      ansible.builtin.file:
-        path: "{{ ceres_k3s_kube_dashboard_token_file }}"
-        state: absent
-    - name: Remove admin rbac definition file
-      ansible.builtin.file:
-        path: "{{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user-role.yml"
-        state: absent
-    - name: Remove admin user definition file
-      ansible.builtin.file:
-        path: "{{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user.yml"
-        state: absent
-    - name: Remove admin user token definition file
-      ansible.builtin.file:
-        path: "{{ ceres_k3s_kube_app_defs_path }}/dashboard.admin-user-token.yml"
-        state: absent
-  # Dashboard Deployment Block conditionals
-  when:
-    - ceres_k3s_installer_install
-    - ceres_k3s_kube_dashboard_query.resources is defined
-    - ceres_k3s_kube_dashboard_query.resources != None
-    - ceres_k3s_kube_dashboard_query.resources | length >0
-    - not ceres_k3s_kube_dashboard_install or ceres_k3s_kube_dashboard_reinstall
+        name: "{{ ceres_k3s_kube_dashboard_helm_deploy_namespace }}"
+  when: 
+    - not ceres_k3s_kube_dashboard_install or not ceres_k3s_installer_install
+
+## Dashboard INSTALL
 #
 # Dashboard Install and Deployment Block
-- name: Kube Dashboard Block
+- name: Kube Dashboard Install Block
   block:
-    # Get Latest Version - Commented out because of issues with v3 alpha which is latest
-    #- name: Get Kube Dashboard Version
-    #  ansible.builtin.shell:
-    #    cmd: "curl -w '%{url_effective}' -I -L -s -S https://github.com/kubernetes/dashboard/releases/latest -o /dev/null | sed -e 's|.*/||'"
-    #  register: reg_kube_dashboard_version
-    #
-    # Define Kube Dashboard installer environment
-    - name: Set facts for Kube Dashboard installer environment
-      ansible.builtin.set_fact:
-        ceres_k3s_kube_dashboard_install_env:
-          #VERSION_KUBE_DASHBOARD: "{{ reg_kube_dashboard_version.stdout }}"
-          VERSION_KUBE_DASHBOARD: "{{ ceres_k3s_kube_dashboard_version }}"
-    # Install Kube Dashboard using defined environment
-    - name: Install Kube Dashboard
-      ansible.builtin.command:
-        # Recommended uses tls alternative is http
-        cmd: "k3s kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/${VERSION_KUBE_DASHBOARD}/aio/deploy/recommended.yaml"
-        #cmd: "k3s kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/${VERSION_KUBE_DASHBOARD}/aio/deploy/alternative.yaml"
-      environment: "{{ ceres_k3s_kube_dashboard_install_env }}"
-      register: reg_kube_dashboard_install
+    # Helm kubernetes-dashboard install
+    - name: Use helm to install and deploy kubernetes-dashboard in its own namespace
+      kubernetes.core.helm:
+        api_key: "{{ ceres_awx_ansible_token }}"
+        name: "{{ ceres_k3s_kube_dashboard_helm_deploy_name }}"
+        chart_ref: "{{ ceres_k3s_kube_dashboard_helm_deploy_chart_ref }}"
+        chart_version: "{{ ceres_k3s_kube_dashboard_helm_deploy_chart_version }}"
+        release_state: present
+        release_namespace: "{{ ceres_k3s_kube_dashboard_helm_deploy_namespace }}"
+        create_namespace: True
+        update_repo_cache: True
+        wait: True
+      register: reg_k3s_kube_dashboard_helm
+    # Wait for deploy to finish before continuing
+    - name: Wait for kubernetes-dashboard deployment to finish - This may take a few minutes
+      kubernetes.core.k8s_info:
+        api_key: "{{ ceres_awx_ansible_token }}"
+        kind: Deployment
+        namespace: "{{ ceres_k3s_kube_dashboard_helm_deploy_namespace }}"
+        name: "{{ ceres_k3s_kube_dashboard_deployment_name }}"
+        wait: True
+        wait_sleep: 15
+        wait_timeout: 120
+      register: reg_k3s_kube_dashboard_depl
     # Dashboard Admin User Definitions
     - name: Dashboard admin user definition file
       ansible.builtin.template:
@@ -487,21 +520,21 @@
         mode: 0400
         content: "{{ reg_k3s_kube_dashboard_token.stdout }}"
   always:
-    #
     # Dump the output of block tasks if needed for troubleshooting
     - name: "Debug block tasks output"
       ansible.builtin.debug:
         msg:
-        - "{{ omit if reg_kube_dashboard_version is not defined else reg_kube_dashboard_version }}"
-        - "{{ omit if reg_kube_dashboard_install is not defined else reg_kube_dashboard_install }}"
+        - "{{ omit if reg_k3s_kube_dashboard_helm is not defined else reg_k3s_kube_dashboard_helm }}"
+        - "{{ omit if reg_k3s_kube_dashboard_depl is not defined else reg_k3s_kube_dashboard_depl }}"
         - "{{ omit if reg_kube_dashboard_deploy is not defined else reg_kube_dashboard_deploy}}"
+        - "{{ omit if reg_k3s_kube_dashboard_token_create is not defined else reg_k3s_kube_dashboard_token_create}}"
         - "{{ omit if reg_k3s_kube_dashboard_token is not defined else reg_k3s_kube_dashboard_token}}"
         verbosity: 1
-  # Dashboard Deployment Block conditionals
-  when:
+  when: 
     - ceres_k3s_installer_install
-    - not ceres_k3s_kube_dashboard_query.resources | default(None) or ceres_k3s_kube_dashboard_reinstall
+    - not ceres_k3s_kube_dashboard_query.resources | default(None)
     - ceres_k3s_kube_dashboard_install
+
 #
 # Get dashboard token contents from file
 - name: lookup kube dashboard token
@@ -614,6 +647,13 @@
 #
 #########################
 
+# Remove the dashboard ingress def file if exists and no ingress
+- name: Remove the dashboard ingress def file if exists and no ingress
+  ansible.builtin.file:
+    path: "{{ ceres_k3s_kube_app_defs_path }}/dashboard-ingress.yml"
+    state: absent
+  when: 
+    - not ceres_k3s_kube_dashboard_install or not ceres_k3s_nginx_ingress_install or not ceres_k3s_dashboard_ingress_install
 #
 # Create the dashboard ingress def file
 - name: Dashboard Ingress definition file
@@ -630,13 +670,6 @@
     - ceres_k3s_dashboard_ingress_install
     - ceres_awx_ingress_fqdn is defined
     - ceres_awx_ingress_fqdn | length >0
-# Remove the dashboard ingress def file if exists and no ingress
-- name: Remove the dashboard ingress def file if exists and no ingress
-  ansible.builtin.file:
-    path: "{{ ceres_k3s_kube_app_defs_path }}/dashboard-ingress.yml"
-    state: absent
-  when: 
-    - not ceres_k3s_kube_dashboard_install or not ceres_k3s_nginx_ingress_install or not ceres_k3s_dashboard_ingress_install
 # Create/Update dashboard ingress from definition
 - name: Create / Update dashboard ingress from definition
   block:

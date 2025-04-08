@@ -369,7 +369,7 @@
 # Check if dashboard is already deployed
 - name: Query k3s to see if kubernetes-dashboard deployment exists
   kubernetes.core.k8s_info:
-    kind: "Deployment"
+    kind: "Service"
     namespace: "{{ ceres_k3s_kube_dashboard_helm_deploy_namespace }}"
     name: "{{ ceres_k3s_kube_dashboard_servicename }}"
     api_key: "{{ ceres_k3s_ansible_token }}"

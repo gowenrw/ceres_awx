@@ -8,7 +8,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/use-regex: "false"
 spec:
   tls:
   - hosts:
@@ -18,8 +18,8 @@ spec:
   - host: {{ ceres_awx_ingress_fqdn }}
     http:
       paths:
-      - path: /awx/(.*)
-        pathType: ImplementationSpecific
+      - path: /awx/
+        pathType: Prefix
         backend:
           service:
             name: {{ ceres_awx_value_servicename }}

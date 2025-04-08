@@ -370,8 +370,8 @@
 - name: Query k3s to see if kubernetes-dashboard deployment exists
   kubernetes.core.k8s_info:
     kind: "Deployment"
-    namespace: "kubernetes-dashboard"
-    name: "kubernetes-dashboard"
+    namespace: "{{ ceres_k3s_kube_dashboard_helm_deploy_namespace }}"
+    name: "{{ ceres_k3s_kube_dashboard_servicename }}"
     api_key: "{{ ceres_k3s_ansible_token }}"
   register: ceres_k3s_kube_dashboard_query
   when: ceres_k3s_installer_install
@@ -466,10 +466,10 @@
         api_key: "{{ ceres_awx_ansible_token }}"
         kind: Deployment
         namespace: "{{ ceres_k3s_kube_dashboard_helm_deploy_namespace }}"
-        name: "{{ ceres_k3s_kube_dashboard_helm_deploy_name }}"
+        name: "{{ ceres_k3s_kube_dashboard_deployment_name }}"
         wait: True
         wait_sleep: 15
-        wait_timeout: 60
+        wait_timeout: 120
       register: reg_k3s_kube_dashboard_depl
     # Dashboard Admin User Definitions
     - name: Dashboard admin user definition file

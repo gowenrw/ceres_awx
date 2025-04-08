@@ -7,8 +7,10 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/use-regex: "false"
 spec:
   tls:
   - hosts:
@@ -18,8 +20,8 @@ spec:
   - host: {{ ceres_awx_ingress_fqdn }}
     http:
       paths:
-      - path: /dashboard/(.*)
-        pathType: ImplementationSpecific
+      - path: /dashboard/
+        pathType: Prefix
         backend:
           service:
             name: kubernetes-dashboard

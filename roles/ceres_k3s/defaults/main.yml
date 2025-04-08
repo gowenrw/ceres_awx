@@ -37,6 +37,8 @@ ceres_k3s_kube_dashboard_install: False # Set to true to install and false to pr
 ceres_k3s_kube_dashboard_reinstall: False
 ceres_k3s_kube_dashboard_token_file: /etc/rancher/k3s/dashboard-token
 ceres_k3s_kube_dashboard_token:
+ceres_k3s_kube_dashboard_servicename: kubernetes-dashboard-kong-proxy
+ceres_k3s_kube_dashboard_deployment_name: kubernetes-dashboard-web
 ceres_k3s_kube_dashboard_helm_repo_url: "https://kubernetes.github.io/dashboard/"
 ceres_k3s_kube_dashboard_helm_repo_name: kubernetes-dashboard
 ceres_k3s_kube_dashboard_helm_deploy_name: kubernetes-dashboard

@@ -1,0 +1,28 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: kubernetes-dashboard
+  name: kubernetes-dashboard-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  tls:
+  - hosts:
+    - {{ ceres_awx_ingress_fqdn }}
+    secretName: kubernetes-dashboard-cert   # if doesnt exist will create self-signed certs
+  rules:
+  - host: {{ ceres_awx_ingress_fqdn }}
+    http:
+      paths:
+      - path: /dashboard/(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: kubernetes-dashboard
+            port:
+              number: 443
+  ingressClassName: nginx
